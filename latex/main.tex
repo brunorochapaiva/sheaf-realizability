@@ -1,0 +1,440 @@
+\documentclass[12pt]{article}
+
+
+\newif\ifnotes
+\notestrue % comment out to hide notes
+
+\DeclareUnicodeCharacter{03A3}{\(\Sigma\)}
+\DeclareUnicodeCharacter{03A0}{\(\Pi\)}
+
+\input{packages-to-include}
+
+\newtheorem{thrm}{Theorem}[section]
+\newtheorem{lemm}[thrm]{Lemma}
+\newtheorem{prop}[thrm]{Proposition}
+\newtheorem{defn}[thrm]{Definition}
+\newtheorem{remk}[thrm]{Remark}
+\newtheorem{exam}[thrm]{Example}
+\newtheorem{cons}[thrm]{Construction}
+\newtheorem{coro}[thrm]{Corollary}
+\newtheorem{nota}[thrm]{Notation}
+
+\input{macros}
+
+%--------------------------------------------------------------------------------
+% Document proper
+\begin{document}
+
+\title{Realizability with Sheaves}
+\author{Bruno da Rocha Paiva}
+\maketitle
+
+We begin a treatment of realizability internal to categories of sheaves.
+
+\newpage
+\section{Internal Language of a Presheaf Topos}
+
+A typical course in mathematical logic may start by looking at formal systems
+such as natural deduction or the sequent calculus, giving rise to a notion of
+truth, namely the provability of formulas. A natural next step is to then look
+at the semantics of said proof system. These semantics can vary significantly
+depending on the chosen logic such as boolean valuations for propositional
+logic, Kripke frames for modal logic, \(\mathcal{L}\)-structures for predicate
+logic, etc. Regardless, in each case we can consider whether a formula is valid,
+i.e.\ true in every model and this gives rise to yet to a second notion of
+truth. Remarkably, these two notions of truth often coincide, provided the right
+proof system and semantics are chosen. While provability quantifies
+existentially over proofs, asking whether a formal proof exists, validity is a
+universal statement asking that the interpretation of a formula hold in all
+models. This duality is powerful: to show a formula \(\phi\) is not provable by
+proof-theoretic means is difficult. Typical methods start by identifying some
+property of proofs \(P\) such that any proof of any formula \(\psi\) can be
+transformed to another proof of \(\psi\) satisfying \(P\). From here, if we can
+show that no proof of \(\phi\) satisfying \(P\) exists, then that must mean no
+proof exists in general. Typical examples of properties \(P\) can be that the
+proof does not make use of the \textbf{Cut} rule in sequent calculus or
+alternatively for natural deduction that there exist no \(\beta\)-redexs. While
+these are interesting and useful results to have, in this case the semantics
+offers an easier route. To show \(\phi\) is not valid it suffices to demonstrate
+a model in which the interpretation of \(\phi\) does not hold and this is
+generally easier than the syntactic route.
+
+At a first glance the power of this duality seems to be in dispatching of syntax
+and work purely with models. As we move to more and more complicated languages,
+going beyond first-order logic to its higher-order counterparts, then the needle
+begins to move back. In particular, consider (your favourite version of)
+Martin-L\"of Type Theory (\MLTT{}) with \(\Pi\)-types and \(\Sigma\)-types.
+Semantics for \MLTT{} are usually categorically, either through categories with
+families, contextual categories, natural models, the list goes on. Fixing your
+favourite notion of model, categories of presheaves \(\PresheafCat\) generally
+give rise to a model of dependent type theory. That means if we prove some
+statement in \MLTT{}, then by taking the interpretation of said statement in
+\(\PresheafCat\) we will get a true statement about presheaves over \(\C\).
+Working with presheaves can be quite labourious and often becomes an exercise
+in bookkeeping of indices.
+
+
+
+\newpage
+\section{Internal PCAs}
+
+In set-based mathematics, partial functions \(f : X \ParTo Y\) are usually
+defined as a subset \(\text{dom}(f) \subseteq X\) and a total function
+\(f : \text{dom}(f) \to Y\) on said subset. With such a definition, the
+composition of two partial functions \(f : X \ParTo Y\) and \(g : Y \ParTo Z\)
+will have domain \(\text{dom}(g \circ f) = \text{im}(f) \cap \text{dom}(g)\), on
+which the composite \(g \circ f\) is total. Associativity of function
+composition comes down to associativity of subset intersections and as a total
+function is ``trivially'' partial we also have identity maps satisfying the unit
+laws. With this, we have just defined a category of sets and partial functions
+between them. A similar construction can be done for arbitrary categories under
+the mild condition that pullbacks along monomorphisms exist. Said pullbacks will
+provide composition of partial morphisms, leading us to the final obstruction,
+which is that pullbacks are only associative up to (unique) isomorphism. This is
+remedied by identifying partial maps up to isomorphism of the domains as we will
+make explicit later.
+
+\begin{defn}
+  Given a category \(\C\) with pullbacks we define the \definiendum{category of
+    partial maps} in \(\C\), denoted \(\ParCat{\C}\), according to the following:
+  \begin{itemize}
+    \item objects of \(\ParCat{\C}\) are exactly those of \(\C\).
+    \item given objects \(X,Y\), their hom-set \(\ParCat{\C}(X,Y)\) is given by
+      equivalence classes of spans \(X \xhookleftarrow{m} S \xrightarrow{f} Y\)
+      with \(m\) monic. Two such spans
+      \(X \xhookleftarrow{m} S \xrightarrow{f} Y\) and
+      \(X \xhookleftarrow{n} P \xrightarrow{g} Y\) are equivalent if there
+      exists an isomorphism \(f : S \cong P\) such that the following commutes
+      \[\begin{tikzcd}
+          && S \\
+          X &&&& Y \\
+          && P \arrow["m"', hook, from=1-3, to=2-1] \arrow["f", from=1-3, to=2-5] \arrow["f"', from=1-3, to=3-3] \arrow["n", hook', from=3-3, to=2-1] \arrow["g"', from=3-3, to=2-5]
+        \end{tikzcd}\]
+    \item Composition of two morphisms
+      \(X \xhookleftarrow{m} S \xrightarrow{f} Y\) and
+      \(Y \xhookleftarrow{n} P \xrightarrow{g} Z\) is given by the pullback
+      \[\begin{tikzcd}
+          X \\
+          S & Y \\
+          {S\times_YP} & P & Z \arrow["m", hook', from=2-1, to=1-1] \arrow["f"', from=2-1, to=2-2] \arrow[from=3-1, to=2-1] \arrow["\lrcorner"{anchor=center, pos=0.125, rotate=90}, draw=none, from=3-1, to=2-2] \arrow[from=3-1, to=3-2] \arrow["n", hook', from=3-2, to=2-2] \arrow["g"', from=3-2, to=3-3]
+        \end{tikzcd}\]
+    \item Identity maps are given by the span consisting of two identity maps.
+  \end{itemize}
+\end{defn}
+
+The associative and unit laws can be checked to follow from the uniqueness (up
+to isomorphism) of pullbacks. Working through this definition for the category
+of sets we recover a category isomorphic to our original description. In the
+specific case of sets we were able to avoid worrying about equivalence classes
+by using subsets instead of subobjects and subset intersections instead of
+pullbacks. Similarly, we can give a more concrete description for the category
+of partial maps of sheaves.
+
+\newpage
+
+Fix an internal PCA \(\A\) in the category of presheaves on \(\C\) along with a
+coverage yielding the modality \(\Box\). We order predicates using the
+following internal statement
+\[
+  \varphi \leq \psi
+  \iff
+  \PresheafCat \models
+    \exists e : A,
+    \forall x : X,
+    \forall a \in \varphi(x),
+    \Box ({e \odot a \downarrow} \land e \odot a \in \psi(x))
+\]
+Let us now compile this out to the corresponding external statement about
+\(\PresheafCat\). We will start assuming nothing about \(\A\) or
+\(\C\) to get the general definition. Then, we will look at the specific
+case when \(\C\) is a pre-order and \(\A\) is a constant presheaf to compare
+to previous work.
+
+The interpretation of the foregoing statement will be a subpresheaf of
+the terminal presheaf, which is constantly singleton. That is,
+we have
+\[
+ \llbracket
+    \exists e : \A,
+    \forall x : X,
+    \forall a \in \varphi(x),
+    \Box ({e \odot a \downarrow} \land e \odot a \in \psi(x))
+  \rrbracket \subseteq \mathbb{1}
+\]
+Equivalently, after picking your favourite singleton, for each object \(\mathfrak{X}\) we
+have
+\begin{equation}\label{eqn:interpretation_as_subset}
+ \llbracket
+    \exists e : \A,
+    \forall x : X,
+    \forall a \in \varphi(x),
+    \Box ({e \odot a \downarrow} \land e \odot a \in \psi(x))
+  \rrbracket_{\mathfrak{X}} \subseteq \{\star\}\tag{\(\dagger\)}
+\end{equation}
+with the condition that if a map \(f : \mathfrak{Y} \to \mathfrak{X}\) exists
+then the interpretation at \(\mathfrak{X}\) is a subset of the interpretation at
+\(\mathfrak{Y}\). If the subset~\ref{eqn:interpretation_as_subset} is inhabited,
+i.e.\ it contains~\(\star\), then the statement ``holds'' at object
+\(\mathfrak{X}\), otherwise it does not. Let us now start unfolding the
+interpretation of this statement: we are after a condition for
+\[
+ \star \in \llbracket
+    \exists e : \A,
+    \forall x : X,
+    \forall a \in \varphi(x),
+    \Box ({e \odot a \downarrow} \land e \odot a \in \psi(x))
+  \rrbracket_{\mathfrak{X}}
+\]
+Interpreting the existential, this holds if there exists some
+\(\bar{e} : \A_{\mathfrak{X}}\) such that
+\[
+ \bar{e} \in \llbracket
+    \forall x : X,
+    \forall a \in \varphi(x),
+    \Box ({e \odot a \downarrow} \land e \odot a \in \psi(x))
+  \rrbracket_{\mathfrak{X}}
+\]
+For the next step, we take advantage of the fact that we have We will also take
+advantage of the fact that we have
+\(\forall_{\phi} \cdot \forall_{\psi} = \forall{\phi \cdot \psi}\) to interpret
+both quantifiers at once, which will simplify things greatly. With that in mind,
+the preceding holds if for all maps
+\(f_{1} : \mathfrak{X}_{1} \to \mathfrak{X}\) and elements
+\(\bar{x} : X_{\mathfrak{X}_{1}}\) and \(\bar{a} : \A_{\mathfrak{X}_{1}}\), if
+\( \bar{a} \in \varphi_{\mathfrak{X}_{1}}(\bar{x}) \) then we must also have
+\(
+ (\bar{e} \cdot f_{1}\,,\,\bar{x}\,,\,\bar{a}) \in \llbracket
+    \Box ({e \odot a \downarrow} \land e \odot a \in \psi(x))
+  \rrbracket_{\mathfrak{X}_{1}}
+\).
+To simplify the consequent we see the modality \(\Box\) unfolds to the following:
+it holds if there exists a sieve \(S\) on \(\mathcal{X}_{3}\) such that for all
+\(f_{4} : \mathfrak{X}_{4} \to \mathfrak{X}_{3}\) in \(S\) we have
+\begin{multline*}
+ (\bar{e} \cdot f_{1}\cdot f_{2}\cdot f_{3} \cdot f_{4}, \bar{x} \cdot f_{2} \cdot f_{3} \cdot f_{4}, \bar{a} \cdot f_{3} \cdot f_{4}) \in \llbracket
+    {e \odot a \downarrow} \land e \odot a \in \psi(x)
+  \rrbracket_{\mathfrak{X}_{4}}
+  \\
+  =
+  {\llbracket {e \odot a \downarrow} \rrbracket_{\mathfrak{X}_{4}}}
+  \cap
+  {\llbracket e \odot a \in \psi(x) \rrbracket_{\mathfrak{X}_{4}}}
+\end{multline*}
+Now,
+\((\bar{e} \cdot f_{1}\cdot f_{2}\cdot f_{3} \cdot f_{4}, \bar{x} \cdot f_{2} \cdot f_{3} \cdot f_{4}, \bar{a} \cdot f_{3} \cdot f_{4})
+\in
+\llbracket {e \odot a \downarrow} \rrbracket_{\mathfrak{X}_{4}}\)
+holds when the partial application
+\(
+(\bar{e} \cdot f_{1}\cdot f_{2}\cdot f_{3} \cdot f_{4})
+\odot_{\mathfrak{X}_{4}}
+(\bar{a} \cdot f_{3} \cdot f_{4})
+\)
+is defined in the usual set sense. As for
+\(
+(\bar{e} \cdot f_{1}\cdot f_{2}\cdot f_{3} \cdot f_{4}, \bar{x} \cdot f_{2} \cdot f_{3} \cdot f_{4}, \bar{a} \cdot f_{3} \cdot f_{4})
+\in
+{\llbracket e \odot a \in \psi(x) \rrbracket_{\mathfrak{X}_{4}}}
+\),
+it will hold when we have
+\(
+(\bar{e} \cdot f_{1}\cdot f_{2}\cdot f_{3} \cdot f_{4})
+\odot_{\mathfrak{X}_{4}}
+(\bar{a} \cdot f_{3} \cdot f_{4})
+\in
+\phi_{\mathfrak{X}_{4}}(\bar{x} \cdot f_{2} \cdot f_{3} \cdot f_{4})
+\).
+
+Truly we have now unfolded this definition past any level of readability or
+usefulness. Putting a few assumptions
+
+
+\section{A Realizability Tripos}
+
+\todo[inline]{Define Heyting prealgebra}
+
+\begin{defn}
+  Given a presheaf \(\X\) we define the type of \definiendum{realizability
+    predicates on \(\X\)} as the exponential \(\RealPred{\X} \).
+  %
+  We further define an ordering on realizability
+  predicates~\(\varphi, \psi : \RealPred{\X}\) by
+  %
+  \[
+    \varphi \leq \psi
+    \IsDefined
+    \IExists{e : \A}{
+      \IForall{x : \X}{
+        \IForall{a \in \varphi(x)}{
+          \IBox{(
+            \IAnd%
+            {\ITotal{\IAp{e}{a}}}%
+            {\IAp{e}{a} \in \psi(x)}
+          )}
+        }
+      }
+    }
+  \]
+  %
+  We will say that \definiendum{\(e\) evidences \(\varphi \leq \psi\)} if
+  it witnesses the existential quantifier above.
+\end{defn}
+
+%
+
+\begin{lemm}
+  For any presheaf \(\X\), \((\RealPred{\X}, \leq)\) is a preorder.
+\end{lemm}
+\begin{proof}
+  Fix \(\varphi\), then \(\varphi \leq \varphi\) is always evidenced by
+  \(\IIdentCode\).
+  %
+  Fix \(x : \X\) and \(a \in \varphi(x)\), since application of \(\IIdentCode\) is
+  always well-defined and behaves as identity, it holds
+  that~\(\ITotal{\IAp{\IIdentCode}{a}}\) and \({\IAp{\IIdentCode}{a}\in\varphi(x)}\).
+  %
+  This implies the necessary boxed statement to prove \(\leq\) reflexive.
+
+  It is also transitive. Suppose that \(\varphi \leq \psi\) and
+  \(\psi \leq \chi\) evidenced by \(e_{1}\) and \(e_{2}\) respectively.
+  %
+  Fixing \(x : \X\) and \(a \in \varphi(x)\), it follows by assumption that
+  %
+  \[
+    \IBox{(
+      \IAnd%
+      {\ITotal{\IAp{e_{1}}{a}}}%
+      {\IAp{e_{1}}{a} \in \psi(x)}
+    )}
+  \]
+  %
+  By monotonicity of \(\IBoxSym\) as well as our second assumption we may derive
+  %
+  \[
+    \IBox{(
+      \IAnd%
+      {\ITotal{\IAp{e_{1}}{a}}}%
+      {\IBox{[\IAnd%
+        {\ITotal{\IAp{e_{2}}{(\IAp{e_{1}}{a})}}}%
+        {\IAp{e_{2}}{(\IAp{e_{1}}{a})} \in \chi(x)}
+      ]}}
+    )}
+  \]
+  %
+  As \(\IBoxSym\) is idempotent and preserves conjunctions we may simplify this
+  to contain a single occurence of the modal box
+  %
+  \[
+    \IBox{(
+      \IAnd%
+      {\ITotal{\IAp{e_{1}}{a}}}%
+      {\IAnd%
+        {\ITotal{\IAp{e_{2}}{(\IAp{e_{1}}{a})}}}%
+        {\IAp{e_{2}}{(\IAp{e_{1}}{a})} \in \chi(x)}
+      }
+    )}
+  \]
+  %
+  As needed, this is equivalent to saying that
+  \(\IAp{\IAp{\ICompCode}{e_{1}}}{e_{2}}\) evidences \(\varphi \leq \chi\).
+\end{proof}
+
+\todo[inline]{prove it has finite meets}
+
+\begin{lemm}
+  For any presheaf \(\X\), the preorder \((\RealPred{\X}, \leq)\) has finite
+  meets.
+  %
+  The top element is described by~\ref{defn:pred-top} and the meet of two
+  realizability predicates~\(\varphi\) and \(\psi\) is described
+  by~\ref{defn:pred-meet}:
+  %
+  \begin{gather}
+    \TTop{\X}(x)
+    \IsDefined
+    \ISetComp{a:\A}{\ITop}
+    \label{defn:pred-top}
+    \\
+    \TAnd{\varphi}{\psi}{\X}(x)
+    \IsDefined
+    \ISetComp{a:\A}{\IAnd%
+      {\IAnd{\ITotal{\IAp{\IFstCode}{a}}}{\IAp{\IFstCode}{a}\in\varphi(x)}}%
+      {\IAnd{\ITotal{\IAp{\ISndCode}{a}}}{\IAp{\ISndCode}{a}\in\psi(x)}}
+    }
+    \label{defn:pred-meet}
+  \end{gather}
+\end{lemm}
+\begin{proof}
+  We start by showing that \(\TTop{\X}\) is a greatest element.
+  %
+  Fixing \(\varphi:\RealPred{\X}\), then the identity code \(\IIdentCode\)
+  evidences \(\varphi \leq \TTop{\X}\), as for all \(x : \X\) and
+  \(a \in \varphi(x)\) we have \(\IAp{\IIdentCode}{a} = a\).
+
+  Next we show \(\TAnd{\varphi}{\psi}{\X}\) is the meet of \(\varphi\) and
+  \(\psi\) in \(\RealPred{\X}\).
+  %
+  The projection codes~\(\IFstCode\) and~\(\ISndCode\) evidence
+  \(\TAnd{\varphi}{\psi}{\X}\leq\varphi\) and
+  \(\TAnd{\varphi}{\psi}{\X}\leq\psi\) respectively:
+  %
+  if \(a \in \TAnd{\varphi}{\psi}{\X}\) then by definition we have
+  \(\IAnd{\ITotal{\IAp{\IFstCode}{a}}}{\IAp{\IFstCode}{a}\in\varphi}\), as
+  well as the corresponding for \(\ISndCode\) and \(\psi\).
+  %
+  As for the elimination rule, suppose we have \(\chi\leq\varphi\) and
+  \(\chi\leq\psi\) evidenced by \(e_{1}\) and \(e_{2}\) respectively,
+  then~%
+  %
+  \(
+    e \IsDefined
+    \IAbs{a}{\IPAp{\IPAp{\IPairCode}{(\IPAp{e_{1}}{a})}}{(\IPAp{e_{1}}{a})}}
+  \)
+  %
+  evidences \(\chi\leq\TAnd{\varphi}{\psi}{\X}\).
+  %
+  We know this by specialising our assumptions on~\(e_{1}\) and~\(e_{2}\)
+  to a fixed \(x:\X\) and \(a\in\chi(x)\) and commuting \(\IBoxSym\) with
+  conjunctions, giving us
+  %
+  \[
+    \IBox{
+      (\IAnd{
+        \IAnd{\ITotal{\IAp{e_{1}}{a}}}{\ITotal{\IAp{e_{2}}{a}}}
+      }{
+        \IAnd{\IAp{e_{1}}{a}\in\varphi(x)}{\IAp{e_{2}}{a}\in\psi(x)}
+      })
+    }
+  \]
+  %
+  The first two conjuncts tell us that \(\ITotal{\IAp{e}{a}}\) and so by the
+  specification of functional completeness we see that
+  \(\IAp{e}{a} = \IAp{\IAp{\IPairCode}{(\IAp{e_{1}}{a})}}{(\IAp{e_{1}}{a})}\).
+  %
+  From this we see that
+
+
+\end{proof}
+
+\todo[inline]{prove it has finite joins}
+
+\todo[inline]{prove it has Heyting implication}
+
+% Hence we have proved these are heyting algebras
+
+\todo[inline]{define pullback and show it is heyting algebra morphism}
+
+\todo[inline]{prove left adjoint to pullback exists (as monotone map)}
+
+\todo[inline]{prove right adjoint to pullback exists (as monotone map)}
+
+\todo[inline]{prove beck-chevalley condition}
+
+
+\todo[inline]{show there is a generic object}
+
+
+\newpage
+\printbibliography{}
+
+\end{document}

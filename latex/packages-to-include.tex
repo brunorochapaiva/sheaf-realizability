@@ -1,0 +1,57 @@
+\usepackage{geometry}
+\geometry{
+  a4paper,
+  left=25mm,
+  right=25mm,
+  top=25mm,
+}
+
+% Packages for using unicode
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+
+\usepackage[T1]{fontenc}
+%\usepackage[scaled=0.75]{DejaVuSansMono} % Good monospace font for code
+
+\usepackage[
+  backend=biber,
+  mincrossrefs=999,
+  style=numeric,
+  doi=true,
+  isbn=false,
+  url=false,
+  eprint=false,
+]{biblatex}
+\addbibresource{references.bib}
+\AtEveryBibitem{\clearname{editor}} % Always remove editor information
+
+\usepackage[]{hyperref}
+\hypersetup{
+    colorlinks=false,
+}
+
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsfonts}
+\usepackage{amsthm}
+\usepackage{newtxmath}
+\usepackage{url}
+\usepackage{tikz-cd}
+\usepackage{quiver}
+\usepackage{scalefnt}
+\usepackage{microtype}
+\usepackage{subfiles}
+\usepackage{mathpartir}
+\usepackage[bb=dsserif]{mathalpha}
+\usepackage{bm}
+\usepackage{mathtools}
+\ifnotes%
+\usepackage{todonotes}
+\else
+\usepackage[disable]{todonotes}
+\fi
+\usepackage{cleveref}
+\usepackage{xspace}
+\usepackage{multirow}
+\usepackage{ulem}
+\usepackage{contour}

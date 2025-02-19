@@ -1,0 +1,130 @@
+%% Macros
+
+%% Macro to superimpose two symbols
+\makeatletter
+\newcommand{\superimpose}[3][\mathord]{#1{\mathpalette\superimpose@{{#2}{#3}}}}
+\newcommand{\superimpose@}[2]{\superimpose@@{#1}#2}
+\newcommand{\superimpose@@}[3]{%
+  \ooalign{%
+    \hfil$\m@th#1#2$\hfil\cr
+    \hfil$\m@th#1#3$\hfil\cr
+  }%
+}
+\makeatother
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% GENERAL MATHEMATICAL NOTATION %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%% Used in the vernacular to mark a term being defined.
+%% Currently, does nothing else besides making the term italic.
+%% But it’s still nice to provide a layer of abstraction for this purpose.
+%% It may be used, for example, to add things to the index.
+\newcommand{\definiendum}[1]{\textbf{#1}}
+
+\newcommand{\IsDefined}{\mathbin{\vcentcolon\equiv}}
+
+%% General one letter notations
+\newcommand{\A}{\ensuremath{\mathsf{A}}} % arbitrary PCA
+\newcommand{\C}{\ensuremath{\mathcal{C}}} % arbitrary category
+\renewcommand{\P}{\ensuremath{{P}}} % arbitrary poset (replaces paragraph symbol)
+\renewcommand{\L}{\ensuremath{{L}}} % arbitrary lattice
+\newcommand{\X}{\ensuremath{X}} % arbitrary sheaf
+
+\newcommand{\Par}[1]{{#1}_\bot}
+\newcommand{\ParTo}{\rightharpoonup}
+\newcommand{\ParCat}[1]{{#1}^\ParTo}
+
+\newcommand{\PresheafCat}{\hat{\C}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% VERNACULAR COMMANDS %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newcommand{\SystemT}{\textsc{System T}}
+\newcommand{\MLTT}{\textsc{MLTT}}
+\newcommand{\Agda}{\textsc{Agda}}
+\newcommand{\Boxtt}{\textsc{BoxTT}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% DECORATION %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\setlength{\ULdepth}{3pt}
+\contourlength{1pt}
+\newcommand{\underlinehelper}[3]{
+  \colorbox{#2}{
+  #1{\phantom{#3}}%
+  \llap{\contour{#2}{#3}}%
+  }
+}
+\newcommand{\hla}[1]{\underlinehelper{\uline}{pink}{#1}}
+\newcommand{\hlb}[1]{\underlinehelper{\uwave}{yellow}{#1}}
+\newcommand{\hlc}[1]{\underlinehelper{\uuline}{pink}{#1}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% INTERNAL %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%% Logical language
+\newcommand{\ITop}{\top}
+
+\newcommand{\INotSym}{\lnot}
+\newcommand{\INot}[1]{\INotSym{#1}}
+
+\newcommand{\IAndSym}{\land}
+\newcommand{\IAnd}[2]{{#1}\IAndSym{#2}}
+
+\newcommand{\IOrSym}{\lor}
+\newcommand{\IOr}[2]{{#1}\IOrSym{#2}}
+
+\newcommand{\IForallSym}{\forall}
+\newcommand{\IForall}[2]{\IForallSym{#1}.{#2}}
+
+\newcommand{\IExistsSym}{\exists}
+\newcommand{\IExists}[2]{\IExistsSym{#1}.{#2}}
+
+\newcommand{\IBoxSym}{\Box}
+\newcommand{\IBox}[1]{\IBoxSym{#1}}
+
+\newcommand{\ISetComp}[2]{\{{#1}\mid{#2}\}}
+
+%% Types
+\newcommand{\IPower}[1]{\mathcal{P}{#1}}
+\newcommand{\IFun}[2]{{#2}^{#1}}
+
+% INTERNAL PCA
+
+%% Partial application
+\newcommand{\IApSym}{\cdot}
+\newcommand{\IAp}[2]{{#1}\IApSym{#2}}
+
+%% Polynomial application
+\newcommand{\IPApSym}{\cdot}
+\newcommand{\IPAp}[2]{{#1}\IPApSym{#2}}
+
+%% Polynomial abstraction
+\newcommand{\IAbs}[2]{\Lambda{#1}.\,{#2}}
+
+%% Partial element is defined
+\newcommand{\ITotal}[1]{{#1}\downarrow}
+
+\newcommand{\IIdentCode}{\texttt{id}}
+
+\newcommand{\ICompCode}{\texttt{comp}}
+
+\newcommand{\IPairCode}{\texttt{pair}}
+\newcommand{\IFstCode}{\texttt{p}_0}
+\newcommand{\ISndCode}{\texttt{p}_1}
+
+
+%% Realizability Predicates
+\newcommand{\RealPred}[1]{\IFun{#1}{\IPower{\A}}}
+
+%% Tripos language
+
+\newcommand{\TTop}[1]{\top}
+
+\newcommand{\TAndSym}[1]{\land}
+\newcommand{\TAnd}[3]{{#1}\TAndSym{#3}{#2}}

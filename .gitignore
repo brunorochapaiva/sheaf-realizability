@@ -1,0 +1,20 @@
+# Agda build directory
+_build
+
+*.aux
+*.dvi
+*.toc
+*.ps
+*.pdf
+*.log
+*.bbl
+*.blg
+*.lox
+*.fdb_latexmk
+*.fls
+*.out
+*.bcf
+*.vtc
+*.run.xml
+*.synctex.gz
+
