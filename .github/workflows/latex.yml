@@ -1,0 +1,29 @@
+name: Generate PDF
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - latex/**
+jobs:
+  build_latex:
+    permissions: write-all
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up git repository
+        uses: actions/checkout@v3
+        with:
+          submodules: true
+      - name: Compile LaTeX document
+        uses: xu-cheng/latex-action@v3
+        with:
+          working_directory: latex
+          root_file: main.tex
+      - name: Delete old draft release
+        run: gh release delete draft --cleanup-tag
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Create latest draft release
+        run: gh release create draft --title "Latest draft" "latex/main.pdf#latest-draft.pdf"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
