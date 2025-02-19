@@ -1,4 +1,4 @@
-main=rsmg5
+main=main
 collectionID=FX2URPTD
 
 default:
