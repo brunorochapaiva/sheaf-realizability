@@ -1,20 +1,24 @@
 \begin{code}
 
 open import MLTT.Spartan
-open import MLTT.Vector
 
 module PCA where
 
  open import PAS
  open import Polynomial
 
- PCA-structure : {𝓣 𝓤 : Universe} (𝒜 : PAS 𝓣 𝓤) → 𝓤 ⊔ 𝓣  ̇
- PCA-structure {𝓣} 𝒜 = Σ 𝕜 ꞉ ⟅ 𝒜 ⟆ , Σ 𝕤 ꞉ ⟅ 𝒜 ⟆ ,
-    ((a b : ⟅ 𝒜 ⟆) → ⟦ 𝕔 𝕜 · 𝕔 a · 𝕔 b ⟧[ 𝒜 ] ≡ η a)
-  × ((a b : ⟅ 𝒜 ⟆) → is-defined ⟦ 𝕔 𝕤 · 𝕔 a · 𝕔 b ⟧[ 𝒜 ])
-  × ((a b c : ⟅ 𝒜 ⟆) → ⟦ 𝕔 𝕤 · 𝕔 a · 𝕔 b · 𝕔 c  ⟧[ 𝒜 ] ≼ ⟦ 𝕔 𝕤 · 𝕔 c · (𝕔 b · 𝕔 c) ⟧[ 𝒜 ])
-  where
-   open import Partiality 𝓣
+ module _ {𝓣 𝓤 : Universe} (𝒜 : PAS 𝓣 𝓤) where
+
+  open import Partiality 𝓣
+  open PASNotation 𝒜
+  open PolynomialNotation 𝒜
+
+  -- Partial combinatory algebra structure
+  PCA-structure : 𝓤 ⊔ 𝓣 ̇
+  PCA-structure = Σ 𝕜 ꞉ ⟅ 𝒜 ⟆ , Σ 𝕤 ꞉ A ,
+     ((a b : A) → ⟦ 𝕔 𝕜 · 𝕔 a · 𝕔 b ⟧ ≡ η a)
+   × ((a b : A) → is-defined ⟦ 𝕔 𝕤 · 𝕔 a · 𝕔 b ⟧)
+   × ((a b c : A) → ⟦ 𝕔 𝕤 · 𝕔 a · 𝕔 b · 𝕔 c  ⟧ ≼ ⟦ 𝕔 𝕤 · 𝕔 c · (𝕔 b · 𝕔 c) ⟧)
 
  PCA : (𝓣 𝓤 : Universe) → 𝓤 ⁺ ⊔ 𝓣 ⁺  ̇
  PCA 𝓣 𝓤 = Σ (PCA-structure {𝓣} {𝓤})
@@ -99,13 +103,3 @@ module PCA where
 
   s-law₂' : (a b c : A) → ⟦ 𝕔 𝕤 · 𝕔 a · 𝕔 b · 𝕔 c  ⟧ ≼ ⟦ 𝕔 𝕤 · 𝕔 c · (𝕔 b · 𝕔 c) ⟧
   s-law₂' = pr₂ (pr₂ (pr₂ (pr₂ (pr₂ 𝔸))))
-
- functionally-complete-structure : {𝓣 𝓤 : Universe} → PAS 𝓣 𝓤 → (𝓤 ⊔ 𝓣) ̇
- functionally-complete-structure 𝒜 = {n : ℕ} →
-  Π t ꞉ Poly 𝒜 (succ n) , Σ e ꞉ A , Π xs ꞉ Vector A (succ n) ,
-   is-defined (apply 𝒜 e (tail xs)) × ⟦ substitute 𝒜 (to-sub 𝒜 xs) t ⟧ ≼ apply 𝒜 e xs
-  where
-   open import Partiality _
-   open PASNotation 𝒜
-   open import Polynomial
-   open PolynomialNotation 𝒜
