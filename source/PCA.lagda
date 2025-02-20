@@ -1,10 +1,7 @@
 \begin{code}
 
 open import MLTT.Spartan
-open import MLTT.Fin
 open import MLTT.Vector
-open import UF.Sets
-open import UF.SubtypeClassifier
 
 module PCA where
 

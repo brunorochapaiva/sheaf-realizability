@@ -3,7 +3,6 @@
 open import MLTT.Spartan
 open import MLTT.Fin
 open import MLTT.Vector
-open import UF.SubtypeClassifier
 
 open import PAS
 
