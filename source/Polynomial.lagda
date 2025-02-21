@@ -44,7 +44,7 @@ module Polynomial where
 
   -- Closed (total) substitutions
   CSub : ℕ → 𝓤 ̇
-  CSub n = Vector ⟅ 𝒜 ⟆ n
+  CSub n = Vector A n
 
   substitute : {n m : ℕ} → Sub m n → Poly 𝒜 n → Poly 𝒜 m
   substitute σ (𝕧 i)   = σ !! i
@@ -54,13 +54,16 @@ module Polynomial where
   to-sub : {n : ℕ} → CSub n → Sub 0 n
   to-sub = vmap 𝕔
 
-  -- Apply multiple arguments in reverse order
+  -- Apply multiple arguments in order
   -- We expect `apply e [ a ; b ; c ]` to compute `((e ⊕ a) ⊕ b) ⊕ c`
-  apply : {n : ℕ} → ⟅ 𝒜 ⟆ → CSub n → 𝓛 ⟅ 𝒜 ⟆
-  apply a []      = η a
-  apply a (x ∷ σ) = ((_⊕ x) ♯) (apply a σ)
+  apply-poly : {n m : ℕ} → Poly 𝒜 m → Sub m n → Poly 𝒜 m
+  apply-poly e []      = e
+  apply-poly e (x ∷ σ) = apply-poly (e · x) σ
 
-  𝕔-is-defined : (a : ⟅ 𝒜 ⟆) → is-defined ⟦ 𝕔 a ⟧[ 𝒜 ]
+  apply : {n : ℕ} → A → CSub n → 𝓛 A
+  apply e σ = ⟦ apply-poly (𝕔 e) (to-sub σ) ⟧[ 𝒜 ]
+
+  𝕔-is-defined : (a : A) → is-defined ⟦ 𝕔 a ⟧[ 𝒜 ]
   𝕔-is-defined a = ⋆
 
   ·-is-defined-left : (t r : Poly 𝒜 0)
