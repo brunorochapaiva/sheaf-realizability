@@ -1,8 +1,10 @@
 \begin{code}
 
 open import MLTT.Spartan
-open import UF.FunExt
-open import UF.Sets
+open import UF.Base
+open import UF.FunExt using (funext)
+open import UF.Lower-FunExt using (lower-funext)
+open import UF.Sets using (is-set)
 open import UF.Subsingletons
 open import UF.Subsingletons-FunExt
 open import UF.SubtypeClassifier
@@ -11,11 +13,18 @@ module Partiality (𝓣 : Universe) where
 
  open import Lifting.Construction 𝓣 public
  open import Lifting.Monad 𝓣 public
+ open import Lifting.UnivalentPrecategory 𝓣
+ open import Lifting.Miscelanea 𝓣
 
  binary-Kleisli : {X : 𝓤 ̇} {Y : 𝓥 ̇} {Z : 𝓦 ̇}
                 → (X → Y → 𝓛 Z)
                 → 𝓛 X → 𝓛 Y → 𝓛 Z
- binary-Kleisli f x y = μ (𝓛̇ (λ g → (g ♯) y) (𝓛̇ f x))
+ binary-Kleisli f x y =
+  (Σ ϕ ꞉ is-defined x , Σ ψ ꞉ is-defined y , is-defined (f (value x ϕ) (value y ψ))) ,
+  (λ (ϕ , ψ , χ) → value (f (value x ϕ) (value y ψ)) χ) ,
+  Σ-is-prop (being-defined-is-prop x) λ ϕ →
+   Σ-is-prop (being-defined-is-prop y) λ ψ →
+    being-defined-is-prop (f (value x ϕ) (value y ψ))
 
  binary-Kleisli-is-defined-left : {X : 𝓤 ̇} {Y : 𝓥 ̇} {Z : 𝓦 ̇}
                                 → (f : X → Y → 𝓛 Z)
@@ -40,7 +49,7 @@ module Partiality (𝓣 : Universe) where
  x ≡ y = Σ i ꞉ is-defined x , Σ j ꞉ is-defined y , value x i ＝ value y j
 
  _≼_ : {X : 𝓤 ̇} → 𝓛 X → 𝓛 X → 𝓤 ⊔ 𝓣 ̇
- x ≼ y = is-defined x → x ≡ y
+ _≼_ {𝓤} {X} = _⊑_ {𝓤} X
 
  _≋_ : {X : 𝓤 ̇} → 𝓛 X → 𝓛 X → 𝓤 ⊔ 𝓣 ̇
  x ≋ y = x ≼ y × y ≼ x
@@ -66,18 +75,72 @@ module Partiality (𝓣 : Universe) where
  ≡-is-defined-right : {X : 𝓤 ̇} → (x y : 𝓛 X) → x ≡ y → is-defined y
  ≡-is-defined-right _ _ (_ , h , _) = h
 
+ ≡-value : {X : 𝓤 ̇} → (x y : 𝓛 X) (h : is-defined x) (j : is-defined y)
+         → x ≡ y → value x h ＝ value y j
+ ≡-value x y h j (k , l , e) =
+  value x h ＝⟨ ap (value x) (being-defined-is-prop x h k) ⟩
+  value x k ＝⟨ e ⟩
+  value y l ＝⟨ ap (value y) (being-defined-is-prop y l j) ⟩
+  value y j ∎
+
  ≡-implies-≼ : {X : 𝓤 ̇} → (x y : 𝓛 X) → x ≡ y → x ≼ y
- ≡-implies-≼ x y h _ = h
+ ≡-implies-≼ x y (h , i , j) = (λ _ → i) , λ l → ≡-value x y l i (h , i , j)
 
  ≼-refl : {X : 𝓤 ̇} (x : 𝓛 X) → x ≼ x
- ≼-refl x h = h , h , refl
+ ≼-refl x = id , (λ _ → refl)
 
  ≼-trans : {X : 𝓤 ̇} (x y z : 𝓛 X) → x ≼ y → y ≼ z → x ≼ z
- ≼-trans x y z h j k = ≡-trans x y z (h k) (j (≡-is-defined-right x y (h k)))
+ ≼-trans {𝓤} {X} x y z h j = 𝓛-comp {𝓤} X x y z h j
 
  ≼-preserves-defined : {X : 𝓤 ̇} (x y : 𝓛 X)
                      → x ≼ y → is-defined x → is-defined y
- ≼-preserves-defined x y h j = pr₁ (pr₂ (h j))
+ ≼-preserves-defined {𝓤} {X} = def-pr {𝓤} X
+
+ ≼-value : {X : 𝓤 ̇} → (x y : 𝓛 X) (h : is-defined x) (j : is-defined y)
+         → x ≼ y → value x h ＝ value y j
+ ≼-value x y h i (f , δ) = ≡-value x y h i (h , f h , δ h)
+
+ is-defined-≼-implies-≡ : {X : 𝓤 ̇} (x y : 𝓛 X)
+                        → is-defined x
+                        → x ≼ y
+                        → x ≡ y
+ is-defined-≼-implies-≡ x y ϕ (g , δ) = ϕ , g ϕ , δ ϕ
+
+ 𝓛̇-≼ : {X : 𝓤 ̇} {Y : 𝓥 ̇} (f : X → Y) (x y : 𝓛 X)
+     → x ≼ y → 𝓛̇ f x ≼ 𝓛̇ f y
+ 𝓛̇-≼ f x y (g , δ) = g , λ ϕ → ap f (δ ϕ)
+
+ ≼-ap : {X : 𝓤 ̇} {Y : 𝓥 ̇} (f : X → 𝓛 Y) (x y : 𝓛 X) → x ≼ y → (f ♯) x ≼ (f ♯) y
+ ≼-ap f x y (g , δ) = h , ϵ
+  where
+   h : is-defined ((f ♯) x) → is-defined ((f ♯) y)
+   h (ϕ , ψ) = g ϕ , transport (is-defined ∘ f) (δ ϕ) ψ
+
+   ϵ : value ((f ♯) x) ∼ value ((f ♯) y) ∘ h
+   ϵ (ϕ , ψ) = ≡-value (f (value x ϕ)) (f (value y (g ϕ)))
+    ψ
+    (transport (is-defined ∘ f) (δ ϕ) ψ)
+    (transport (f (value x ϕ) ≡_) (ap f (δ ϕ)) (ψ , ψ , refl))
+
+ ≼-ap₂ : {X : 𝓤 ̇} {Y : 𝓥 ̇} {Z : 𝓦 ̇}
+         (x₁ x₂ : 𝓛 X) (y₁ y₂ : 𝓛 Y)
+         (f : X → Y → 𝓛 Z)
+       → x₁ ≼ x₂ → y₁ ≼ y₂ → binary-Kleisli f x₁ y₁ ≼ binary-Kleisli f x₂ y₂
+ ≼-ap₂ x₁ x₂ y₁ y₂ f (g , δ) (h , ϵ) = i , γ
+  where
+   i : is-defined (binary-Kleisli f x₁ y₁) → is-defined (binary-Kleisli f x₂ y₂)
+   i (ϕ , ψ , χ) = g ϕ , h ψ , transport is-defined (ap₂ f (δ ϕ) (ϵ ψ)) χ
+
+   γ : value (binary-Kleisli f x₁ y₁) ∼ value (binary-Kleisli f x₂ y₂) ∘ i
+   γ (ϕ , ψ , χ) = ≡-value
+     (f (value x₁ ϕ) (value y₁ ψ))
+     (f (value x₂ (g ϕ)) (value y₂ (h ψ)))
+     χ
+     ξ
+     (transport (f (value x₁ ϕ) (value y₁ ψ) ≡_) (ap₂ f (δ ϕ) (ϵ ψ)) (χ , χ , refl))
+    where
+     ξ : is-defined (f (value x₂ (g ϕ)) (value y₂ (h ψ)))
+     ξ = transport is-defined (ap₂ f (δ ϕ) (ϵ ψ)) χ
 
  module _ {X : 𝓤 ̇} (X-is-set : is-set X) where
 
@@ -86,14 +149,15 @@ module Partiality (𝓣 : Universe) where
                    λ _ → Σ-is-prop (being-defined-is-prop y)
                     λ _ → X-is-set
 
-  ≼-is-prop : (fe : funext 𝓣 (𝓣 ⊔ 𝓤))
+  ≼-is-prop : (fe : funext 𝓣 (𝓤 ⊔ 𝓣))
               (x y : 𝓛 X) → is-prop (x ≼ y)
-  ≼-is-prop fe x y = Π-is-prop fe (λ _ → ≡-is-prop x y)
+  ≼-is-prop fe x y = Σ-is-prop (Π-is-prop (lower-funext 𝓣 𝓤 fe) λ _ → being-defined-is-prop y)
+                      λ _ → Π-is-prop (lower-funext 𝓣 𝓣 fe)
+                       λ _ → X-is-set
 
-  ≋-is-prop : (fe : funext 𝓣 (𝓣 ⊔ 𝓤))
+  ≋-is-prop : (fe : funext 𝓣 (𝓤 ⊔ 𝓣))
               (x y : 𝓛 X) → is-prop (x ≋ y)
   ≋-is-prop fe x y = Σ-is-prop (≼-is-prop fe x y) (λ _ → ≼-is-prop fe y x)
-
 
  binary-Kleisli-η-both : {X : 𝓤 ̇} {Y : 𝓥 ̇} {Z : 𝓦 ̇}
                        → (f : X → Y → 𝓛 Z)
@@ -102,9 +166,9 @@ module Partiality (𝓣 : Universe) where
  binary-Kleisli-η-both f x y = left , right
   where
    left : binary-Kleisli f (η x) (η y) ≼ f x y
-   left (⋆ , ⋆ , i) = (⋆ , ⋆ , i) , i , refl
+   left = (λ (⋆ , ⋆ , ϕ) → ϕ) , λ _ → refl
 
    right : f x y ≼ binary-Kleisli f (η x) (η y)
-   right h = h , (⋆ , ⋆ , h) , refl
+   right = (λ ϕ → ⋆ , ⋆ , ϕ) , λ _ → refl
 
 \end{code}
