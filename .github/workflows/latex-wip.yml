@@ -1,10 +1,10 @@
-name: Generate PDF
+name: Generate draft PDF
 on:
   push:
     branches:
       - main
     paths:
-      - latex/**
+      - latex/wip/**
 jobs:
   build_latex:
     permissions: write-all
@@ -17,13 +17,13 @@ jobs:
       - name: Compile LaTeX document
         uses: xu-cheng/latex-action@v3
         with:
-          working_directory: latex
+          working_directory: latex/wip
           root_file: main.tex
       - name: Delete old draft release
         run: gh release delete draft --cleanup-tag
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Create latest draft release
-        run: gh release create draft --title "Latest draft" "latex/main.pdf#latest-draft.pdf"
+        run: gh release create draft --title "Latest draft" "latex/wip/main.pdf#latest-draft.pdf"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
