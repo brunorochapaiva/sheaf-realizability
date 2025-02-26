@@ -8,6 +8,7 @@ open import PAS
 open import Polynomial
 open import PCA
 open import FC
+open import Misc
 
 module PCAEquivFC {𝓣 𝓤 : Universe} {𝒜 : PAS 𝓣 𝓤} where
 
@@ -53,17 +54,12 @@ module PCAEquivFC {𝓣 𝓤 : Universe} {𝒜 : PAS 𝓣 𝓤} where
 
   private
 
+   𝕜⊕-is-defined : (a : A) → is-defined ⟦ 𝕔 𝕜 · 𝕔 a ⟧
+   𝕜⊕-is-defined a = k-law₀ {𝒜 = 𝒜} pca a
+
    𝕜⊕ : A → A
-   𝕜⊕ a = value (𝕜 ⊕ a) III
-    where
-     I : binary-Kleisli _⊕_ (η 𝕜) (η a) ≼ 𝕜 ⊕ a
-     I = pr₁ (binary-Kleisli-η-both _⊕_ 𝕜 a)
+   𝕜⊕ a = value ⟦ 𝕔 𝕜 · 𝕔 a ⟧ (𝕜⊕-is-defined a)
 
-     II : is-defined ⟦ 𝕔 𝕜 · 𝕔 a ⟧
-     II = k-law₀ {𝒜 = 𝒜} pca a
-
-     III : is-defined (𝕜 ⊕ a)
-     III = ≼-preserves-defined ⟦ 𝕔 𝕜 · 𝕔 a ⟧ (𝕜 ⊕ a) I II
 
    abs-single : {n : ℕ} → Poly 𝒜 (succ n) → Poly 𝒜 n
    abs-single (𝕧 𝟎)       = 𝕔 𝕤 · 𝕔 𝕜 · 𝕔 𝕜
@@ -74,24 +70,58 @@ module PCAEquivFC {𝓣 𝓤 : Universe} {𝒜 : PAS 𝓣 𝓤} where
    abs-single-spec : {n : ℕ} (t : Poly 𝒜 (succ n)) (x : A) (xs : CSub 𝒜 n)
                    → ⟦ substitute 𝒜 (to-sub 𝒜 (x ∷ xs)) t ⟧
                      ≼ ⟦ substitute 𝒜 (to-sub 𝒜 xs) (abs-single t) · 𝕔 x ⟧
-   abs-single-spec (𝕧 𝟎) x xs = {!!}
+   abs-single-spec (𝕧 𝟎) x xs =
+    ≼-trans ⟦ 𝕔 x ⟧ ⟦ 𝕔 𝕜 · 𝕔 x · (𝕔 𝕜 · 𝕔 x) ⟧ ⟦ 𝕔 𝕤 · 𝕔 𝕜 · 𝕔 𝕜 · 𝕔 x ⟧
+     (≼-trans ⟦ 𝕔 x ⟧ ⟦ 𝕔 𝕜 · 𝕔 x · 𝕔 (𝕜⊕ x) ⟧ ⟦ 𝕔 𝕜 · 𝕔 x · (𝕔 𝕜 · 𝕔 x) ⟧ I II)
+     III
     where
-     goal : η x ≼ ⟦ 𝕔 𝕤 · 𝕔 𝕜 · (𝕔 𝕜 · 𝕔 x) ⟧
-     goal = {!!}
-
      I : ⟦ 𝕔 x ⟧ ≼ ⟦ 𝕔 𝕜 · 𝕔 x · 𝕔 (𝕜⊕ x) ⟧
      I = ≡-implies-≼ ⟦ 𝕔 x ⟧ ⟦ 𝕔 𝕜 · 𝕔 x · 𝕔 (𝕜⊕ x) ⟧
           (≡-symm ⟦ 𝕔 𝕜 · 𝕔 x · 𝕔 (𝕜⊕ x) ⟧ ⟦ 𝕔 x ⟧
            (k-law₁ {𝒜 = 𝒜} pca x (𝕜⊕ x)))
 
      II : ⟦ 𝕔 𝕜 · 𝕔 x · 𝕔 (𝕜⊕ x) ⟧ ≼ ⟦ 𝕔 𝕜 · 𝕔 x · (𝕔 𝕜 · 𝕔 x) ⟧
-     II = {!!}
+     II = csubstitute-≼ 𝒜 (𝕔 𝕜 · 𝕔 x · 𝕧 𝟎) ((𝕔 𝕜 · 𝕔 x) ∷ []) h
+      where
+       h : (p : Fin 1) → is-defined ⟦ ((𝕔 𝕜 · 𝕔 x) ∷ []) !! p ⟧
+       h 𝟎 = 𝕜⊕-is-defined x
 
      III : ⟦ 𝕔 𝕜 · 𝕔 x · (𝕔 𝕜 · 𝕔 x) ⟧ ≼ ⟦ 𝕔 𝕤 · 𝕔 𝕜 · 𝕔 𝕜 · 𝕔 x ⟧
      III = s-law₂ {𝒜 = 𝒜} pca 𝕜 𝕜 x
-   abs-single-spec (𝕧 (suc n)) x xs = {!!}
-   abs-single-spec (𝕔 a) x xs = {!!}
+   abs-single-spec (𝕧 (suc n)) x xs = transport
+    (λ t → ⟦ t ⟧ ≼ ⟦ 𝕔 𝕜 · t · 𝕔 x ⟧)
+    (vmap-!! 𝕔 xs n)
+    (k-law₁' {𝒜 = 𝒜} pca (xs !! n) x)
+   abs-single-spec (𝕔 a) x xs = k-law₁' {𝒜 = 𝒜} pca a x
    abs-single-spec (t · r) x xs = {!!}
+    where
+     IH1 : ⟦ substitute 𝒜 (to-sub 𝒜 (x ∷ xs)) t ⟧
+            ≼ ⟦ substitute 𝒜 (to-sub 𝒜 xs) (abs-single t) · 𝕔 x ⟧
+     IH1 = abs-single-spec t x xs
+
+     IH2 : ⟦ substitute 𝒜 (to-sub 𝒜 (x ∷ xs)) r ⟧
+            ≼ ⟦ substitute 𝒜 (to-sub 𝒜 xs) (abs-single r) · 𝕔 x ⟧
+     IH2 = abs-single-spec r x xs
+
+     I : ⟦ substitute 𝒜 (to-sub 𝒜 (x ∷ xs)) t
+          · substitute 𝒜 (to-sub 𝒜 (x ∷ xs)) r ⟧
+           ≼ ⟦ substitute 𝒜 (to-sub 𝒜 xs) (abs-single t) · 𝕔 x
+              · (substitute 𝒜 (to-sub 𝒜 xs) (abs-single r) · 𝕔 x) ⟧
+     I = binary-Kleisli-≼
+      ⟦ substitute 𝒜 (to-sub 𝒜 (x ∷ xs)) t ⟧
+      ⟦ substitute 𝒜 (to-sub 𝒜 xs) (abs-single t) · 𝕔 x ⟧
+      ⟦ substitute 𝒜 (to-sub 𝒜 (x ∷ xs)) r ⟧
+      ⟦ substitute 𝒜 (to-sub 𝒜 xs) (abs-single r) · 𝕔 x ⟧
+      _⊕_
+      IH1
+      IH2
+
+     II : ⟦ substitute 𝒜 (to-sub 𝒜 xs) (abs-single t) · 𝕔 x
+           · (substitute 𝒜 (to-sub 𝒜 xs) (abs-single r) · 𝕔 x) ⟧
+            ≼ ⟦ 𝕔 𝕤 · substitute 𝒜 (to-sub 𝒜 xs) (abs-single t)
+               · substitute 𝒜 (to-sub 𝒜 xs) (abs-single r) · 𝕔 x ⟧
+     II = {!!}
+
 
    abs : {n : ℕ} → Poly 𝒜 (succ n) → A
    abs t = {!!}

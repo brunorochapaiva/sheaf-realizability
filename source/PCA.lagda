@@ -56,6 +56,62 @@ module PCA {𝓣 𝓤 : Universe} where
            ≼ ⟦ 𝕔 𝕤[ pca ] · 𝕔 a · 𝕔 b · 𝕔 c  ⟧
   s-law₂ pca = pr₂ (pr₂ (pr₂ (pr₂  pca)))
 
+  k-law₁' : (pca : PCA-structure 𝒜)
+          → (a b : A)
+          → η a ≼ ⟦ 𝕔 𝕜[ pca ] · 𝕔 a · 𝕔 b ⟧
+  k-law₁' pca a b = ≡-implies-≼ (η a) ⟦ 𝕔 𝕜[ pca ] · 𝕔 a · 𝕔 b ⟧
+   (≡-symm ⟦ 𝕔 𝕜[ pca ] · 𝕔 a · 𝕔 b ⟧ (η a) (k-law₁ pca a b))
+
+  --p-k-law₀ : (pca : PCA-structure 𝒜)
+  --         → (t : Poly 𝒜 0)
+  --         → is-defined ⟦ 𝕔 𝕜[ pca ] · t ⟧
+  --p-k-law₀ pca t = {!!}
+
+  p-k-law₁ : (pca : PCA-structure 𝒜)
+           → (t r : Poly 𝒜 0)
+           → is-defined ⟦ r ⟧
+           → ⟦ t ⟧ ≼ ⟦ 𝕔 𝕜[ pca ] · t · r ⟧
+  p-k-law₁ pca t r ψ = {!!} , {!!}
+   where
+    f : is-defined ⟦ t ⟧ → is-defined ⟦ 𝕔 𝕜[ pca ] · t · r ⟧
+    f ϕ = (⋆ , ϕ , χ) , ψ , ξ
+     where
+      χ' : is-defined (binary-Kleisli _⊕_ (η 𝕜[ pca ]) (η (value (evaluate 𝒜 t) ϕ)))
+      χ' = k-law₀ pca (value (evaluate 𝒜 t) ϕ)
+
+      χ : is-defined (𝕜[ pca ] ⊕ value (evaluate 𝒜 t) ϕ)
+      χ = ≋-preserves-is-defined
+       (binary-Kleisli _⊕_ (η 𝕜[ pca ]) (η (value (evaluate 𝒜 t) ϕ)))
+       (𝕜[ pca ] ⊕ value (evaluate 𝒜 t) ϕ)
+       (binary-Kleisli-η-both _⊕_ 𝕜[ pca ] (value (evaluate 𝒜 t) ϕ))
+       χ'
+
+      ξ' : is-defined (binary-Kleisli
+            _⊕_
+            (η (value (𝕜[ pca ] ⊕ value (evaluate 𝒜 t) ϕ) χ))
+            (η (value (evaluate 𝒜 r) ψ)))
+      ξ' = ≋-preserves-is-defined
+       {!!}
+       {!!}
+       {!!}
+       {!!}
+
+      ξ : is-defined (value (𝕜[ pca ] ⊕ value (evaluate 𝒜 t) ϕ) χ ⊕ value (evaluate 𝒜 r) ψ)
+      ξ = {!!}
+       where
+        I : is-defined (binary-Kleisli
+                         _⊕_
+                         (binary-Kleisli
+                          _⊕_
+                          (η 𝕜[ pca ])
+                          (η (value (evaluate 𝒜 t) ϕ)))
+                         (η (value (evaluate 𝒜 r) ψ)))
+        I = ≡-is-defined-left
+         ⟦ 𝕔 𝕜[ pca ] · 𝕔 (value (evaluate 𝒜 t) ϕ) · 𝕔 (value (evaluate 𝒜 r) ψ) ⟧
+         (η _)
+         (k-law₁ pca (value (evaluate 𝒜 t) ϕ) (value (evaluate 𝒜 r) ψ))
+
+
   module PCAStructureNotation (pca : PCA-structure 𝒜) where
 
    𝕜 : A

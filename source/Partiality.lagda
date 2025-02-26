@@ -122,11 +122,11 @@ module Partiality (𝓣 : Universe) where
     (transport (is-defined ∘ f) (δ ϕ) ψ)
     (transport (f (value x ϕ) ≡_) (ap f (δ ϕ)) (ψ , ψ , refl))
 
- ≼-ap₂ : {X : 𝓤 ̇} {Y : 𝓥 ̇} {Z : 𝓦 ̇}
+ binary-Kleisli-≼ : {X : 𝓤 ̇} {Y : 𝓥 ̇} {Z : 𝓦 ̇}
          (x₁ x₂ : 𝓛 X) (y₁ y₂ : 𝓛 Y)
          (f : X → Y → 𝓛 Z)
        → x₁ ≼ x₂ → y₁ ≼ y₂ → binary-Kleisli f x₁ y₁ ≼ binary-Kleisli f x₂ y₂
- ≼-ap₂ x₁ x₂ y₁ y₂ f (g , δ) (h , ϵ) = i , γ
+ binary-Kleisli-≼ x₁ x₂ y₁ y₂ f (g , δ) (h , ϵ) = i , γ
   where
    i : is-defined (binary-Kleisli f x₁ y₁) → is-defined (binary-Kleisli f x₂ y₂)
    i (ϕ , ψ , χ) = g ϕ , h ψ , transport is-defined (ap₂ f (δ ϕ) (ϵ ψ)) χ
@@ -141,6 +141,24 @@ module Partiality (𝓣 : Universe) where
     where
      ξ : is-defined (f (value x₂ (g ϕ)) (value y₂ (h ψ)))
      ξ = transport is-defined (ap₂ f (δ ϕ) (ϵ ψ)) χ
+
+ binary-Kleisli-≼-left : {X : 𝓤 ̇} {Y : 𝓥 ̇} {Z : 𝓦 ̇}
+                         (x₁ x₂ : 𝓛 X) (y : 𝓛 Y)
+                         (f : X → Y → 𝓛 Z)
+                       → x₁ ≼ x₂
+                       → binary-Kleisli f x₁ y ≼ binary-Kleisli f x₂ y
+ binary-Kleisli-≼-left x₁ x₂ y f h = binary-Kleisli-≼ x₁ x₂ y y f h (≼-refl y)
+
+ binary-Kleisli-≼-right : {X : 𝓤 ̇} {Y : 𝓥 ̇} {Z : 𝓦 ̇}
+                          (x : 𝓛 X) (y₁ y₂ : 𝓛 Y)
+                          (f : X → Y → 𝓛 Z)
+                        → y₁ ≼ y₂
+                        → binary-Kleisli f x y₁ ≼ binary-Kleisli f x y₂
+ binary-Kleisli-≼-right x y₁ y₂ f h = binary-Kleisli-≼ x x y₁ y₂ f (≼-refl x) h
+
+ ≋-preserves-is-defined : {X : 𝓤 ̇} (x y : 𝓛 X)
+                        → x ≋ y → is-defined x → is-defined y
+ ≋-preserves-is-defined x y h = ≼-preserves-defined x y (pr₁ h)
 
  module _ {X : 𝓤 ̇} (X-is-set : is-set X) where
 
