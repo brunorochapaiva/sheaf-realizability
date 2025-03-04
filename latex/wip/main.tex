@@ -1,11 +1,13 @@
 \documentclass[11pt]{article}
 
-
 \newif\ifnotes
 \notestrue % comment out to hide notes
 
 \DeclareUnicodeCharacter{03A3}{\(\Sigma\)}
 \DeclareUnicodeCharacter{03A0}{\(\Pi\)}
+\DeclareFontFamily{U}{min}{}
+\DeclareFontShape{U}{min}{m}{n}{<-> udmj30}{}
+\newcommand\yo{\!\text{\usefont{U}{min}{m}{n}\symbol{'207}}\!}
 
 \input{packages-to-include}
 
@@ -73,181 +75,120 @@ statement in \MLTT{}, then by taking the interpretation of said statement in
 Working with presheaves can be quite labourious and often becomes an exercise
 in bookkeeping of indices.
 
+\subsection{Exponentials}
 
-
-\newpage
-\section{Internal PCAs}
-
-In set-based mathematics, partial functions \(f : X \ParTo Y\) are usually
-defined as a subset \(\text{dom}(f) \subseteq X\) and a total function
-\(f : \text{dom}(f) \to Y\) on said subset. With such a definition, the
-composition of two partial functions \(f : X \ParTo Y\) and \(g : Y \ParTo Z\)
-will have domain \(\text{dom}(g \circ f) = \text{im}(f) \cap \text{dom}(g)\), on
-which the composite \(g \circ f\) is total. Associativity of function
-composition comes down to associativity of subset intersections and as a total
-function is ``trivially'' partial we also have identity maps satisfying the unit
-laws. With this, we have just defined a category of sets and partial functions
-between them. A similar construction can be done for arbitrary categories under
-the mild condition that pullbacks along monomorphisms exist. Said pullbacks will
-provide composition of partial morphisms, leading us to the final obstruction,
-which is that pullbacks are only associative up to (unique) isomorphism. This is
-remedied by identifying partial maps up to isomorphism of the domains as we will
-make explicit later.
+Given two types \(A, B\), the type of functions from \(A\) to \(B\),
+denoted \(\IFun{A}{B}\), behaves like the usual function type in type theory.
+%
+As for its categorical semantics we have the following
 
 \begin{defn}
-  Given a category \(\C\) with pullbacks we define the \definiendum{category of
-    partial maps} in \(\C\), denoted \(\ParCat{\C}\), according to the following:
-  \begin{itemize}
-    \item objects of \(\ParCat{\C}\) are exactly those of \(\C\).
-    \item given objects \(X,Y\), their hom-set \(\ParCat{\C}(X,Y)\) is given by
-      equivalence classes of spans \(X \xhookleftarrow{m} S \xrightarrow{f} Y\)
-      with \(m\) monic. Two such spans
-      \(X \xhookleftarrow{m} S \xrightarrow{f} Y\) and
-      \(X \xhookleftarrow{n} P \xrightarrow{g} Y\) are equivalent if there
-      exists an isomorphism \(f : S \cong P\) such that the following commutes
-      \[\begin{tikzcd}
-          && S \\
-          X &&&& Y \\
-          && P \arrow["m"', hook, from=1-3, to=2-1] \arrow["f", from=1-3, to=2-5] \arrow["f"', from=1-3, to=3-3] \arrow["n", hook', from=3-3, to=2-1] \arrow["g"', from=3-3, to=2-5]
-        \end{tikzcd}\]
-    \item Composition of two morphisms
-      \(X \xhookleftarrow{m} S \xrightarrow{f} Y\) and
-      \(Y \xhookleftarrow{n} P \xrightarrow{g} Z\) is given by the pullback
-      \[\begin{tikzcd}
-          X \\
-          S & Y \\
-          {S\times_YP} & P & Z \arrow["m", hook', from=2-1, to=1-1] \arrow["f"', from=2-1, to=2-2] \arrow[from=3-1, to=2-1] \arrow["\lrcorner"{anchor=center, pos=0.125, rotate=90}, draw=none, from=3-1, to=2-2] \arrow[from=3-1, to=3-2] \arrow["n", hook', from=3-2, to=2-2] \arrow["g"', from=3-2, to=3-3]
-        \end{tikzcd}\]
-    \item Identity maps are given by the span consisting of two identity maps.
-  \end{itemize}
+  Given two objects \(A, B\), their exponential is an object \(\IFun{A}{B}\)
+  along with a morphism \(\EEval : A \times \IFun{A}{B} \to B\) such that
+  for all \(f : C \times A \to B\) there exists a unique
+  \(\tilde{f}: C \to \IFun{A}{B}\) making the following triangle commutes
+  %
+  \[\begin{tikzcd}
+    {C \times \IFun{A}{B}} && B \\
+    \\
+    {C\times A}
+    \arrow["{\EEval}", from=1-1, to=1-3]
+    \arrow["{C\times\tilde{f}}", from=3-1, to=1-1]
+    \arrow["f"', from=3-1, to=1-3]
+  \end{tikzcd}\]
 \end{defn}
 
-The associative and unit laws can be checked to follow from the uniqueness (up
-to isomorphism) of pullbacks. Working through this definition for the category
-of sets we recover a category isomorphic to our original description. In the
-specific case of sets we were able to avoid worrying about equivalence classes
-by using subsets instead of subobjects and subset intersections instead of
-pullbacks. Similarly, we can give a more concrete description for the category
-of partial maps of sheaves.
+\subsubsection{Exponentials of Presheaves}
 
-\newpage
-
-Fix an internal PCA \(\A\) in the category of presheaves on \(\C\) along with a
-coverage yielding the modality \(\Box\). We order predicates using the
-following internal statement
+The exponential of two presheaves \(X,Y\) is a presheaf
+\(\IFun{X}{Y}\) with action on objects given by
+%
 \[
-  \varphi \leq \psi
-  \iff
-  \PresheafCat \models
-    \exists e : A,
-    \forall x : X,
-    \forall a \in \varphi(x),
-    \Box ({e \odot a \downarrow} \land e \odot a \in \psi(x))
+  (\IFun{X}{Y})_{w} \IsDefined \mathsf{Nat}(\yo(w) \times X, Y)
 \]
-Let us now compile this out to the corresponding external statement about
-\(\PresheafCat\). We will start assuming nothing about \(\A\) or
-\(\C\) to get the general definition. Then, we will look at the specific
-case when \(\C\) is a pre-order and \(\A\) is a constant presheaf to compare
-to previous work.
+%
+and action on morphisms defined as follows
+%
+\[\begin{array}{l}
+  \IFun{X}{Y}_{f:u \to w} :
+    \mathsf{Nat}(\yo(w) \times X, Y) \to \mathsf{Nat}(\yo(u) \times X, Y)\\
+  (\IFun{X}{Y}_{f:u \to w}(\alpha))_{v}(g : v \to u, x : X_{v})
+    \IsDefined \alpha_{v}(fg, x)
+\end{array}\]
 
-The interpretation of the foregoing statement will be a subpresheaf of
-the terminal presheaf, which is constantly singleton. That is,
-we have
+The evaluation map is a natural transformation
+\(\EEval : X \times \IFun{X}{Y} \to Y\) defined for each object
+\(w\) by
+%
+\[\begin{array}{l}
+  \EEval_{w} : X \times \mathsf{Nat}(\yo(w) \times X, Y) \to Y\\
+  \EEval_{w}(x, \alpha) \IsDefined \alpha_{w}(\mathsf{id}, x)
+\end{array}\]
+%
+Naturality of \(\EEval\) means for all \(x : X_{w}\),
+\(\alpha : \mathsf{Nat}(\yo(w) \times X, Y)\) and \(f : v \to w\) we have
 \[
- \llbracket
-    \exists e : \A,
-    \forall x : X,
-    \forall a \in \varphi(x),
-    \Box ({e \odot a \downarrow} \land e \odot a \in \psi(x))
-  \rrbracket \subseteq \mathbb{1}
+  Y_{f}(\alpha_{w}(\mathsf{id}, x)) =
+  Y_{f}(\EEval_{w}(x, \alpha)) =
+  \EEval_{v}(X_{f}(x), \IFun{X}{Y}_{f}(\alpha)) =
+  (\IFun{X}{Y}_{f}(\alpha))_{v}(\mathsf{id}, X_{f}(x)) =
+  \alpha_{v}(f, X_{f}(x))
 \]
-Equivalently, after picking your favourite singleton, for each object \(\mathfrak{X}\) we
-have
-\begin{equation}\label{eqn:interpretation_as_subset}
- \llbracket
-    \exists e : \A,
-    \forall x : X,
-    \forall a \in \varphi(x),
-    \Box ({e \odot a \downarrow} \land e \odot a \in \psi(x))
-  \rrbracket_{\mathfrak{X}} \subseteq \{\star\}\tag{\(\dagger\)}
-\end{equation}
-with the condition that if a map \(f : \mathfrak{Y} \to \mathfrak{X}\) exists
-then the interpretation at \(\mathfrak{X}\) is a subset of the interpretation at
-\(\mathfrak{Y}\). If the subset~\ref{eqn:interpretation_as_subset} is inhabited,
-i.e.\ it contains~\(\star\), then the statement ``holds'' at object
-\(\mathfrak{X}\), otherwise it does not. Let us now start unfolding the
-interpretation of this statement: we are after a condition for
-\[
- \star \in \llbracket
-    \exists e : \A,
-    \forall x : X,
-    \forall a \in \varphi(x),
-    \Box ({e \odot a \downarrow} \land e \odot a \in \psi(x))
-  \rrbracket_{\mathfrak{X}}
-\]
-Interpreting the existential, this holds if there exists some
-\(\bar{e} : \A_{\mathfrak{X}}\) such that
-\[
- \bar{e} \in \llbracket
-    \forall x : X,
-    \forall a \in \varphi(x),
-    \Box ({e \odot a \downarrow} \land e \odot a \in \psi(x))
-  \rrbracket_{\mathfrak{X}}
-\]
-For the next step, we take advantage of the fact that we have We will also take
-advantage of the fact that we have
-\(\forall_{\phi} \cdot \forall_{\psi} = \forall{\phi \cdot \psi}\) to interpret
-both quantifiers at once, which will simplify things greatly. With that in mind,
-the preceding holds if for all maps
-\(f_{1} : \mathfrak{X}_{1} \to \mathfrak{X}\) and elements
-\(\bar{x} : X_{\mathfrak{X}_{1}}\) and \(\bar{a} : \A_{\mathfrak{X}_{1}}\), if
-\( \bar{a} \in \varphi_{\mathfrak{X}_{1}}(\bar{x}) \) then we must also have
-\(
- (\bar{e} \cdot f_{1}\,,\,\bar{x}\,,\,\bar{a}) \in \llbracket
-    \Box ({e \odot a \downarrow} \land e \odot a \in \psi(x))
-  \rrbracket_{\mathfrak{X}_{1}}
-\).
-To simplify the consequent we see the modality \(\Box\) unfolds to the following:
-it holds if there exists a sieve \(S\) on \(\mathcal{X}_{3}\) such that for all
-\(f_{4} : \mathfrak{X}_{4} \to \mathfrak{X}_{3}\) in \(S\) we have
-\begin{multline*}
- (\bar{e} \cdot f_{1}\cdot f_{2}\cdot f_{3} \cdot f_{4}, \bar{x} \cdot f_{2} \cdot f_{3} \cdot f_{4}, \bar{a} \cdot f_{3} \cdot f_{4}) \in \llbracket
-    {e \odot a \downarrow} \land e \odot a \in \psi(x)
-  \rrbracket_{\mathfrak{X}_{4}}
-  \\
-  =
-  {\llbracket {e \odot a \downarrow} \rrbracket_{\mathfrak{X}_{4}}}
-  \cap
-  {\llbracket e \odot a \in \psi(x) \rrbracket_{\mathfrak{X}_{4}}}
-\end{multline*}
-Now,
-\((\bar{e} \cdot f_{1}\cdot f_{2}\cdot f_{3} \cdot f_{4}, \bar{x} \cdot f_{2} \cdot f_{3} \cdot f_{4}, \bar{a} \cdot f_{3} \cdot f_{4})
-\in
-\llbracket {e \odot a \downarrow} \rrbracket_{\mathfrak{X}_{4}}\)
-holds when the partial application
-\(
-(\bar{e} \cdot f_{1}\cdot f_{2}\cdot f_{3} \cdot f_{4})
-\odot_{\mathfrak{X}_{4}}
-(\bar{a} \cdot f_{3} \cdot f_{4})
-\)
-is defined in the usual set sense. As for
-\(
-(\bar{e} \cdot f_{1}\cdot f_{2}\cdot f_{3} \cdot f_{4}, \bar{x} \cdot f_{2} \cdot f_{3} \cdot f_{4}, \bar{a} \cdot f_{3} \cdot f_{4})
-\in
-{\llbracket e \odot a \in \psi(x) \rrbracket_{\mathfrak{X}_{4}}}
-\),
-it will hold when we have
-\(
-(\bar{e} \cdot f_{1}\cdot f_{2}\cdot f_{3} \cdot f_{4})
-\odot_{\mathfrak{X}_{4}}
-(\bar{a} \cdot f_{3} \cdot f_{4})
-\in
-\phi_{\mathfrak{X}_{4}}(\bar{x} \cdot f_{2} \cdot f_{3} \cdot f_{4})
-\).
 
-Truly we have now unfolded this definition past any level of readability or
-usefulness. Putting a few assumptions
-
+%\newpage
+%\section{Internal PCAs}
+%
+%In set-based mathematics, partial functions \(f : X \ParTo Y\) are usually
+%defined as a subset \(\text{dom}(f) \subseteq X\) and a total function
+%\(f : \text{dom}(f) \to Y\) on said subset. With such a definition, the
+%composition of two partial functions \(f : X \ParTo Y\) and \(g : Y \ParTo Z\)
+%will have domain \(\text{dom}(g \circ f) = \text{im}(f) \cap \text{dom}(g)\), on
+%which the composite \(g \circ f\) is total. Associativity of function
+%composition comes down to associativity of subset intersections and as a total
+%function is ``trivially'' partial we also have identity maps satisfying the unit
+%laws. With this, we have just defined a category of sets and partial functions
+%between them. A similar construction can be done for arbitrary categories under
+%the mild condition that pullbacks along monomorphisms exist. Said pullbacks will
+%provide composition of partial morphisms, leading us to the final obstruction,
+%which is that pullbacks are only associative up to (unique) isomorphism. This is
+%remedied by identifying partial maps up to isomorphism of the domains as we will
+%make explicit later.
+%
+%\begin{defn}
+%  Given a category \(\C\) with pullbacks we define the \definiendum{category of
+%    partial maps} in \(\C\), denoted \(\ParCat{\C}\), according to the following:
+%  \begin{itemize}
+%    \item objects of \(\ParCat{\C}\) are exactly those of \(\C\).
+%    \item given objects \(X,Y\), their hom-set \(\ParCat{\C}(X,Y)\) is given by
+%      equivalence classes of spans \(X \xhookleftarrow{m} S \xrightarrow{f} Y\)
+%      with \(m\) monic. Two such spans
+%      \(X \xhookleftarrow{m} S \xrightarrow{f} Y\) and
+%      \(X \xhookleftarrow{n} P \xrightarrow{g} Y\) are equivalent if there
+%      exists an isomorphism \(f : S \cong P\) such that the following commutes
+%      \[\begin{tikzcd}
+%          && S \\
+%          X &&&& Y \\
+%          && P \arrow["m"', hook, from=1-3, to=2-1] \arrow["f", from=1-3, to=2-5] \arrow["f"', from=1-3, to=3-3] \arrow["n", hook', from=3-3, to=2-1] \arrow["g"', from=3-3, to=2-5]
+%        \end{tikzcd}\]
+%    \item Composition of two morphisms
+%      \(X \xhookleftarrow{m} S \xrightarrow{f} Y\) and
+%      \(Y \xhookleftarrow{n} P \xrightarrow{g} Z\) is given by the pullback
+%      \[\begin{tikzcd}
+%          X \\
+%          S & Y \\
+%          {S\times_YP} & P & Z \arrow["m", hook', from=2-1, to=1-1] \arrow["f"', from=2-1, to=2-2] \arrow[from=3-1, to=2-1] \arrow["\lrcorner"{anchor=center, pos=0.125, rotate=90}, draw=none, from=3-1, to=2-2] \arrow[from=3-1, to=3-2] \arrow["n", hook', from=3-2, to=2-2] \arrow["g"', from=3-2, to=3-3]
+%        \end{tikzcd}\]
+%    \item Identity maps are given by the span consisting of two identity maps.
+%  \end{itemize}
+%\end{defn}
+%
+%The associative and unit laws can be checked to follow from the uniqueness (up
+%to isomorphism) of pullbacks. Working through this definition for the category
+%of sets we recover a category isomorphic to our original description. In the
+%specific case of sets we were able to avoid worrying about equivalence classes
+%by using subsets instead of subobjects and subset intersections instead of
+%pullbacks. Similarly, we can give a more concrete description for the category
+%of partial maps of sheaves.
 
 \section{A Realizability Tripos}
 
@@ -339,7 +280,7 @@ usefulness. Putting a few assumptions
   \(\IAp{\IAp{\ICompCode}{e_{1}}}{e_{2}}\) evidences \(\varphi \leq \chi\).
 \end{proof}
 
-\todo[inline]{prove it has finite meets}
+%\todo[inline]{prove it has finite meets}
 
 \begin{lemm}
   For any presheaf \(\X\), the preorder \((\RealPred{\X}, \leq)\) has finite
@@ -428,6 +369,266 @@ usefulness. Putting a few assumptions
 
 \todo[inline]{show there is a generic object}
 
+\subsection{Presheaves with a Lawvere-Tierney Topology}
+
+Fix two realizability predicates \(\phi,\psi : \RealPred{\X}\), that is global
+elements \(\phi,\psi : 1 \to \RealPred{\X}\).
+%
+We will unfold the denotation of \(\phi \leq \psi\) in the case of a preasheaf
+category with some Lawvere-Tierney topology \(j : \Omega \to \Omega\).
+%
+We are, of course, interested in the following mono
+%
+\[
+  \llbracket
+    \IExists{e : \A}{
+      \IForall{x : \X}{
+        \IForall{a \in \varphi(x)}{
+          \IBox{(
+            \IAnd%
+            {\ITotal{\IAp{e}{a}}}%
+            {\IAp{e}{a} \in \psi(x)}
+          )}
+        }
+      }
+    }
+  \rrbracket : \cdot \hookrightarrow 1
+\]
+%
+We interpret the existential along the projection \(\pi_{\A} : 1 \times \A \to 1\)
+giving us
+%
+\[
+  \exists_{\pi_{\A}}(\underbrace{\llbracket
+    \IForall{x : \X}{
+      \IForall{a \in \varphi(x)}{
+        \IBox{(
+          \IAnd%
+          {\ITotal{\IAp{e}{a}}}%
+          {\IAp{e}{a} \in \psi(x)}
+        )}
+      }
+    }
+  \rrbracket}_{\text{subobject of }1 \times A})
+\]
+%
+We interpret the universal along the projection
+\(\pi_{\X} : (1 \times \A) \times \X \to 1 \times \A\) giving
+%
+\[
+  \exists_{\pi_{\A}}\circ\forall_{\pi_{\X}}(\underbrace{\llbracket
+    \IForall{a \in \varphi(x)}{
+      \IBox{(
+        \IAnd%
+        {\ITotal{\IAp{e}{a}}}%
+        {\IAp{e}{a} \in \psi(x)}
+      )}
+    }
+  \rrbracket}_{\text{subobject of }(1 \times A) \times \X})
+\]
+%
+Next we need to interpret the relative universal quantifier.
+%
+For this, the denotation of the open term
+\(e : \A, x : \X \vdash \phi(x) : \IPower{\A}\) gives us a mono
+%
+\(
+  m :
+  S \hookrightarrow ((1 \times \A) \times \X) \times \A
+\)
+%
+and composing this with the projection
+\(\pi'_{\A} : ((1 \times \A) \times \X) \times \A \to (1 \times \A) \times \X\)
+will give us the map along which we will interpret the quantifier.
+%
+\[
+  \exists_{\pi_{\A}}\circ
+  \forall_{\pi_{\X}}\circ
+  \forall_{\pi'_{\A}\circ m}(\underbrace{\llbracket
+    \IBox{(
+      \IAnd%
+      {\ITotal{\IAp{e}{a}}}%
+      {\IAp{e}{a} \in \psi(x)}
+    )}
+  \rrbracket}_{\text{subobject of } S})
+\]
+%
+Quantifiers are functorial so this is equivalent to the following
+statement with a single universal
+%
+\[
+  \exists_{\pi_{\A}}\circ
+  \forall_{\pi_{\X}\circ\pi'_{\A}\circ m}(\underbrace{\llbracket
+    \IBox{(
+      \IAnd%
+      {\ITotal{\IAp{e}{a}}}%
+      {\IAp{e}{a} \in \psi(x)}
+    )}
+  \rrbracket}_{\text{subobject of } S})
+\]
+%
+The modality is interpeted by taking the closure of the subobjects arising
+out of the Lawvere-Tierney topology \(j:\Omega\to\Omega\).
+%
+\[
+  \exists_{\pi_{\A}}\circ
+  \forall_{\pi_{\X}}\circ
+  \forall_{\pi'_{\A}\circ m}
+  (\overline{\underbrace{\llbracket
+      \IAnd%
+      {\ITotal{\IAp{e}{a}}}%
+      {\IAp{e}{a} \in \psi(x)}
+  \rrbracket}_{\text{subobject of } S}})
+\]
+%
+Conjunction is interpreted by the meet of subobjects. Such meets are computed
+by pointwise intersections, but we can safely ignore that for now.
+%
+\[
+  \exists_{\pi_{\A}}\circ
+  \forall_{\pi_{\X}\circ\pi'_{\A}\circ m}
+  \underset{\text{both subobjects of } S}%
+  {(\overline{\underbrace{\llbracket \ITotal{\IAp{e}{a}}\rrbracket}
+   \wedge
+   \underbrace{\llbracket\IAp{e}{a} \in \psi(x)\rrbracket}
+  })}
+\]
+%
+At this point let us see how to interpret the particular terms mentioned.
+%
+We interpret the term \(e : \A, x : \X \vdash \phi(x) : \IPower{\A} \) as a
+morphism \((1 \times \A) \times \X \to \IPower{\A}\) given by preocomposing
+\(\EEval : X \times \RealPred{\X}\) with the pairing of the projection
+\((1 \times \A) \times \X \to \X\) and of the map
+\((1 \times \A) \times \X \to \RealPred{\X}\) which we get by weakening
+\(\phi : 1 \to \RealPred{\X}\).
+%
+For clarity, the natural transformation \(\EEval\) is given by
+%
+\begin{align*}
+  &\EEval_{w} : \X_{w} \times \mathsf{Nat}(\yo(w) \times \X, \IPower{\A})
+                \to \IPower{\A}_{w}\\
+  &\EEval_{w}(x, \alpha) = \alpha_{w}(\mathsf{id}, x)
+\end{align*}
+%
+meaning that the denotation \(\llbracket\phi(x)\rrbracket\) is given by
+%
+\begin{align*}
+  &\llbracket\phi(x)\rrbracket_{w} : (1 \times \A) \times \X \to \IPower{\A}\\
+  &\llbracket\phi(x)\rrbracket_{w}((\star, a), x) =
+    \EEval_{w}(x, \phi_{w}) = \phi_{w}(\mathsf{id}, x)
+\end{align*}
+%
+Naturality in this case means that for any \(f : u \to w\), \(g : v \to u\)
+and \(x : \X_{u}\) we have
+\[
+  (\alpha_{u}(f, x))\{g\} = \alpha_{v}(fg, x\{g\})
+\]
+
+
+\[
+  ([\alpha_{v}(fg, x\{g\})]_{u}(f, a)) = \alpha_{v}(fg, x\{g\})
+\]
+
+We can now define the mono \(m\) from \(\llbracket\phi(x)\rrbracket\) as
+the mono corresponding to the characteristic function
+\(\chi_{m} : (1 \times \A) \times \X \to \Omega\) arising by precomposing
+with the interpretations of \(e : \A, x : \X \vdash a : \A  \)
+and the weakening of \(e : \A, x : \X \vdash \phi(x) : \IPower{\A}\).
+%
+In the end this means that we have
+\[
+  (((\star, e), x), a) \in \mathsf{domain}(m)_{w}
+  \iff
+  w \in [\phi_{w}(\mathsf{id}, x)]_{w}(\mathsf{id}, a)
+\]
+
+\dots
+
+And this leads us to the following external definition of the ordering
+on realizability predicates.
+
+\begin{defn}
+  We say that \(\phi \leq \psi\) at world \(w\) if there exists a code
+  \(e : \A_{w}\) such that for all maps \(f : u \leq w\), elements
+  \(x : \X_{u}\) and codes \(a : \A_{u}\), if
+  %
+  \[
+    \mathsf{id}_{u} \in [\phi_{u}(\mathsf{id}_{u}, x\{f\})]_{u}(\mathsf{id}_{u},a)
+  \]
+  %
+  then there exists a cover \(\mathcal{V}\) of \(u\) such that for all
+  \((g : v \to u) \in \mathcal{V}\) we have
+  %
+  \[\begin{array}{ccc}
+  e\{fg\} \cdot_{v} a\{g\} \downarrow &\text{ and }&
+  \mathsf{id}_{v} \in [\phi_{v}(\mathsf{id}_{v}, x\{fg\})]_{v}(\mathsf{id}_{v},e\{fg\} \cdot_{v} a\{g\}).
+  \end{array}\]
+\end{defn}
+
+In the case that the underlying category is a poset
+%
+\begin{defn}[Over a poset]
+  We say that \(\phi \leq \psi\) at world \(w\) if there exists a code
+  \(e : \A_{w}\) such that for all extensions \(u \leq w\), elements
+  \(x : \X_{u}\) and codes \(a : \A_{u}\), if
+  %
+  \[
+    u \in [\phi_{u}(u\leq u, x|_{u})]_{u}(u \leq u,a)
+  \]
+  %
+  then there exists a cover \(\mathcal{V}\) of \(u\) such that for all \(v \in \mathcal{V}\) we
+  have
+  %
+  \[\begin{array}{ccc}
+    e|_{v} \cdot_{v} a|_{v} \downarrow &\text{ and }&
+    v \in [\phi_{v}(v\leq v, x|_{v})]_{v}(v \leq v,e|_{v} \cdot_{v} a|_{v})
+  \end{array}\]
+\end{defn}
+
+And further assuming that \(\A\) is a constant presheaf we get
+%
+\begin{defn}[Over a poset with constant \(\A\)]
+  We say that \(\phi \leq \psi\) at world \(w\) if there exists a code
+  \(e : \A\) such that for all extensions \(u \leq w\), elements
+  \(x : \X_{u}\) and codes \(a : \A\), if
+  %
+  \[
+    u \in [\phi_{u}(u\leq u, x|_{u})]_{u}(u \leq u,a)
+  \]
+  %
+  then there exists a cover \(\mathcal{V}\) of \(u\) such that for all \(v \in \mathcal{V}\) we
+  have
+  %
+  \[\begin{array}{ccc}
+    e \cdot_{v} a \downarrow &\text{ and }&
+    v \in [\phi_{v}(v\leq v, x|_{v})]_{v}(v \leq v,e \cdot_{v} a)
+  \end{array}\]
+\end{defn}
+
+We can also work with uncurried predicates, so now we have
+\(\phi,\psi : \IPower{(\X\times\A)}\), the previous assumptions and if we
+also omit the proofs that specific worlds are extensions of others, then
+we get the following definition, which is what we have been working with
+already:
+%
+\begin{defn}[Lots of simplifications]
+  We say that \(\phi \leq \psi\) at world \(w\) if there exists a code
+  \(e : \A\) such that for all extensions \(u \leq w\), elements
+  \(x : \X_{u}\) and codes \(a : \A\), if
+  %
+  \[
+    u \in \phi_{u}(x|_{u}, a)
+  \]
+  %
+  then there exists a cover \(\mathcal{V}\) of \(u\) such that for all \(v \in \mathcal{V}\) we
+  have
+  %
+  \[\begin{array}{ccc}
+    e \cdot_{v} a \downarrow &\text{ and }&
+    v \in \phi_{v}(x|_{v}, e \cdot_{v} a)
+  \end{array}\]
+\end{defn}
 
 \newpage
 \printbibliography{}

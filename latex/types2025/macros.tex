@@ -12,6 +12,7 @@
 }
 \makeatother
 
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% GENERAL MATHEMATICAL NOTATION %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -27,9 +28,11 @@
 %% General one letter notations
 \newcommand{\A}{\ensuremath{\mathsf{A}}} % arbitrary PCA
 \newcommand{\C}{\ensuremath{\mathcal{C}}} % arbitrary category
+\newcommand{\E}{\ensuremath{\mathcal{E}}} % arbitrary topos
 \renewcommand{\P}{\ensuremath{{P}}} % arbitrary poset (replaces paragraph symbol)
 \renewcommand{\L}{\ensuremath{{L}}} % arbitrary lattice
 \newcommand{\X}{\ensuremath{X}} % arbitrary sheaf
+\newcommand{\N}{\mathbb{N}}
 
 \newcommand{\Par}[1]{{#1}_\bot}
 \newcommand{\ParTo}{\rightharpoonup}
@@ -63,18 +66,10 @@
 \newcommand{\hlc}[1]{\underlinehelper{\uuline}{pink}{#1}}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% EXTERNAL %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-%% Eval map
-\newcommand{\EEval}{\mathsf{ev}}
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% INTERNAL %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-% Logical language
-
+%% Logical language
 \newcommand{\ITop}{\top}
 
 \newcommand{\INotSym}{\lnot}
@@ -97,11 +92,9 @@
 
 \newcommand{\ISetComp}[2]{\{{#1}\mid{#2}\}}
 
-% Types
+%% Types
 \newcommand{\IPower}[1]{\mathcal{P}{#1}}
-
-%% Function types
-\newcommand{\IFun}[2]{{{#2}^{#1}}}
+\newcommand{\IFun}[2]{{#2}^{#1}}
 
 % INTERNAL PCA
 

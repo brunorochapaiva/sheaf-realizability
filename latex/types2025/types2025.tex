@@ -1,0 +1,285 @@
+% easychair.tex,v 3.5 2017/03/15
+
+\documentclass{easychair}
+%\documentclass[EPiC]{easychair}
+%\documentclass[EPiCempty]{easychair}
+%\documentclass[debug]{easychair}
+%\documentclass[verbose]{easychair}
+%\documentclass[notimes]{easychair}
+%\documentclass[withtimes]{easychair}
+%\documentclass[a4paper]{easychair}
+%\documentclass[letterpaper]{easychair}
+
+\usepackage{doc}
+
+% use this if you have a long article and want to create an index
+% \usepackage{makeidx}
+
+% In order to save space or manage large tables or figures in a
+% landcape-like text, you can use the rotating and pdflscape
+% packages. Uncomment the desired from the below.
+%
+% \usepackage{rotating}
+% \usepackage{pdflscape}
+
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsfonts}
+\usepackage{amsthm}
+\usepackage{newtxmath}
+\usepackage{url}
+\usepackage{tikz-cd}
+\usepackage{quiver}
+\usepackage{scalefnt}
+\usepackage{microtype}
+\usepackage{subfiles}
+\usepackage{mathpartir}
+\usepackage[bb=dsserif]{mathalpha}
+\usepackage{bm}
+\usepackage{mathtools}
+\usepackage{cleveref}
+\usepackage{xspace}
+\usepackage{multirow}
+\usepackage{ulem}
+\usepackage{contour}
+
+\newtheorem{thrm}{Theorem}
+\newtheorem{lemm}[thrm]{Lemma}
+\newtheorem{prop}[thrm]{Proposition}
+\newtheorem{defn}[thrm]{Definition}
+\newtheorem{remk}[thrm]{Remark}
+\newtheorem{exam}[thrm]{Example}
+\newtheorem{cons}[thrm]{Construction}
+\newtheorem{coro}[thrm]{Corollary}
+\newtheorem{nota}[thrm]{Notation}
+
+\input{macros}
+
+%\makeindex
+
+%% Front Matter
+%%
+% Regular title as in the article class.
+%
+\title{Realizability Triposes from Sheaves}
+
+% Authors are joined by \and. Their affiliations are given by \inst, which indexes
+% into the list defined using \institute
+%
+\author{
+ Bruno da Rocha Paiva%\inst{1}}
+\and
+ Vincent Rahli%\inst{1}
+}
+
+% Institutes for affiliations are also joined by \and,
+\institute{
+  University of Birmingham, United Kingdom
+ }
+
+%  \authorrunning{} has to be set for the shorter version of the authors' names;
+% otherwise a warning will be rendered in the running heads. When processed by
+% EasyChair, this command is mandatory: a document without \authorrunning
+% will be rejected by EasyChair
+
+\authorrunning{da Rocha Paiva and Rahli}
+
+% \titlerunning{} has to be set to either the main title or its shorter
+% version for the running heads. When processed by
+% EasyChair, this command is mandatory: a document without \titlerunning
+% will be rejected by EasyChair
+\titlerunning{Realizability Triposes from Sheaves}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+  Given a topos \(\E\) and a Lawvere-Tierney topology
+  \(\Box : \Omega \to \Omega\) on it, we develop a realizability \(\E\)-tripos
+  using the internal logic of the topos.
+  %
+  Instantiating \(\E\) with a category of sheaves, we recover a notion of
+  realizability with choice sequences.
+\end{abstract}
+
+% The table of contents below is added for your convenience. Please do not use
+% the table of contents if you are preparing your paper for publication in the
+% EPiC Series or Kalpa Publications series
+
+%\setcounter{tocdepth}{2}
+%{\small
+%\tableofcontents}
+
+%\section{To mention}
+%
+%Processing in EasyChair - number of pages.
+%
+%Examples of how EasyChair processes papers. Caveats (replacement of EC
+%class, errors).
+
+%------------------------------------------------------------------------------
+
+%Paragraph about early investigations of Brouwer's intuitionism. Maybe
+%Kreisel, Moschovakis, Kripke, etc?
+
+It was in \textit{Brouwer's second act of intuitionism} that choice sequences
+first appeared.
+%
+Brouwer envisioned an idealised mathematician that would
+generate entries of an infinitely proceeding sequence
+\((\alpha_{0}, \alpha_{1}, \alpha_{2}, \dots)\).
+%
+At any given moment, the mathematician would only have access to the entries
+generated so far, hence any deductions would necessarily rely on a finite number
+of entries.
+%
+Brouwer ``proved'' this particular intuition to hold in his Bar Theorem, which
+in reality was really an axiom.
+%
+The first formal systems of Brouwer's intuitionism were developed by
+Kleene and Vesley~\cite{kleeneFoundationsIntuitionisticMathematics1965}
+and Kreisel and Troelstra~\cite{kreiselFormalSystemsBranches1970} in which
+the authors investigated the Bar Theorem, continuity principles, as well
+as different kinds of choice sequences.
+
+More recently, interpretations of Brouwer's choice sequences have been leveraged
+to give anti-classical models of dependent type theories.
+%
+In~\cite{coquandComputationalInterpretationForcing2012} the authors give a
+computational account of forcing.
+%
+Based on this view of forcing the authors
+of~\cite{coquandIndependenceMarkovsPrinciple2017} produce a model of \MLTT{}
+falsifying Markov's principle.
+%
+This interpretation of choice sequences is combined with term models in a series
+of papers~\cite{bickfordComputabilityChurchTuringChoice2018,
+  bickfordOpenBarBrouwerian2021, cohenSeparatingMarkovsPrinciples2024,
+  rahliValidatingBrouwersContinuity2018, forsterMarkovsPrinciplesConstructive}
+to explore principles such as bar induction, continuity of functions on the
+Baire space and different versions of Markov's principles.
+%
+As pointed out by~\cite{sterlingHigherOrderFunctions2021}, there is a common
+thread of constructions internal to sheaf models which links all the foregoing
+works.
+%
+In the tradition of Kripke and Beth semantics, by taking a category of of
+sheaves over a preordered set \(\mathbb{W}\) of worlds and carrying out
+the standard operational constructions internally to this model, we should
+expect to recover models akin to the above.
+
+In the sequel we will start from this observation in an attempt to connect these
+realizability constructions in the form of PER models with choice sequences to
+categorical realizability over categories of sheaves rather than the category of
+sets.
+%
+As in the abstract, we fix a topos \(\E\) and a Lawvere-Tierney topology
+\(\Box : \Omega \to \Omega\) and proceed to define a realizability tripos over
+\(\E\).
+%
+Following~\cite{faberEffectiveOperationsType2016} we define partial combinatory
+algebras using \(\preccurlyeq\) as opposed to \(\simeq\).
+%
+For the former, we have \(a \preccurlyeq b\) if when \(a \downarrow\) then
+\(b \downarrow\) and their values agree, while \(a \simeq b\) holds if
+\(a \preccurlyeq b\) and \(b \preccurlyeq a\).
+
+\begin{defn}
+  An \definiendum{internal partial combinatory algebra} consists of
+  an object \(\A\) of \(\E\), a partial morphism
+  \(-\cdot-:\A \times \A \rightharpoonup \A\) and elements
+  \(\mathsf{k},\mathsf{s} : \A\) satisfying the internal
+  statements:
+  \[\begin{array}{c}
+      \mathsf{k} \cdot a \downarrow \qquad
+      \mathsf{s} \cdot a \downarrow \qquad
+      \mathsf{s} \cdot a \cdot b \downarrow \\
+      a \preccurlyeq \mathsf{k} \cdot a \cdot b \qquad
+      a \cdot c \cdot (b \cdot c) \preccurlyeq \mathsf{s} \cdot a \cdot b \cdot c
+  \end{array}\]
+\end{defn}
+
+
+The usual story with partial combinatory algebras (pcas) carries over to the
+internal setting.
+%
+We can still show that a pca is functionally complete and with that we get
+access to most programming constructs needed for realizability such as pairings,
+booleans, coproducts, and whatever else the mind might dream of.
+
+With an internal pca we could now define a realizability tripos akin to the
+usual set-based realizability triposes.
+%
+In fact this is done in~\cite{vanoostenSemanticalProofJonghs1991}, in which the
+author takes a pca internal to a category of presheaves, takes its
+sheafification to get a pca internal to the relevant category of sheaves, and
+then implicitly works in the realizability topos arising out of said pca object.
+%
+
+
+\begin{defn}
+  Given a object \(\X\) we define the type of \definiendum{realizability
+    predicates on \(\X\)} as the exponential \(\RealPred{\X} \).
+  %
+  We further define an ordering on realizability
+  predicates~\(\varphi, \psi : \RealPred{\X}\) by
+  %
+  \[
+    \varphi \leq \psi
+    \IsDefined
+    \IExists{e : \A}{
+      \IForall{x : \X}{
+        \IForall{a \in \varphi(x)}{
+          \IBox{(
+            \IAnd%
+            {\ITotal{\IAp{e}{a}}}%
+            {\IAp{e}{a} \in \psi(x)}
+          )}
+        }
+      }
+    }
+  \]
+  %
+  %We will say that \definiendum{\(e\) evidences \(\varphi \leq \psi\)} if
+  %it witnesses the existential quantifier above.
+\end{defn}
+
+Using the internal language of \(\E\) we can show that realizability predicates
+on an object \(\X\) with this particular ordering form a pre-ordered set.
+%
+Furthermore, we can define reindexing pre-Heyting algebra morphisms by
+precomposition, show these have left and right adjoints (as monotone maps)
+satisfying the Beck-Chevalley condition, and finally we can give an appropriate
+generic element giving us a \(\E\)-tripos.
+
+Instantiating \(\E\) to the category of presheaves over a poset \(\mathbb{W}\)
+and using the \(\Box\) arising from some notion of sheaves, we recover a notion
+of realizability with choice sequences similar to the notions studied
+previously.
+%
+This seems like a particularly good setting for studying the realizability
+of choice sequences themselves.
+%
+By choosing different pca objects we expect to be able to handle different
+versions of choice sequences, from fully lawless choice sequences, to lawful
+choice sequences and any variation sitting in between these.
+%
+This contrasts the situation with a sheafified pca object, as by sheafifying
+we inadvertently add realizers for many choice sequences which may not
+have been realized before.
+
+
+
+
+
+\label{sect:bib}
+\bibliographystyle{plain}
+%\bibliographystyle{alpha}
+%\bibliographystyle{unsrt}
+%\bibliographystyle{abbrv}
+\bibliography{references}
+
+%------------------------------------------------------------------------------
+\end{document}
+
