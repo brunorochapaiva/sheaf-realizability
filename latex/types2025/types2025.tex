@@ -134,9 +134,6 @@ At any given moment, the mathematician would only have access to the entries
 generated so far, hence any deductions would necessarily rely on a finite number
 of entries.
 %
-Brouwer ``proved'' this particular intuition to hold in his Bar Theorem, which
-in reality was really an axiom.
-%
 The first formal systems of Brouwer's intuitionism were developed by
 Kleene and Vesley~\cite{kleeneFoundationsIntuitionisticMathematics1965}
 and Kreisel and Troelstra~\cite{kreiselFormalSystemsBranches1970} in which
@@ -164,7 +161,7 @@ As pointed out by~\cite{sterlingHigherOrderFunctions2021}, there is a common
 thread of constructions internal to sheaf models which links all the foregoing
 works.
 %
-In the tradition of Kripke and Beth semantics, by taking a category of of
+In the tradition of Kripke and Beth semantics, by taking a category of
 sheaves over a preordered set \(\mathbb{W}\) of worlds and carrying out
 the standard operational constructions internally to this model, we should
 expect to recover models akin to the above.
@@ -178,8 +175,12 @@ As in the abstract, we fix a topos \(\E\) and a Lawvere-Tierney topology
 \(\Box : \Omega \to \Omega\) and proceed to define a realizability tripos over
 \(\E\).
 %
-Following~\cite{faberEffectiveOperationsType2016} we define partial combinatory
-algebras using \(\preccurlyeq\) as opposed to \(\simeq\).
+We define partial combinatory algebras (pca) using \(\preccurlyeq\) as opposed
+to \(\simeq\).
+%
+It is shown in~\cite{faberEffectiveOperationsType2016} that any
+``weak'' pca, that is using \(\preccurlyeq\), is isomorphic to a ``strong'' pca,
+that is using \(\simeq\), hence this is mainly an aesthetic decision.
 %
 For the former, we have \(a \preccurlyeq b\) if when \(a \downarrow\) then
 \(b \downarrow\) and their values agree, while \(a \simeq b\) holds if
@@ -201,7 +202,7 @@ For the former, we have \(a \preccurlyeq b\) if when \(a \downarrow\) then
 \end{defn}
 
 
-The usual story with partial combinatory algebras (pcas) carries over to the
+The usual story with partial combinatory algebras carries over to the
 internal setting.
 %
 We can still show that a pca is functionally complete and with that we get
@@ -219,8 +220,8 @@ then implicitly works in the realizability topos arising out of said pca object.
 
 
 \begin{defn}
-  Given a object \(\X\) we define the type of \definiendum{realizability
-    predicates on \(\X\)} as the exponential \(\RealPred{\X} \).
+  Given an object \(\X\) we define the type of \definiendum{realizability
+    predicates on \(\X\)} as the type \(\RealPred{\X}\).
   %
   We further define an ordering on realizability
   predicates~\(\varphi, \psi : \RealPred{\X}\) by
@@ -251,15 +252,15 @@ on an object \(\X\) with this particular ordering form a pre-ordered set.
 Furthermore, we can define reindexing pre-Heyting algebra morphisms by
 precomposition, show these have left and right adjoints (as monotone maps)
 satisfying the Beck-Chevalley condition, and finally we can give an appropriate
-generic element giving us a \(\E\)-tripos.
+generic element giving us an \(\E\)-tripos.
 
 Instantiating \(\E\) to the category of presheaves over a poset \(\mathbb{W}\)
 and using the \(\Box\) arising from some notion of sheaves, we recover a notion
 of realizability with choice sequences similar to the notions studied
 previously.
 %
-This seems like a particularly good setting for studying the realizability
-of choice sequences themselves.
+The category of assemblies arising out of this tripos seems like a particularly
+good setting for studying the realizability of choice sequences themselves.
 %
 By choosing different pca objects we expect to be able to handle different
 versions of choice sequences, from fully lawless choice sequences, to lawful
@@ -268,12 +269,38 @@ choice sequences and any variation sitting in between these.
 This contrasts the situation with a sheafified pca object, as by sheafifying
 we inadvertently add realizers for many choice sequences which may not
 have been realized before.
+%
+Towards this goal, we now suggest two assemblies of interest: that of
+pure natural numbers and that of effectful natural numbers.
 
+\begin{defn}
+  The \definiendum{pure natural numbers assembly}, denoted
+  \(\mathsf{N}_\mathsf{pur}\), consists of the constant presheaf
+  \(\Delta\mathbb{N}\) along with the realizability relation \(e \vDash_{w} n\)
+  if and only if the code \(e : \A_{w}\) equals the Church encoding of
+  \(n : \mathbb{N}\) at \(w\).
+\end{defn}
 
+\begin{defn}
+  The \definiendum{effectful natural numbers assembly}, denoted
+  \(\mathsf{N}_\mathsf{eff}\), consists of the sheafification of \(\Delta\mathbb{N}\).
+  %
+  As for the realizability relation, if we have \(\mathcal{U}\) covering \(w\)
+  and \(n : \mathcal{U} \to \mathbb{N}\), then
+  \(e \vDash_{w} (\mathcal{U}, n)\), if and only if there exists a cover
+  \(\mathcal{V}\) of \(w\) such that for all
+  \(v \in \mathcal{U} \cap \mathcal{V}\) and \(a : \A_{v}\),
+  \({e|_{v}} \cdot_{v} a\) is defined and equals the Church encoding of
+  \(n_{v}\) at \(v\).
+\end{defn}
 
+At the level of underlying presheaves, the later is the sheafification of the
+former, so we hope to find an analogous universal property to justify it as the
+correct definition of effectful natural numbers in this setting.
+%
+With this, we can then study choice sequences as the exponential object
+\(\IFun{\mathsf{N}_{\mathsf{eff}}}{\mathsf{N}_{\mathsf{eff}}}\) in this category.
 
-
-\label{sect:bib}
 \bibliographystyle{plain}
 %\bibliographystyle{alpha}
 %\bibliographystyle{unsrt}
