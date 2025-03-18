@@ -30,6 +30,7 @@
 \renewcommand{\P}{\ensuremath{{P}}} % arbitrary poset (replaces paragraph symbol)
 \renewcommand{\L}{\ensuremath{{L}}} % arbitrary lattice
 \newcommand{\X}{\ensuremath{X}} % arbitrary sheaf
+\newcommand{\E}{\mathcal{E}} % arbitrary topos
 
 \newcommand{\Par}[1]{{#1}_\bot}
 \newcommand{\ParTo}{\rightharpoonup}
@@ -77,6 +78,8 @@
 
 \newcommand{\ITop}{\top}
 
+\newcommand{\IBot}{\bot}
+
 \newcommand{\INotSym}{\lnot}
 \newcommand{\INot}[1]{\INotSym{#1}}
 
@@ -86,22 +89,31 @@
 \newcommand{\IOrSym}{\lor}
 \newcommand{\IOr}[2]{{#1}\IOrSym{#2}}
 
+\newcommand{\IImpliesSym}{\Rightarrow}
+\newcommand{\IImplies}[2]{{#1}\IImpliesSym{#2}}
+
 \newcommand{\IForallSym}{\forall}
-\newcommand{\IForall}[2]{\IForallSym{#1}.{#2}}
+\newcommand{\IForall}[2]{\IForallSym{#1}.\,{#2}}
 
 \newcommand{\IExistsSym}{\exists}
-\newcommand{\IExists}[2]{\IExistsSym{#1}.{#2}}
+\newcommand{\IExists}[2]{\IExistsSym{#1}.\,{#2}}
 
 \newcommand{\IBoxSym}{\Box}
 \newcommand{\IBox}[1]{\IBoxSym{#1}}
 
 \newcommand{\ISetComp}[2]{\{{#1}\mid{#2}\}}
 
+\newcommand{\IEqSym}{=}
+\newcommand{\IEq}[2]{{#1}\IEqSym{#2}}
+
 % Types
 \newcommand{\IPower}[1]{\mathcal{P}{#1}}
 
+\newcommand{\IProd}[2]{{#1}\times{#2}}
+
 %% Function types
 \newcommand{\IFun}[2]{{{#2}^{#1}}}
+\newcommand{\IId}[1]{\mathbb{1}_{#1}}
 
 % INTERNAL PCA
 
@@ -119,21 +131,53 @@
 %% Partial element is defined
 \newcommand{\ITotal}[1]{{#1}\downarrow}
 
+%% Partial element ordering
+\newcommand{\IPLeqSym}{\preccurlyeq}
+\newcommand{\IPLeq}[2]{{#1}\IPLeqSym{#2}}
+
 \newcommand{\IIdentCode}{\texttt{id}}
 
 \newcommand{\ICompCode}{\texttt{comp}}
 
+%% Pairing
 \newcommand{\IPairCode}{\texttt{pair}}
 \newcommand{\IFstCode}{\texttt{p}_0}
 \newcommand{\ISndCode}{\texttt{p}_1}
 
+%% Disjoint unions
+\newcommand{\ILeftCode}{\texttt{in}_0}
+\newcommand{\IRightCode}{\texttt{in}_1}
+\newcommand{\IMatchCode}{\texttt{match}}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% TRIPOS %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %% Realizability Predicates
-\newcommand{\RealPred}[1]{\IFun{#1}{\IPower{\A}}}
+\newcommand{\RealPred}[1]{\IPower{(\IProd{#1}{\A})}}
 
-%% Tripos language
+% Tripos language
 
-\newcommand{\TTop}[1]{\top}
+%% Helper macro to tag tripos language symbols with the object type
+\newcommand{\TagWithObject}[2]{\overset{\scriptscriptstyle #2}{#1}}
 
-\newcommand{\TAndSym}[1]{\land}
+\newcommand{\TTop}[1]{\TagWithObject{\top}{#1}}
+
+\newcommand{\TBot}[1]{\TagWithObject{\bot}{#1}}
+
+\newcommand{\TAndSym}[1]{\TagWithObject{\land}{#1}}
 \newcommand{\TAnd}[3]{{#1}\TAndSym{#3}{#2}}
+
+\newcommand{\TOrSym}[1]{\TagWithObject{\wedge}{#1}}
+\newcommand{\TOr}[3]{{#1}\TOrSym{#3}{#2}}
+
+\newcommand{\TImpliesSym}[1]{\TagWithObject{\Rightarrow}{#1}}
+\newcommand{\TImplies}[3]{{#1}\TImpliesSym{#3}{#2}}
+
+\newcommand{\TPull}[1]{{#1}^\ast}
+
+%% Category of assemblies
+\newcommand{\AsmSym}{\mathbf{Asm}}
+\newcommand{\Asm}[3]{\AsmSym_{(#2,#3)}(#1)}
+\newcommand{\AsmCat}{\Asm{\A}{\E}{\Box}}

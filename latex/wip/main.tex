@@ -33,107 +33,197 @@
 
 We begin a treatment of realizability internal to categories of sheaves.
 
-\newpage
-\section{Internal Language of a Presheaf Topos}
-
-A typical course in mathematical logic may start by looking at formal systems
-such as natural deduction or the sequent calculus, giving rise to a notion of
-truth, namely the provability of formulas. A natural next step is to then look
-at the semantics of said proof system. These semantics can vary significantly
-depending on the chosen logic such as boolean valuations for propositional
-logic, Kripke frames for modal logic, \(\mathcal{L}\)-structures for predicate
-logic, etc. Regardless, in each case we can consider whether a formula is valid,
-i.e.\ true in every model and this gives rise to yet to a second notion of
-truth. Remarkably, these two notions of truth often coincide, provided the right
-proof system and semantics are chosen. While provability quantifies
-existentially over proofs, asking whether a formal proof exists, validity is a
-universal statement asking that the interpretation of a formula hold in all
-models. This duality is powerful: to show a formula \(\phi\) is not provable by
-proof-theoretic means is difficult. Typical methods start by identifying some
-property of proofs \(P\) such that any proof of any formula \(\psi\) can be
-transformed to another proof of \(\psi\) satisfying \(P\). From here, if we can
-show that no proof of \(\phi\) satisfying \(P\) exists, then that must mean no
-proof exists in general. Typical examples of properties \(P\) can be that the
-proof does not make use of the \textbf{Cut} rule in sequent calculus or
-alternatively for natural deduction that there exist no \(\beta\)-redexs. While
-these are interesting and useful results to have, in this case the semantics
-offers an easier route. To show \(\phi\) is not valid it suffices to demonstrate
-a model in which the interpretation of \(\phi\) does not hold and this is
-generally easier than the syntactic route.
-
-At a first glance the power of this duality seems to be in dispatching of syntax
-and work purely with models. As we move to more and more complicated languages,
-going beyond first-order logic to its higher-order counterparts, then the needle
-begins to move back. In particular, consider (your favourite version of)
-Martin-L\"of Type Theory (\MLTT{}) with \(\Pi\)-types and \(\Sigma\)-types.
-Semantics for \MLTT{} are usually categorically, either through categories with
-families, contextual categories, natural models, the list goes on. Fixing your
-favourite notion of model, categories of presheaves \(\PresheafCat\) generally
-give rise to a model of dependent type theory. That means if we prove some
-statement in \MLTT{}, then by taking the interpretation of said statement in
-\(\PresheafCat\) we will get a true statement about presheaves over \(\C\).
-Working with presheaves can be quite labourious and often becomes an exercise
-in bookkeeping of indices.
-
-\subsection{Exponentials}
-
-Given two types \(A, B\), the type of functions from \(A\) to \(B\),
-denoted \(\IFun{A}{B}\), behaves like the usual function type in type theory.
+%\section{Internal Language of a Presheaf Topos}
 %
-As for its categorical semantics we have the following
+%A typical course in mathematical logic may start by looking at formal systems
+%such as natural deduction or the sequent calculus, giving rise to a notion of
+%truth, namely the provability of formulas. A natural next step is to then look
+%at the semantics of said proof system. These semantics can vary significantly
+%depending on the chosen logic such as boolean valuations for propositional
+%logic, Kripke frames for modal logic, \(\mathcal{L}\)-structures for predicate
+%logic, etc. Regardless, in each case we can consider whether a formula is valid,
+%i.e.\ true in every model and this gives rise to yet to a second notion of
+%truth. Remarkably, these two notions of truth often coincide, provided the right
+%proof system and semantics are chosen. While provability quantifies
+%existentially over proofs, asking whether a formal proof exists, validity is a
+%universal statement asking that the interpretation of a formula hold in all
+%models. This duality is powerful: to show a formula \(\phi\) is not provable by
+%proof-theoretic means is difficult. Typical methods start by identifying some
+%property of proofs \(P\) such that any proof of any formula \(\psi\) can be
+%transformed to another proof of \(\psi\) satisfying \(P\). From here, if we can
+%show that no proof of \(\phi\) satisfying \(P\) exists, then that must mean no
+%proof exists in general. Typical examples of properties \(P\) can be that the
+%proof does not make use of the \textbf{Cut} rule in sequent calculus or
+%alternatively for natural deduction that there exist no \(\beta\)-redexs. While
+%these are interesting and useful results to have, in this case the semantics
+%offers an easier route. To show \(\phi\) is not valid it suffices to demonstrate
+%a model in which the interpretation of \(\phi\) does not hold and this is
+%generally easier than the syntactic route.
+%
+%At a first glance the power of this duality seems to be in dispatching of syntax
+%and work purely with models. As we move to more and more complicated languages,
+%going beyond first-order logic to its higher-order counterparts, then the needle
+%begins to move back. In particular, consider (your favourite version of)
+%Martin-L\"of Type Theory (\MLTT{}) with \(\Pi\)-types and \(\Sigma\)-types.
+%Semantics for \MLTT{} are usually categorically, either through categories with
+%families, contextual categories, natural models, the list goes on. Fixing your
+%favourite notion of model, categories of presheaves \(\PresheafCat\) generally
+%give rise to a model of dependent type theory. That means if we prove some
+%statement in \MLTT{}, then by taking the interpretation of said statement in
+%\(\PresheafCat\) we will get a true statement about presheaves over \(\C\).
+%Working with presheaves can be quite labourious and often becomes an exercise
+%in bookkeeping of indices.
+%
+%\subsection{Exponentials}
+%
+%Given two types \(A, B\), the type of functions from \(A\) to \(B\),
+%denoted \(\IFun{A}{B}\), behaves like the usual function type in type theory.
+%%
+%As for its categorical semantics we have the following
+%
+%\begin{defn}
+%  Given two objects \(A, B\), their exponential is an object \(\IFun{A}{B}\)
+%  along with a morphism \(\EEval : A \times \IFun{A}{B} \to B\) such that
+%  for all \(f : C \times A \to B\) there exists a unique
+%  \(\tilde{f}: C \to \IFun{A}{B}\) making the following triangle commutes
+%  %
+%  \[\begin{tikzcd}
+%    {C \times \IFun{A}{B}} && B \\
+%    \\
+%    {C\times A}
+%    \arrow["{\EEval}", from=1-1, to=1-3]
+%    \arrow["{C\times\tilde{f}}", from=3-1, to=1-1]
+%    \arrow["f"', from=3-1, to=1-3]
+%  \end{tikzcd}\]
+%\end{defn}
+%
+%\subsubsection{Exponentials of Presheaves}
+%
+%The exponential of two presheaves \(X,Y\) is a presheaf
+%\(\IFun{X}{Y}\) with action on objects given by
+%%
+%\[
+%  (\IFun{X}{Y})_{w} \IsDefined \mathsf{Nat}(\yo(w) \times X, Y)
+%\]
+%%
+%and action on morphisms defined as follows
+%%
+%\[\begin{array}{l}
+%  \IFun{X}{Y}_{f:u \to w} :
+%    \mathsf{Nat}(\yo(w) \times X, Y) \to \mathsf{Nat}(\yo(u) \times X, Y)\\
+%  (\IFun{X}{Y}_{f:u \to w}(\alpha))_{v}(g : v \to u, x : X_{v})
+%    \IsDefined \alpha_{v}(fg, x)
+%\end{array}\]
+%
+%The evaluation map is a natural transformation
+%\(\EEval : X \times \IFun{X}{Y} \to Y\) defined for each object
+%\(w\) by
+%%
+%\[\begin{array}{l}
+%  \EEval_{w} : X \times \mathsf{Nat}(\yo(w) \times X, Y) \to Y\\
+%  \EEval_{w}(x, \alpha) \IsDefined \alpha_{w}(\mathsf{id}, x)
+%\end{array}\]
+%%
+%Naturality of \(\EEval\) means for all \(x : X_{w}\),
+%\(\alpha : \mathsf{Nat}(\yo(w) \times X, Y)\) and \(f : v \to w\) we have
+%\[
+%  Y_{f}(\alpha_{w}(\mathsf{id}, x)) =
+%  Y_{f}(\EEval_{w}(x, \alpha)) =
+%  \EEval_{v}(X_{f}(x), \IFun{X}{Y}_{f}(\alpha)) =
+%  (\IFun{X}{Y}_{f}(\alpha))_{v}(\mathsf{id}, X_{f}(x)) =
+%  \alpha_{v}(f, X_{f}(x))
+%\]
+%
+%\subsection{Substitution and Logical Quantification}
+%
+%Any topos is able to interpret both proof-relevant and proof-irrelevant
+%universal and existential quantification.
+%%
+%Let us focus on proof-irrelevant quantification, that is quantification yielding
+%propositions.
+%%
+%For any map \(f : X \to Y\) we have a reindexing map
+%\(f^{*} : \mathsf{Sub}(Y) \to \mathsf{Sub}(X)\) by precomposition with \(f\).
+%%
+%This reindexing preserves all Heyting algebra structure and gives our
+%interpretation of substitution of terms in predicates.
+%%
+%As we are in a topos, we also happen to have left and right adjoints
+%\(\exists_{f} \dashv f^{*} \dashv \forall_{f}\), though this time they are only
+%monotone maps and do not preserve all the Heyting algebra structure.
+%%
+%These adjoints can be shown to satisfy the Beck-Chevalley conditions, so they
+%form, respectively, our interpretation of existential and universal quantifiers.
+%
+%Focusing on existential quantification first, suppose we have a predicate
+%\(\phi : \mathsf{Sub}(X \times Y)\) in two typed variables \(x\) and \(y\).
+%%
+%Considering the projection \(\pi : X \times Y \to X\), we can get a predicate
+%\(\exists_{\pi}\phi : \mathsf{Sub}(X)\).
+%%
+%Abusing some notation, if initially we saw \(\phi\) as the interpretation of
+%some syntactical predicate \(\phi(x,y)\), then we would see this new predicate
+%as the interpretation of the predicate \(\exists y : Y, \phi(x,y)\)
+%with a single free variable \(x\).
+%%
+%In fact, from adjointness gives us the expected introduction and elimination
+%rules.
+%%
+%Suppose we have a term \(t(x)\) of type \(Y\) such that we can prove
+%\(\phi(x,t(x))\).
+%%
+%From the denotation of \(t(x)\) we expect to get some morphism \(X \to Y\)
+%which we can get extend to a section of \(\pi : X \times Y \to X\)
+%
+%some kind of morphism \(\llbracket t(x) \rrbracket : X \to Y\)
+%
+% for some term \(t(x)\), then
+%from said term we expect to
+%
+%\subsubsection{Quantifiers in Presheaves}
+%
+%Fix a map \(\phi : X \to Y\) of presheaves and a subpresheaf
+%\(S \hookrightarrow X\), with which we can look at both types of quantifiers.
+%
+%For existentials, we apply \(\exists_{\phi}\) to \(S\) giving us a subpresheaf
+%of \(Y\) which is described by
+%%
+%\[
+%  {(\exists_{\phi}S)}_{w} =
+%  \{y : Y_{w} \mid \exists x \in S_{w}, \phi_{w}(x) = y\} \subseteq Y_{w}
+%\]
+%%
+%or equivalently described by
+%%
+%\[
+%  {(\exists_{\phi}S)}_{w} =
+%  \{y : Y_{w} \mid
+%  \forall f : v \to w, \exists x \in S_{v}, \phi_{v}(x) = Y_{f}(y) \}
+%\]
+%%
+%as if we have \(x \in S_{w}\) such that \(\phi_{w}(x)=y\) then, by naturality of
+%\(\phi\), we can see that for all \(f : v \to w\) we have
+%\(\phi_{v}(X_{f}(x))=Y_{f}(\phi_{w}(x))=Y_{f}(y)\) meaning that \(X_{f}(x)\)
+%witnesses \(\exists x \in S_{v}, \phi_{v}(x) = Y_{f}(y)\).
+%
+%For universals, applying \(\forall_{\phi}\) to \(S\) gives the following
+%subpresheaf
+%%
+%\[
+%  {(\forall_{\phi}S)}_{w} =
+%  \{y : Y_{w} \mid
+%  \forall f : v \to w, \forall x \in X_{v},
+%  \phi_{w}(x) = y \implies x \in S_{v} \} \subseteq Y_{w}
+%\]
+%%
+%Unlike for the existential quantifier, there is no simplification allowing
+%us to remove quantification over morphisms.
+%%
+%This is due to the fact that a subpresheaf must be monotonic, hence
+%the similarity to Kripke semantics of universal quantification.
 
-\begin{defn}
-  Given two objects \(A, B\), their exponential is an object \(\IFun{A}{B}\)
-  along with a morphism \(\EEval : A \times \IFun{A}{B} \to B\) such that
-  for all \(f : C \times A \to B\) there exists a unique
-  \(\tilde{f}: C \to \IFun{A}{B}\) making the following triangle commutes
-  %
-  \[\begin{tikzcd}
-    {C \times \IFun{A}{B}} && B \\
-    \\
-    {C\times A}
-    \arrow["{\EEval}", from=1-1, to=1-3]
-    \arrow["{C\times\tilde{f}}", from=3-1, to=1-1]
-    \arrow["f"', from=3-1, to=1-3]
-  \end{tikzcd}\]
-\end{defn}
 
-\subsubsection{Exponentials of Presheaves}
 
-The exponential of two presheaves \(X,Y\) is a presheaf
-\(\IFun{X}{Y}\) with action on objects given by
-%
-\[
-  (\IFun{X}{Y})_{w} \IsDefined \mathsf{Nat}(\yo(w) \times X, Y)
-\]
-%
-and action on morphisms defined as follows
-%
-\[\begin{array}{l}
-  \IFun{X}{Y}_{f:u \to w} :
-    \mathsf{Nat}(\yo(w) \times X, Y) \to \mathsf{Nat}(\yo(u) \times X, Y)\\
-  (\IFun{X}{Y}_{f:u \to w}(\alpha))_{v}(g : v \to u, x : X_{v})
-    \IsDefined \alpha_{v}(fg, x)
-\end{array}\]
-
-The evaluation map is a natural transformation
-\(\EEval : X \times \IFun{X}{Y} \to Y\) defined for each object
-\(w\) by
-%
-\[\begin{array}{l}
-  \EEval_{w} : X \times \mathsf{Nat}(\yo(w) \times X, Y) \to Y\\
-  \EEval_{w}(x, \alpha) \IsDefined \alpha_{w}(\mathsf{id}, x)
-\end{array}\]
-%
-Naturality of \(\EEval\) means for all \(x : X_{w}\),
-\(\alpha : \mathsf{Nat}(\yo(w) \times X, Y)\) and \(f : v \to w\) we have
-\[
-  Y_{f}(\alpha_{w}(\mathsf{id}, x)) =
-  Y_{f}(\EEval_{w}(x, \alpha)) =
-  \EEval_{v}(X_{f}(x), \IFun{X}{Y}_{f}(\alpha)) =
-  (\IFun{X}{Y}_{f}(\alpha))_{v}(\mathsf{id}, X_{f}(x)) =
-  \alpha_{v}(f, X_{f}(x))
-\]
 
 %\newpage
 %\section{Internal PCAs}
@@ -192,9 +282,17 @@ Naturality of \(\EEval\) means for all \(x : X_{w}\),
 
 \section{A Realizability Tripos}
 
-\todo[inline]{Define Heyting prealgebra}
+In this section we fix a topos \(\mathcal{E}\) along with a Lawvere-Tierney
+topology \(\Box : \Omega \to \Omega\) on this topos.
+%
+I believe for this definition \(\mathcal{E}\) can be an elementary topos,
+but I am less sure how this works out once we start considering sheafification.
+%
+We give our definitions internally to \(\mathcal{E}\), letting us simplify
+the proofs in this section.
 
-\begin{defn}
+
+\begin{defn}\label{defn:tripos-predicates-and-ordering}
   Given a presheaf \(\X\) we define the type of \definiendum{realizability
     predicates on \(\X\)} as the exponential \(\RealPred{\X} \).
   %
@@ -206,12 +304,14 @@ Naturality of \(\EEval\) means for all \(x : X_{w}\),
     \IsDefined
     \IExists{e : \A}{
       \IForall{x : \X}{
-        \IForall{a \in \varphi(x)}{
-          \IBox{(
-            \IAnd%
-            {\ITotal{\IAp{e}{a}}}%
-            {\IAp{e}{a} \in \psi(x)}
-          )}
+        \IForall{a : \A}{
+          \IImplies%
+            {\varphi(a,x)}%
+            {\IBox{(
+              \IAnd%
+              {\ITotal{\IAp{e}{a}}}%
+              {\psi(\IAp{e}{a}, x)}
+            )}}
         }
       }
     }
@@ -221,9 +321,7 @@ Naturality of \(\EEval\) means for all \(x : X_{w}\),
   it witnesses the existential quantifier above.
 \end{defn}
 
-%
-
-\begin{lemm}
+\begin{lemm}\label{lemm:tripos-preorder}
   For any presheaf \(\X\), \((\RealPred{\X}, \leq)\) is a preorder.
 \end{lemm}
 \begin{proof}
@@ -280,29 +378,27 @@ Naturality of \(\EEval\) means for all \(x : X_{w}\),
   \(\IAp{\IAp{\ICompCode}{e_{1}}}{e_{2}}\) evidences \(\varphi \leq \chi\).
 \end{proof}
 
-%\todo[inline]{prove it has finite meets}
-
-\begin{lemm}
+\todo[inline]{fix proof to use new notation}
+\begin{lemm}\label{lemm:tripos-finite-meets}
   For any presheaf \(\X\), the preorder \((\RealPred{\X}, \leq)\) has finite
   meets.
   %
-  The top element is described by~\ref{defn:pred-top} and the meet of two
+  The top element is described by~\ref{defn:tripos-top} and the meet of two
   realizability predicates~\(\varphi\) and \(\psi\) is described
-  by~\ref{defn:pred-meet}:
+  by~\ref{defn:tripos-binary-meet}:
   %
   \begin{gather}
-    \TTop{\X}(x)
+    \TTop{\X}(x,a)
     \IsDefined
-    \ISetComp{a:\A}{\ITop}
-    \label{defn:pred-top}
+    \ITop
+    \label{defn:tripos-top}
     \\
-    \TAnd{\varphi}{\psi}{\X}(x)
+    (\TAnd{\varphi}{\psi}{\X})(x,a)
     \IsDefined
-    \ISetComp{a:\A}{\IAnd%
+    \IAnd%
       {\IAnd{\ITotal{\IAp{\IFstCode}{a}}}{\IAp{\IFstCode}{a}\in\varphi(x)}}%
       {\IAnd{\ITotal{\IAp{\ISndCode}{a}}}{\IAp{\ISndCode}{a}\in\psi(x)}}
-    }
-    \label{defn:pred-meet}
+    \label{defn:tripos-binary-meet}
   \end{gather}
 \end{lemm}
 \begin{proof}
@@ -353,23 +449,173 @@ Naturality of \(\EEval\) means for all \(x : X_{w}\),
   \(\IAp{e}{a} = \IAp{\IAp{\IPairCode}{(\IAp{e_{1}}{a})}}{(\IAp{e_{1}}{a})}\).
 \end{proof}
 
-\todo[inline]{prove it has finite joins}
+\begin{lemm}\label{lemm:tripos-finite-joins}
+  For any presheaf \(\X\), the preorder \((\RealPred{\X}, \leq)\) has finite
+  joins.
+  %
+  The bottom element is described by~\ref{defn:tripos-bottom} and the join of two
+  realizability predicates~\(\varphi\) and \(\psi\) is described
+  by~\ref{defn:tripos-binary-join}:
+  %
+  \begin{gather}
+    \TBot{\X}(x,a)
+    \IsDefined
+    \IBot
+    \label{defn:tripos-bottom}
+    \\
+    (\TOr{\varphi}{\psi}{\X})(x,a)
+    \IsDefined
+    \IExists{b:\A}{\IOr%
+      {(\IAnd{\IEq{a}{\IAp{\ILeftCode}{b}}}{b\in\varphi(x)})}%
+      {(\IAnd{\IEq{a}{\IAp{\IRightCode}{b}}}{b\in\psi(x)})}
+    }
+    \label{defn:tripos-binary-join}
+  \end{gather}
+\end{lemm}
+\begin{proof}
+  First we see that \(\TBot{\X}\) is indeed the bottom element, but any code
+  \(e : \A\) vacuously evidences the inequality \(\TBot{\X} \leq \phi\).
 
-\todo[inline]{prove it has Heyting implication}
+  Now let us see that \(\TOr{\varphi}{\psi}{\X}\) is indeed the required join.
+  %
+  The introduction rules \(\varphi\leq\TOr{\varphi}{\psi}{\X}\) and
+  \(\psi\leq\TOr{\varphi}{\psi}{\X}\) are evidenced by \(\ILeftCode\) and
+  \(\IRightCode\) respectively.
+  %
+  To prove the former, fix \(x:\X\) and \(a:\A\) such that \(\varphi(x,a)\),
+  then we always have \(\ITotal{\IAp{\ILeftCode}{a}}\) and hence
+  \((\TOr{\varphi}{\psi}{\X})(x,\IAp{\ILeftCode}{a})\).
+  %
+  \(\Box\) is inflationary so this finishes the proof and we note that the case
+  for \(\IRightCode\) follows similarly.
+  %
+  As for the elimination rule, suppose that \(e_{0}\) evidences
+  \(\varphi \leq \chi\) and \(e_{1}\) evidences \(\psi \leq \chi\), then
+  \(\IAp{\IAp{\IMatchCode}{e_{0}}}{e_{1}}\) will evidence
+  \(\TOr{\varphi}{\psi}{\X} \leq \chi\).
+  %
+  In fact, fix \(x:\X\) and \(a:\A\) such that
+  \((\TOr{\varphi}{\psi}{\X})(x,a)\), then there exists some \(b:\A\) such that
+  either \(\IEq{a}{\IAp{\ILeftCode}{b}}\) and \(b\in\varphi(x)\), or
+  \(\IEq{a}{\IAp{\IRightCode}{b}}\) and \(b\in\psi(x)\).
+  %
+  In the first case, we have that
+  %
+  \(\IPLeq%
+  {\IAp{e_{0}}{b}}%
+  {\IAp{\IAp{\IAp{\IMatchCode}{e_{0}}}{e_{1}}}{(\IAp{\IRightCode}{b})}}%
+  \)
+  %
+  and \(\IBox{(\IAnd{\ITotal{\IAp{e_{0}}{b}}}{\chi(\IAp{e_{0}}{b},x)})}\),
+  from which we can show that
+  %
+  \(\IBox{(\IAnd%
+    {\ITotal{\IAp{\IAp{\IAp{\IMatchCode}{e_{0}}}{e_{1}}}{a}}}%
+    {\chi(\IAp{\IAp{\IAp{\IMatchCode}{e_{0}}}{e_{1}}}{a},x)}%
+  )}\).
+  %
+  The right case follows analogously.
+\end{proof}
 
-% Hence we have proved these are heyting algebras
+\begin{lemm}\label{lemm:tripos-heyting-implication}
+  For any presheaf \(\X\), \((\RealPred{\X}, \leq)\) has Heyting
+  implication described by
+  \begin{gather}
+    (\TImplies{\varphi}{\psi}{\X})(x,a)
+    \IsDefined
+    \IForall{b : \A}{%
+      \IImplies%
+      {\varphi(x,b)}%
+      {\IBox{(%
+          \IAnd%
+          {\ITotal{\IAp{a}{b}}}%
+          {\psi(x,\IAp{a}{b})}
+    )}}}
+    \label{defn:tripos-heyting-implication}
+  \end{gather}
+\end{lemm}
+\begin{proof}
+  Suppose that \(\TAnd{\varphi}{\psi}{\X} \leq \chi\) is evidenced by \(e\),
+  then \(\varphi \leq \TImplies{\psi}{\chi}{\X}\) is realized by the code
+  \(\IAbs{a}{\IAbs{b}{\IPAp{e}{(\IPAp{\IPAp{\IPairCode}{a}}{b})}}}\).
+  %
+  Fixing \(x : \X\) and \(a : \A\) such that \(\varphi(x,a)\), we have
+  %
+  \[\IEq%
+  {\IAp{(\IAbs{a}{\IAbs{b}{\IPAp{e}{(\IPAp{\IPAp{\IPairCode}{a}}{b})}}})}{a}}%
+  {\IAbs{b}{\IPAp{e}{(\IPAp{\IPAp{\IPairCode}{a}}{b})}}}%
+  \]
+  %
+  leaving us to prove that
+  %
+  \(
+  (\TImplies{\psi}{\chi}{\X})%
+  (x, \IAbs{b}{\IPAp{e}{(\IPAp{\IPAp{\IPairCode}{a}}{b})}})%
+  \).
+  %
+  For this, fix \(b : \A\) and assume \(\psi(x,b)\), then we know that
+  %
+  \(\IPLeq%
+  {\IPAp{e}{(\IPAp{\IPAp{\IPairCode}{a}}{b})}}%
+  {\IAp{(\IAbs{b}{\IPAp{e}{(\IPAp{\IPAp{\IPairCode}{a}}{b})}})}{b}}\).
+  %
+  From \(\varphi(x,a)\) and \(\psi(x,b)\) we know that
+  \((\TAnd{\varphi}{\psi}{\X})(x,\IPAp{\IPAp{\IPairCode}{a}}{b})\) and hence
+  %
+  \(\IBox{(%
+    \IAnd%
+    {\ITotal{\IAp{e}{\IPAp{\IPAp{\IPairCode}{a}}{b}}}}%
+    {\psi(x,\IAp{e}{(\IPAp{\IPAp{\IPairCode}{a}}{b})})})}%
+  \)
+  %
+  as needed.
 
-\todo[inline]{define pullback and show it is heyting algebra morphism}
+  For the converse direction suppose that
+  \(\varphi \leq \TImplies{\psi}{\chi}{\X}\) is evidenced by \(e\), then
+  \(\TAnd{\varphi}{\psi}{\X} \leq \chi\) will be evidenced by
+  \(\IAbs{a}{\IPAp{\IPAp{e}{(\IPAp{\IFstCode}{p})}}{(\IPAp{\ISndCode}{p})}}\).
+  %
+  We fix \(x : \X\) and \(a : \A\) and assume \((\TAnd{\varphi}{\psi})(x,a)\),
+  which implies \(\ITotal{\IPAp{\IFstCode}{p}}\),
+  \(\ITotal{\IPAp{\ISndCode}{p}}\) and both \(\varphi(x,\IPAp{\IFstCode}{p})\)
+  and \(\psi(x,\IPAp{\ISndCode}{p})\).
+  %
+  From this we get that
+  %
+  \[
+    \IBox{[\IAnd%
+    {\ITotal{\IPAp{e}{(\IPAp{\IFstCode}{p})}}}%
+    {(\TImplies{\psi}{\chi}{\X})(x,\IPAp{e}{(\IPAp{\IFstCode}{p})})}%
+    ]}
+  \]
+  %
+  but \((\TImplies{\psi}{\chi}{\X})(x,\IPAp{e}{(\IPAp{\IFstCode}{p})})\) and
+  \(\varphi(x,\IPAp{\IFstCode}{p})\) together imply
+  %
+  \[
+    \IBox{[\IAnd%
+    {\ITotal{\IPAp{\IPAp{e}{(\IPAp{\IFstCode}{p})}}{(\IPAp{\ISndCode}{p})}}}%
+    {\chi(x,\IPAp{\IPAp{e}{(\IPAp{\IFstCode}{p})}}{(\IPAp{\ISndCode}{p})})}%
+    ]}
+  \]
+  and so monotonicity and idempotence of \(\IBoxSym\) let us string
+  these two implications together.
+\end{proof}
 
-\todo[inline]{prove left adjoint to pullback exists (as monotone map)}
-
-\todo[inline]{prove right adjoint to pullback exists (as monotone map)}
-
-\todo[inline]{prove beck-chevalley condition}
-
-\todo[inline]{show there is a generic object}
+\todo[inline,caption={}]{
+ type up the following from notes:
+ \begin{itemize}
+   \item define pullback and show it is heyting algebra morphism
+   \item prove left adjoint to pullback exists (as monotone map)
+   \item prove right adjoint to pullback exists (as monotone map)
+   \item prove beck-chevalley condition
+   \item show there is a generic object
+ \end{itemize}
+}
 
 \subsection{Presheaves with a Lawvere-Tierney Topology}
+
+\todo[inline]{adapt to use new realizability predicate type}
 
 Fix two realizability predicates \(\phi,\psi : \RealPred{\X}\), that is global
 elements \(\phi,\psi : 1 \to \RealPred{\X}\).
@@ -550,11 +796,11 @@ on realizability predicates.
 
 \begin{defn}
   We say that \(\phi \leq \psi\) at world \(w\) if there exists a code
-  \(e : \A_{w}\) such that for all maps \(f : u \leq w\), elements
+  \(e : \A_{w}\) such that for all maps \(f : u \to w\), elements
   \(x : \X_{u}\) and codes \(a : \A_{u}\), if
   %
   \[
-    \mathsf{id}_{u} \in [\phi_{u}(\mathsf{id}_{u}, x\{f\})]_{u}(\mathsf{id}_{u},a)
+    \mathsf{id}_{u} \in [\phi_{u}(\mathsf{id}_{u}, x)]_{u}(\mathsf{id}_{u},a)
   \]
   %
   then there exists a cover \(\mathcal{V}\) of \(u\) such that for all
@@ -562,7 +808,7 @@ on realizability predicates.
   %
   \[\begin{array}{ccc}
   e\{fg\} \cdot_{v} a\{g\} \downarrow &\text{ and }&
-  \mathsf{id}_{v} \in [\phi_{v}(\mathsf{id}_{v}, x\{fg\})]_{v}(\mathsf{id}_{v},e\{fg\} \cdot_{v} a\{g\}).
+  \mathsf{id}_{v} \in [\psi_{v}(\mathsf{id}_{v}, x\{g\})]_{v}(\mathsf{id}_{v},e\{fg\} \cdot_{v} a\{g\}).
   \end{array}\]
 \end{defn}
 
@@ -574,7 +820,7 @@ In the case that the underlying category is a poset
   \(x : \X_{u}\) and codes \(a : \A_{u}\), if
   %
   \[
-    u \in [\phi_{u}(u\leq u, x|_{u})]_{u}(u \leq u,a)
+    u \in [\psi_{u}(u\leq u, x)]_{u}(u \leq u,a)
   \]
   %
   then there exists a cover \(\mathcal{V}\) of \(u\) such that for all \(v \in \mathcal{V}\) we
@@ -582,7 +828,7 @@ In the case that the underlying category is a poset
   %
   \[\begin{array}{ccc}
     e|_{v} \cdot_{v} a|_{v} \downarrow &\text{ and }&
-    v \in [\phi_{v}(v\leq v, x|_{v})]_{v}(v \leq v,e|_{v} \cdot_{v} a|_{v})
+    v \in [\psi_{v}(v\leq v, x|_{v})]_{v}(v \leq v,e|_{v} \cdot_{v} a|_{v})
   \end{array}\]
 \end{defn}
 
@@ -594,7 +840,7 @@ And further assuming that \(\A\) is a constant presheaf we get
   \(x : \X_{u}\) and codes \(a : \A\), if
   %
   \[
-    u \in [\phi_{u}(u\leq u, x|_{u})]_{u}(u \leq u,a)
+    u \in [\phi_{u}(u\leq u, x)]_{u}(u \leq u,a)
   \]
   %
   then there exists a cover \(\mathcal{V}\) of \(u\) such that for all \(v \in \mathcal{V}\) we
@@ -602,7 +848,7 @@ And further assuming that \(\A\) is a constant presheaf we get
   %
   \[\begin{array}{ccc}
     e \cdot_{v} a \downarrow &\text{ and }&
-    v \in [\phi_{v}(v\leq v, x|_{v})]_{v}(v \leq v,e \cdot_{v} a)
+    v \in [\psi_{v}(v\leq v, x|_{v})]_{v}(v \leq v,e \cdot_{v} a)
   \end{array}\]
 \end{defn}
 
@@ -618,7 +864,7 @@ already:
   \(x : \X_{u}\) and codes \(a : \A\), if
   %
   \[
-    u \in \phi_{u}(x|_{u}, a)
+    u \in \phi_{u}(x, a)
   \]
   %
   then there exists a cover \(\mathcal{V}\) of \(u\) such that for all \(v \in \mathcal{V}\) we
@@ -626,11 +872,148 @@ already:
   %
   \[\begin{array}{ccc}
     e \cdot_{v} a \downarrow &\text{ and }&
-    v \in \phi_{v}(x|_{v}, e \cdot_{v} a)
+    v \in \psi_{v}(x|_{v}, e \cdot_{v} a)
   \end{array}\]
 \end{defn}
 
-\newpage
+\section{Realizability Categories}%
+\label{sec:realizability-categories}
+
+With a tripos we can now define its associated category of assemblies
+and realizability topos.
+
+\subsection{Assemblies}%
+\label{sub:assemblies}
+
+\begin{defn}\label{defn:assembly}
+  An \definiendum{assembly} is an object \(X\) of \(\E\) with a realizability
+  predicate \(\varphi : \RealPred{X}\) such that we do not have
+  \(\TPull{f}\varphi \leq \TBot{Y}\) for any morphisms \(f : Y \to X\).
+\end{defn}
+
+\begin{remk}
+  The subject definition is subject to change, in particular we are
+  unsure about the totality condition required.
+  %
+  At first it seemed enough to ask for that \(\varphi \leq \TBot{X}\)
+  did not hold, but this did not agree with the definition of assemblies in
+  the set case.
+  %
+  Instead, this simply asked that there exist some \(x:X\) which had at least
+  one realizer, instead of requiring every \(x\) to be realized.
+  %
+  We fix this by reindexing along every morphism in the base category,
+  but it could be possible to reindex along global sections \(x : 1 \to X\)
+  instead.
+\end{remk}
+
+\begin{defn}\label{defn:assembly-morphism}
+  A \definiendum{morphism of assemblies} from \((X,\varphi)\) to
+  \((Y,\psi)\) consists of a morphism \(f : X \to Y\) in \(\E\) such that
+  \(\varphi \leq \TPull{f}\psi\). When \(\varphi \leq \TPull{f}\psi\) holds
+  we say that \(f\) is \definiendum{tracked}.
+\end{defn}
+
+\begin{remk}
+  Using the internal language of \(\E\), \(f : X \to Y\) is tracked as above
+  if we have
+  %
+  \[
+    \IExists{e : \A}{
+      \IForall{x : \X}{
+        \IForall{a : \A}{
+          \IImplies%
+            {\varphi(a,x)}%
+            {\IBox{(
+              \IAnd%
+              {\ITotal{\IAp{e}{a}}}%
+              {\psi(\IAp{e}{a}, f(x))}
+            )}}
+        }
+      }
+    }
+  \]
+\end{remk}
+
+Though we will sometimes use this internal definition, other times it will be
+easier to use abstract properties of triposes, for example in showing that
+assemblies form a category.
+
+\begin{cons}
+  The \definiendum{category of assemblies}, denoted \(\AsmCat\),
+  has as objects the assemblies and morphisms the morphisms of assemblies.
+  %
+  Identity morphisms and composition are both inherited from \(\E\).
+\end{cons}
+\begin{proof}
+  We claimed that identity morphisms and composition are inherited from \(\E\).
+  %
+  For the former, given an assembly \((X,\varphi)\) we have the identity
+  \(\IId{X}\) which is tracked since \(\TPull{\IId{X}}\) is the identity and
+  \(\leq\) is reflexive.
+  %
+  For composition, suppose we have morphisms of assemblies
+  \(f : (Y,\psi) \to (X,\varphi)\) and \(g : (Z,\chi)\to(Y,\psi)\).
+  %
+  Both of these are tracked hence so \(\psi \leq \TPull{f}\varphi\) and
+  \(\chi \leq \TPull{g}\psi\), but \(\TPull{g}\) is monotonic so in addition we
+  also have
+  \(\chi \leq \TPull{g}\psi \leq \TPull{g}\TPull{f}\varphi=\TPull{(fg)}\varphi\)
+  which means that \(fg\) is tracked as necessary.
+  %
+  The unit and associativity equalities then follow immediately as \(\E\) is a
+  category.
+\end{proof}
+
+\subsection{Realizability Topos}%
+\label{sub:realizability-topos}
+
+The definition of the realizability topos follows by simply
+unfolding the tripos-to-topos construction so we don't focus on it for now.
+%
+Eventually it would be good to look at assemblies as a full subcategory of the
+realizability topos given by the subobjects of the constant objects, and
+compare these to the more elementary, direct definition of assemblies.
+
+\subsection{Sheafififcation}
+
+Usually sheaves are described as a reflective subcategory of a category
+of presheaves.
+%
+That means we have an adjoint pair of functors \(L \dashv R\) with
+\(R\) fully faithful.
+%
+The domain of \(R\) is then the category of sheaves, and its codomain the
+category of presheaves.
+%
+We view \(R\) as the inclusion of sheaves into presheaves and \(L\)
+as the sheafification of presheaves.
+%
+From the adjointness condition we recover the property that mapping out
+of the sheafification of a presheaf into a sheaf is equivalent to mapping out
+of the original presheaf into the same sheaf.
+
+For now we look for an analogous sheafification operation in the category
+of assemblies.
+%
+Presumably, the action of said operation on the underlying presheaves
+will be actual sheafification.
+%
+That leaves the action on the realizability relations up for debate.
+
+For our first attempt, let us deconstruct this in the same way that
+sheafification is deconstructed, so we have a single operation
+\({(-)}^{+}\) which sends an arbitrary presheaf to a separated presheaf,
+and a separated presheaf to a sheaf.
+%
+Then sheafification can be done by iterating the \(+\)-operation twice.
+
+\todo[inline]{develop this more}
+
+
+
+
+
 \printbibliography{}
 
 \end{document}
