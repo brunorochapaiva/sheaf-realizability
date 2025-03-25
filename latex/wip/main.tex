@@ -378,7 +378,6 @@ the proofs in this section.
   \(\IAp{\IAp{\ICompCode}{e_{1}}}{e_{2}}\) evidences \(\varphi \leq \chi\).
 \end{proof}
 
-\todo[inline]{fix proof to use new notation}
 \begin{lemm}\label{lemm:tripos-finite-meets}
   For any presheaf \(\X\), the preorder \((\RealPred{\X}, \leq)\) has finite
   meets.
@@ -396,8 +395,8 @@ the proofs in this section.
     (\TAnd{\varphi}{\psi}{\X})(x,a)
     \IsDefined
     \IAnd%
-      {\IAnd{\ITotal{\IAp{\IFstCode}{a}}}{\IAp{\IFstCode}{a}\in\varphi(x)}}%
-      {\IAnd{\ITotal{\IAp{\ISndCode}{a}}}{\IAp{\ISndCode}{a}\in\psi(x)}}
+      {\IAnd{\ITotal{\IAp{\IFstCode}{a}}}{\varphi(x,\IAp{\IFstCode}{a})}}%
+      {\IAnd{\ITotal{\IAp{\ISndCode}{a}}}{\psi(x,\IAp{\ISndCode}{a})}}
     \label{defn:tripos-binary-meet}
   \end{gather}
 \end{lemm}
@@ -415,8 +414,8 @@ the proofs in this section.
   \(\TAnd{\varphi}{\psi}{\X}\leq\varphi\) and
   \(\TAnd{\varphi}{\psi}{\X}\leq\psi\) respectively:
   %
-  if \(a \in \TAnd{\varphi}{\psi}{\X}\) then by definition we have
-  \(\IAnd{\ITotal{\IAp{\IFstCode}{a}}}{\IAp{\IFstCode}{a}\in\varphi}\), as
+  if \((\TAnd{\varphi}{\psi}{\X})(x,a)\) then by definition we have
+  \(\IAnd{\ITotal{\IAp{\IFstCode}{a}}}{\varphi(x,\IAp{\IFstCode}{a})}\), as
   well as the corresponding for \(\ISndCode\) and \(\psi\).
   %
   As for the elimination rule, suppose we have \(\chi\leq\varphi\) and
@@ -430,16 +429,16 @@ the proofs in this section.
   %
   evidences \(\chi\leq\TAnd{\varphi}{\psi}{\X}\).
   %
-  We know this by specialising our assumptions on~\(e_{1}\) and~\(e_{2}\)
-  to a fixed \(x:\X\) and \(a\in\chi(x)\) and commuting \(\IBoxSym\) with
-  conjunctions, giving us
+  We know this by specialising our assumptions on~\(e_{1}\) and~\(e_{2}\) to a
+  fixed \(x:\X\) and \(a:\A\) satisfying \(\chi(x,a)\), and commuting
+  \(\IBoxSym\) with conjunctions, giving us
   %
   \[
     \IBox{
       (\IAnd{
         \IAnd{\ITotal{\IAp{e_{1}}{a}}}{\ITotal{\IAp{e_{2}}{a}}}
       }{
-        \IAnd{\IAp{e_{1}}{a}\in\varphi(x)}{\IAp{e_{2}}{a}\in\psi(x)}
+        \IAnd{\varphi(x,\IAp{e_{1}}{a})}{\psi(x,\IAp{e_{2}}{a})}
       })
     }
   \]
@@ -466,8 +465,8 @@ the proofs in this section.
     (\TOr{\varphi}{\psi}{\X})(x,a)
     \IsDefined
     \IExists{b:\A}{\IOr%
-      {(\IAnd{\IEq{a}{\IAp{\ILeftCode}{b}}}{b\in\varphi(x)})}%
-      {(\IAnd{\IEq{a}{\IAp{\IRightCode}{b}}}{b\in\psi(x)})}
+      {(\IAnd{\IEq{a}{\IAp{\ILeftCode}{b}}}{\varphi(x,b)})}%
+      {(\IAnd{\IEq{a}{\IAp{\IRightCode}{b}}}{\psi(x,b)})}
     }
     \label{defn:tripos-binary-join}
   \end{gather}
@@ -612,6 +611,123 @@ the proofs in this section.
    \item show there is a generic object
  \end{itemize}
 }
+
+\subsection{Totality}
+
+When defining assemblies we will be particularly interested in total
+predicates.
+
+\begin{defn}\ref{defn:tripos-total-predicates}
+  A realizability predicate \(\varphi : \RealPred{X}\) is \definiendum{total}
+  if it satisfies \(\IForall{x:X}{\IExists{a:\A}{\varphi(x,a)}}\).
+\end{defn}
+
+Building new total predicates is not particularly difficult as shown by
+the following lemmas.
+%
+These will be enough to show that most standard constructions in the
+category of assemblies have total predicates as needed.
+
+\begin{lemm}\label{lemm:pullback-preserves-total}
+  Given \(\varphi : \RealPred{Y}\) and a map \(f : X \to Y\), if
+  \(\varphi\) is total then so is \(\TPull{f}\varphi\).
+\end{lemm}
+\begin{proof}
+  Fix \(x:X\), by totality of \(\varphi\) we have some \(a:\A\) such that
+  \(\varphi(f(x),a)\).
+  %
+  By definition, this is the same as saying \((\TPull{f}\varphi)(x,a)\) so
+  pullback preserves totality.
+\end{proof}
+
+\begin{lemm}\label{lemm:top-total}
+  The predicate \(\TTop{X}\) is always total.
+\end{lemm}
+\begin{proof}
+  This is equivalent to showing that \(\A\) is inhabited, but a pca
+  comes equipped with two distinguished elements so this is always the case.
+\end{proof}
+
+\begin{lemm}\label{lemm:meet-total}
+  Two predicates \(\varphi,\psi : \RealPred{X}\) are total if and only if their
+  meet \(\TAnd{\varphi}{\psi}{X}\) is total.
+\end{lemm}
+\begin{proof}
+  For the forward direction, for a given \(x:X\) we have \(a:\A\) and \(b:\A\)
+  such that \(\varphi(x,a)\) and \(\psi(x,b)\) and this means that
+  \((\TAnd{\varphi}{\psi}{X})(x,\IAp{\IAp{\IPairCode}{a}}{b})\).
+  %
+  For the backwards direction, if we have \((\TAnd{\varphi}{\psi}{X})(x,a)\)
+  then we also have \(\varphi(x,\IAp{\IFstCode}{a})\) and
+  \(\psi(x,\IAp{\ISndCode}{a})\), so both \(\varphi\) and \(\psi\) are total.
+\end{proof}
+
+\begin{lemm}\label{lemm:join-total}
+  Given two predicates \(\varphi,\psi : \RealPred{X}\), at least one of them is
+  total if and only if their join \(\TOr{\varphi}{\psi}{X}\) is total.
+\end{lemm}
+\begin{proof}
+  For the forward direction we suppose that \(\varphi\) is total
+  and fix some \(x:X\).
+  %
+  By totality of \(\varphi\) we have \(a:\A\) such that
+  \(\varphi(x,a)\), so then \((\TOr{\varphi}{\psi}{X})(x,\IAp{\ILeftCode}{a})\)
+  which shows that \(\TOr{\varphi}{\psi}{X}\) is total.
+  %
+  In the case that \(\psi\) is total the proof follows analogously.
+  %
+  For the converse, fix \(x : X\), then by totality of the join
+  of \(\varphi\) and \(\psi\) we have some \(a:\A\) such that
+  \((\TOr{\varphi}{\psi}{X})(x,a)\).
+  %
+  By definition, this means that there exists \(b:\A\) such that either
+  \(a = \IAp{\ILeftCode}{b}\) and \(\varphi(x,b)\), in which case \(\varphi\) is
+  total, or \(a = \IAp{\IRightCode}{b}\) and \(\psi(x,b)\), in which case
+  \(\psi\) is total.
+\end{proof}
+
+\begin{lemm}\label{lemm:bot-total}
+  The predicate \(\TBot{X}\) is total if and only if
+  \(\INot{(\IExists{x:X}\ITop)}\) holds, or equivalently,
+  if \(X\) is an initial object of \(\E\).
+\end{lemm}
+\begin{proof}
+  First we prove that totality of \(\TBot{X}\) is equivalent to
+  \(\INot{(\IExists{x:X}\ITop)}\).
+  %
+  To do so, notice that
+  \(\IForall{x:X}{\IExists{a:\A}{\TBot{X}(x,a)}}\)
+  unfolds to
+  \(\IForall{x:X}{\IExists{a:\A}{\IBot}}\),
+  and that is equivalent to
+  \(\IForall{x:X}{\IBot}\).
+  %
+  In turn, this is equivalent to the necessary condition.
+
+  For the second equivalence, that \(\INot{(\IExists{x:X}\ITop)}\)
+  holds if and only if \(X\) is initial, we use the Kripke-Joyal semantics
+  in \(\E\).
+  %
+  Doing so, we see the foregoing statement holds if and only if whenever we have
+  a span \(X \overset{x}{\leftarrow} Z \overset{p}{\twoheadrightarrow} Y\) with
+  \(p\) an epimorphism, then \(Y\) is itself initial.
+  %
+  For the forward direction we have the span
+  \(X \leftarrow X \twoheadrightarrow X\) where all maps are the identity,
+  so by assumption \(X\) is initial.
+  %
+  For the converse, assume \(X\) is initial and we have a span
+  \(X \overset{x}{\leftarrow} Z \overset{p}{\twoheadrightarrow} Y\).
+  %
+  Initial objects in a topos are strict, hence \(Z\) is also a strict initial
+  object.
+  %
+  Any map out of a strict initial object is monic, so \(p\) is both
+  monic and epic, which in a topos implies it is an isomorphism.
+  %
+  As \(Y\) is isomorphic to an initial object, it must also be initial
+  as needed.
+\end{proof}
 
 \subsection{Presheaves with a Lawvere-Tierney Topology}
 
@@ -887,25 +1003,11 @@ and realizability topos.
 
 \begin{defn}\label{defn:assembly}
   An \definiendum{assembly} is an object \(X\) of \(\E\) with a realizability
-  predicate \(\varphi : \RealPred{X}\) such that we do not have
-  \(\TPull{f}\varphi \leq \TBot{Y}\) for any morphisms \(f : Y \to X\).
+  predicate \(\varphi : \RealPred{X}\) satisfying the following internal
+  statement \(\IForall{x:X}{\IExists{a:A}{\varphi(x,a)}}\).
+  %
+  We call such a predicates \definiendum{total}.
 \end{defn}
-
-\begin{remk}
-  The subject definition is subject to change, in particular we are
-  unsure about the totality condition required.
-  %
-  At first it seemed enough to ask for that \(\varphi \leq \TBot{X}\)
-  did not hold, but this did not agree with the definition of assemblies in
-  the set case.
-  %
-  Instead, this simply asked that there exist some \(x:X\) which had at least
-  one realizer, instead of requiring every \(x\) to be realized.
-  %
-  We fix this by reindexing along every morphism in the base category,
-  but it could be possible to reindex along global sections \(x : 1 \to X\)
-  instead.
-\end{remk}
 
 \begin{defn}\label{defn:assembly-morphism}
   A \definiendum{morphism of assemblies} from \((X,\varphi)\) to
@@ -940,8 +1042,8 @@ easier to use abstract properties of triposes, for example in showing that
 assemblies form a category.
 
 \begin{cons}
-  The \definiendum{category of assemblies}, denoted \(\AsmCat\),
-  has as objects the assemblies and morphisms the morphisms of assemblies.
+  The \definiendum{category of assemblies}, denoted \(\AsmCat\), has as objects
+  the assemblies and as morphisms the morphisms of assemblies.
   %
   Identity morphisms and composition are both inherited from \(\E\).
 \end{cons}
@@ -963,6 +1065,68 @@ assemblies form a category.
   %
   The unit and associativity equalities then follow immediately as \(\E\) is a
   category.
+\end{proof}
+
+\begin{lemm}\label{lemm:assemblies-finite-limits}
+  The category of assemblies \(\AsmCat\) has all finite limits.
+\end{lemm}
+\begin{proof}
+  We construct binary products and equalisers from which all finite limits
+  follow.
+
+  Fix two assemblies \((X,\varphi)\) and \((Y,\psi)\), the underlying object of
+  their product will be the product \(\IProd{X}{Y}\) and the realizability
+  relation will be given by
+  \(\TAnd{(\TPull{\IFst}\varphi)}{(\TPull{\ISnd}\psi)}{\IProd{X}{Y}}\).
+  %
+  This is total by lemmas~\ref{lemm:pullback-preserves-total}
+  and~\ref{lemm:meet-total}.
+  %
+  The projections \(\IFst\) and \(\ISnd\) are tracked as we have
+  \(\TAnd{(\TPull{\IFst}\varphi)}{(\TPull{\ISnd}\psi)}{\IProd{X}{Y}} \leq \TPull{\IFst}\varphi\)
+  and
+  \(\TAnd{(\TPull{\IFst}\varphi)}{(\TPull{\ISnd}\psi)}{\IProd{X}{Y}} \leq \TPull{\ISnd}\psi\).
+  %
+  This leaves us to show that given morphisms \(f : (Z,\chi) \to (X,\varphi)\)
+  and \(g : (Z,\chi) \to (Y,\psi)\) that \(\IPair{f}{g} : Z \to \IProd{X}{Y}\)
+  is tracked.
+  %
+  Since \(f\) and \(g\) are tracked we know that
+  \[
+    \chi \leq \TAnd{(\TPull{f}\varphi)}{(\TPull{g}\psi)}{Z}
+         = \TAnd{\TPull{(\IFst\IPair{f}{g})}\varphi}{\TPull{(\ISnd\IPair{f}{g})}\psi}{Z}
+         = \TPull{\IPair{f}{g}}\left[\TAnd{(\TPull{\IFst}\varphi)}{(\TPull{\ISnd}\psi)}{\IProd{X}{Y}}\right]
+  \]
+  which shows that \(\IPair{f}{g}\) is tracked and so the category of assemblies
+  has binary products.
+
+  For equalisers fix two morphisms \(f,g : (X,\varphi) \to (Y,\psi)\) and
+  denote their equaliser in \(\E\) by \(m : \IEqualiser{f}{g} \to X\).
+  %
+  We turn this equaliser into an assembly by giving it the realizability
+  predicate \(\TPull{m}\varphi\), the totality of which follows from lemma
+  \ref{lemm:pullback-preserves-total}.
+  %
+  To show \(m\) is tracked amounts to proving
+  \(\TPull{m}\varphi \leq \TPull{m}\varphi\), which holds by reflexivity of
+  \(\leq\).
+  %
+  Finally suppose we have \(h : (Z,\chi) \to (X,\varphi)\) which equalises \(f\)
+  and \(g\), then the universal property of \(\IEqualiser{f}{g}\) tells us there
+  exists a unique map \(u : Z \to \IEqualiser{f}{g}\) such that \(h = mu\).
+  %
+  As \(h\) is tracked, then so is \(u\) which follows from
+  \(\chi\leq\TPull{h}\varphi=\TPull{(mu)}\varphi=\TPull{u}(\TPull{m}\varphi)\).
+\end{proof}
+
+\begin{lemm}\label{lemm:assemblies-cartesian-closed}
+  The category of assemblies \(\AsmCat\) is cartesian closed.
+\end{lemm}
+\begin{proof}
+  From \Cref{lemm:assemblies-finite-limits} we know that binary products exist,
+  it thus remains to show that exponentials exist.
+  %
+
 \end{proof}
 
 \subsection{Realizability Topos}%
@@ -1011,8 +1175,109 @@ Then sheafification can be done by iterating the \(+\)-operation twice.
 \todo[inline]{develop this more}
 
 
+\newpage
+\appendix
 
+\section{Some intuitions from Set-based realizability}
 
+Let us focus on standard set-based realizability for now, where the connection
+between assemblies and the realizability topos is well-understood.
+%
+Given a set-based tripos \(P\), its realizability topos is given by the
+following:
+
+\begin{defn}\label{defn-appendix-realizability-topos}
+  The \definiendum{objects of the realizability topos} consist of a set \(X\)
+  along with a binary relation \({\approx} : P(\IProd{X}{X})\) which is
+  \[\begin{array}{ll}
+    \textbf{(symmetric)}& x:X,\,y:X \mid x \approx y \vdash y \approx x\\
+    \textbf{(transitive)}& x:X,\,y:X,\,z:X \mid x \approx y,\,y \approx z \vdash x \approx z
+  \end{array}\]
+  %
+  The \definiendum{morphisms of the realizability topos}
+  from \((X,{ \approx_{X} })\) to \((Y,{ \approx_{Y} })\) consist of
+  equivalence classes of binary relations \(F : P(\IProd{X}{Y})\) which are
+  \[\begin{array}{ll}
+      \textbf{(strict)}& x:X,\,y:Y \mid
+                         F(x,y) \vdash
+                         x\approx_{X}x \land y\approx_{Y}y\\
+      \textbf{(total)}& x:X, \mid
+                         x\approx_{X}x \vdash
+                         \exists y:Y, F(x,y)\\
+      \textbf{(extensional)}&
+                              x:X,\,x':X,\,y:Y,\,y':Y \mid
+                              x\approx_{X}x',\,F(x,y)\,F(x',y') \vdash
+                              y\approx_{Y}y'
+  \end{array}\]
+  where two such relations \(F,G\) are in the same equivalence class if
+  \(x:X,\,y:Y\mid F(x,y) \dashv\vdash G(x,y)\).
+\end{defn}
+
+So although morphisms are given by relations, the extra conditions imposed on
+them mean they behave a lot more like functions than maybe is apparent at first.
+%
+More specifically, given an object \(X,\approx_{X}\), we should think of it as
+the set \(\{x : X \mid x\approx_{X}x\}\) quotiented by \(\approx_{X}\).
+%
+Under this view, a morphism from \((X,\approx_X)\) to \((Y,\approx_Y)\)
+does give an actual function.
+%
+Of course, this is mainly an intuition: the objects and morphisms actually
+contain some ``computability'' information from the tripos \(P\) which is lost
+this way.
+
+%\todo[inline]{following paragraph is wrong, can I fix it?}
+%Expanding on this previous point, let us now consider the effective topos, that
+%is the realizability topos associated with Kleene's first algebra
+%\(\mathcal{K}_{1}\).
+%%
+%In the effective topos we have the
+%objects \((\mathbb{N}, \sim)\) and \((\mathbb{N}, \approx)\),
+%both with underlying sets the natural numbers and the following
+%relations:
+%%
+%\[
+%  \begin{array}{cc}
+%    n \sim m \IsDefined
+%      \begin{cases}
+%        \{n\} & \text{ if } n = m \\
+%        \emptyset & \text{ otherwise }
+%      \end{cases}
+%    &\qquad\qquad n \approx m \IsDefined \{0\}
+%  \end{array}
+%\]
+%%
+%The first of these objects is quite canonical and in fact turns out to be the
+%natural number object in the effective topos.
+%%
+%The latter is a little less canonical
+%be just enough to get some weird results.
+%%
+%Regardless, they are both symmetric and transitive: in the case of \(\sim\)
+%these are both realized by the identity function and in the case of \(\approx\)
+%they are both realized by the constantly zero function.
+%%
+%We have the following two relations \(F\) and \(G\) that represent morphisms
+%from \((\mathbb{N},\sim)\) to \((\mathbb{N},\approx)\):
+%%
+%\[
+%  \begin{array}{cc}
+%    F(n, m) \IsDefined
+%      \begin{cases}
+%        \{n\} & \text{ if } n = m \\
+%        \emptyset & \text{ otherwise }
+%      \end{cases}
+%    &\qquad\qquad G(n, m) \IsDefined
+%      \begin{cases}
+%        \{0\} & \text{ if } n = m \\
+%        \emptyset & \text{ otherwise }
+%      \end{cases}
+%  \end{array}
+%\]
+%%
+%These relations are indeed both strict, total and extensional.
+%%
+%In proving strictness of \(F\) we require
 
 \printbibliography{}
 

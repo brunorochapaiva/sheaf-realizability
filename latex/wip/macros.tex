@@ -109,7 +109,15 @@
 % Types
 \newcommand{\IPower}[1]{\mathcal{P}{#1}}
 
+%% Product types
 \newcommand{\IProd}[2]{{#1}\times{#2}}
+\newcommand{\IFst}{\pi_0}
+\newcommand{\ISnd}{\pi_1}
+\newcommand{\IPair}[2]{\langle{#1},{#2}\rangle} % pairing operator
+\newcommand{\IPairBi}[2]{{#1}\times{#2}} % bifunctor action of products
+
+%% Equaliser types
+\newcommand{\IEqualiser}[2]{\mathsf{Eq({#1,#2})}}
 
 %% Function types
 \newcommand{\IFun}[2]{{{#2}^{#1}}}
@@ -169,7 +177,7 @@
 \newcommand{\TAndSym}[1]{\TagWithObject{\land}{#1}}
 \newcommand{\TAnd}[3]{{#1}\TAndSym{#3}{#2}}
 
-\newcommand{\TOrSym}[1]{\TagWithObject{\wedge}{#1}}
+\newcommand{\TOrSym}[1]{\TagWithObject{\lor}{#1}}
 \newcommand{\TOr}[3]{{#1}\TOrSym{#3}{#2}}
 
 \newcommand{\TImpliesSym}[1]{\TagWithObject{\Rightarrow}{#1}}
