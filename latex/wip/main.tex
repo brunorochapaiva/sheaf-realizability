@@ -612,6 +612,259 @@ the proofs in this section.
  \end{itemize}
 }
 
+\subsection{The need for a modality}
+
+One approach we could try would be to keep the typical ordering
+used in realizability, that is without a modality:
+%
+\[
+    \varphi \leq' \psi
+    \IsDefined
+    \IExists{e : \A}{
+      \IForall{x : \X}{
+        \IForall{a : \A}{
+          \IImplies%
+            {\varphi(a,x)}%
+            {\IAnd%
+              {\ITotal{\IAp{e}{a}}}%
+              {\psi(\IAp{e}{a}, x)}
+            }
+        }
+      }
+    }
+\]
+%
+From here we would hope to find an appropriate monad \(T : \AsmCat \to \AsmCat\)
+on assemblies and use its Kleisli category for semantics.
+
+Given an assembly \((X,\varphi)\), denote its underlying
+object of \(T(X,\varphi)\) by \(X_{T}\) and its realizability relation
+by \(\varphi_{T}:\RealPred{X_{T}}\).
+%
+With this notation fixed, a morphism between \((X,\varphi)\) and \((Y,\psi)\) in
+the Kleisli category of \(T\) would then consist of a morphism
+\(f : X \to Y_{T}\) in the underlying category \(\E\) satisfying
+\(\varphi \leq' \TPull{f}\psi\).
+%
+This requirement on \(f\) unfolds to
+%
+\[
+  \IExists{e : \A}{
+    \IForall{x : \X}{
+      \IForall{a : \A}{
+        \IImplies%
+          {\varphi(a,x)}%
+          {\IAnd%
+            {\ITotal{\IAp{e}{a}}}%
+            {\psi_{T}(\IAp{e}{a}, f(x))}
+          }
+      }
+    }
+  }
+\]
+%
+What becomes clear now is that the requirement that \(\IAp{e}{a}\)
+be defined sits outside the purview of the monad \(T\)
+%
+In particular, regardless of the effect on \(X_{T}\) and \(\varphi_{T}\), we
+still require \(\IsTotal{\IAp{e}{a}}\) with no alterations.
+%
+In the presheaf case this amounts to requiring that \({e}\cdot_{w}{a}\)
+be defined, instead of asking that there exist a bar \(U\) of \(w\)
+such that \({e}\cdot_{u}{a}\) is defined for all \(u \in U\).
+
+\subsection{Alternative Definitions}
+
+We have been very particular with where we use the modality \(\Box\) in the
+ordering of realizability predicates, but there are certainly other options.
+%
+We spend a bit of time now considering said options and their logical strength,
+to convince you dear reader that ours is the most canonical.
+
+%\begin{gather}
+%    \IExists{e : \A}{
+%      \IForall{x : \X}{
+%        \IForall{a : \A}{
+%          \IImplies%
+%            {\varphi(a,x)}%
+%            {(
+%              \IAnd%
+%              {\ITotal{\IAp{e}{a}}}%
+%              {\psi(\IAp{e}{a}, x)}
+%            )}
+%        }
+%      }
+%    }
+%    \\
+%    \IExists{e : \A}{
+%      \IForall{x : \X}{
+%        \IForall{a : \A}{
+%          \IImplies%
+%            {\varphi(a,x)}%
+%            {\IBox{(
+%              \IAnd%
+%              {\ITotal{\IAp{e}{a}}}%
+%              {\psi(\IAp{e}{a}, x)}
+%            )}}
+%        }
+%      }
+%    }
+%    \\
+%    \IExists{e : \A}{
+%      \IForall{x : \X}{
+%        \IForall{a : \A}{
+%          \IImplies%
+%            {\IBox{(\varphi(a,x))}}%
+%            {(
+%              \IAnd%
+%              {\ITotal{\IAp{e}{a}}}%
+%              {\psi(\IAp{e}{a}, x)}
+%            )}
+%        }
+%      }
+%    }
+%    \\
+%    \IExists{e : \A}{
+%      \IForall{x : \X}{
+%        \IForall{a : \A}{
+%          \IBox{(\IImplies%
+%            {\varphi(a,x)}%
+%            {(
+%              \IAnd%
+%              {\ITotal{\IAp{e}{a}}}%
+%              {\psi(\IAp{e}{a}, x)}
+%            )})
+%        }}
+%      }
+%    }
+%    \\
+%    \IBox{(\IExists{e : \A}{
+%      \IForall{x : \X}{
+%        \IForall{a : \A}{
+%          \IBox{(\IImplies%
+%            {\varphi(a,x)}%
+%            {(
+%              \IAnd%
+%              {\ITotal{\IAp{e}{a}}}%
+%              {\psi(\IAp{e}{a}, x)}
+%            )})
+%        }}
+%      }
+%    })}
+%    \\
+%    \IBox{(\IExists{e : \A}{
+%      \IForall{x : \X}{
+%        \IForall{a : \A}{
+%          \IImplies%
+%            {\varphi(a,x)}%
+%            {(
+%              \IAnd%
+%              {\ITotal{\IAp{e}{a}}}%
+%              {\psi(\IAp{e}{a}, x)}
+%            )}}
+%      }
+%    })}
+%\end{gather}
+
+First it is helpful to see how \(\IBoxSym\) interacts with Heyting implication.
+%
+If we have a single implication \(\IImplies{A}{B}\) then there are 3 positions
+in which we can place a \(\IBoxSym\), namely in front of the \(A\), in front
+of the \(B\) and surrounding the whole implication.
+%
+Furthermore, as the modality is idempotent, we only need to consider at most
+one box in each position.
+%
+This leaves us with eight possibilities, four of which turn out to be
+equivalent.
+%
+We display all of these below, with the arrows displaying logical implication.
+%
+\begin{center}
+\begin{tikzpicture}
+  \node (a) at (-4.5,3) {\(\IImplies{A}{\IBox{B}}\)};
+  \node (b) at (-1.5,3) {\(\IImplies{\IBox{A}}{\IBox{B}}\)};
+  \node (c) at (1.5,3) {\(\IBox{(\IImplies{\IBox{A}}{\IBox{B}})}\)};
+  \node (d) at (4.5,3) {\(\IBox{(\IImplies{A}{\IBox{B}})}\)};
+  \node (e) at (0,2) {\(\IBox{(\IImplies{A}{B})}\)};
+  \node (f) at (-1.5,1) {\(\IImplies{A}{B}\)};
+  \node (g) at (1.5,1) {\(\IBox{(\IImplies{\IBox{A}}{B})}\)};
+  \node (h) at (0,0) {\(\IImplies{\IBox{A}}{B}\)};
+
+  \draw[->] (h) -- (f);
+  \draw[->] (h) -- (g);
+  \draw[->] (f) -- (e);
+  \draw[->] (g) -- (e);
+  \draw[->] (e) -- (a);
+  \draw[->] (e) -- (b);
+  \draw[->] (e) -- (c);
+  \draw[->] (e) -- (d);
+  \draw[<->] (a) -- (b);
+  \draw[<->] (b) -- (c);
+  \draw[<->] (c) -- (d);
+\end{tikzpicture}
+\end{center}
+%
+\todo[inline]{I think we may also have that \(\IBox{(\IImplies{A}{B})}\) and
+  \(\IBox{(\IImplies{\IBox{A}}{B})}\) are equivalent to the top formulas.}
+%
+%\begin{center}
+%\begin{tikzpicture}
+%
+%  \node (b) at (13,0) {\(\IBox{(\IImplies{\IBox{A}}{\IBox{B}})}\)};
+%  \node (d) at (11,1) {\(\IBox{(\IImplies{A}{\IBox{B}})}\)};
+%  \node (f) at (11,-1) {\(\IBox{(\IImplies{\IBox{A}}{B})}\)};
+%  \node (e) at (8,1) {\(\IBox{(\IImplies{A}{B})}\)};
+%  \node (c) at (8,-1) {\(\IImplies{\IBox{A}}{\IBox{B}}\)};
+%  \node (a) at (6,0) {\(\IImplies{A}{\IBox{B}}\)};
+%
+%  \node (g) at (4,0) {\(\IImplies{A}{B}\)};
+%
+%  \node (h) at (2,0) {\(\IImplies{\IBox{A}}{B}\)};
+%
+%  \draw[->] (h) -- (g);
+%  \draw[->] (g) -- (a);
+%  \draw[<->] (a) -- (e);
+%  \draw[<->] (e) -- (d);
+%  \draw[<->] (d) -- (b);
+%  \draw[<->] (b) -- (f);
+%  \draw[<->] (f) -- (c);
+%  \draw[<->] (c) -- (a);
+%\end{tikzpicture}
+%\end{center}
+%
+The usual definition of implication in realizability uses Heyting implication
+without any boxes, which turns out to be too strong a statement in our setting.
+%
+The above shows there is only one way of weakening an implication with
+\(\IBoxSym\).
+%
+The usual definition of implication in realizability uses Heyting implication
+without any boxes, which turns out to be too strong a statement in our setting.
+%
+The above shows that we have two possible ways of relaxing this, and
+we have chosen the most liberal of the two options.
+
+We also know that \(\IBoxSym\) commutes with universal quantification, i.e.\ the
+formulas \(\IBox{(\IForall{y:Y}{A(y)})}\) and \(\IForall{y:Y}{\IBox{A(y)}}\) are
+logically equivalent.
+%
+This means that, were we to place any boxes around the universal quantifiers,
+we could commute them all inwards, until they would be absorbed
+by our weakening of Heyting implication.
+
+This leaves us with the final question: should we put a \(\IBoxSym\) around
+the existential quantifier or not.
+%
+Unlike boxing the universal quantifiers, this would give us a genuinely weaker
+logical statement, so it could be worthwhile.
+%
+However, it arguable weakens the statement too far, as it means that
+the code \(e\) is no longer uniform in worlds when working in a
+category of presheaves, at which point it seems we could just sheafify
+our pca and work internally to the relevant category of sheaves.
+
+
 \subsection{Totality}
 
 When defining assemblies we will be particularly interested in total
