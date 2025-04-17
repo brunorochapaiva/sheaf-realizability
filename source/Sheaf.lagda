@@ -1,44 +1,15 @@
 \begin{code}
 
 open import MLTT.Spartan
+open import UF.Base
 open import UF.FunExt using (funext)
 open import UF.Subsingletons
 open import UF.Subsingletons-FunExt
 open import UF.SubtypeClassifier
 
-module Sheaf { 𝓤 : Universe} where
+open import LawvereTierney
 
- -- Lawvere-Tierney topology
- LT-topology : 𝓤 ⁺ ̇
- LT-topology =
-  Σ T ꞉ (Ω 𝓤 → Ω 𝓤) ,
-   ((P : Ω 𝓤) → P holds → T P holds) ×
-   ((P Q : Ω 𝓤) → T P holds → (P holds → T Q holds) → T Q holds)
-
- T[_] : LT-topology → (Ω 𝓤 → Ω 𝓤)
- T[_] = pr₁
-
- ret : (topology : LT-topology)
-      → (P : Ω 𝓤) → P holds → T[ topology ] P holds
- ret topology = pr₁ (pr₂ topology)
-
- bind : (topology : LT-topology)
-       → (P Q : Ω 𝓤) → T[ topology ] P holds → (P holds → T[ topology ] Q holds) → T[ topology ] Q holds
- bind topology = pr₂ (pr₂ topology)
-
- module LTNotation (topology : LT-topology) where
-
-  T : Ω 𝓤 → Ω 𝓤
-  T = T[ topology ]
-
-  η : {P : Ω 𝓤} → P holds → T P holds
-  η = ret topology _
-
-  _≫=_ : {P Q : Ω 𝓤} → T P holds → (P holds → T Q holds) → T Q holds
-  _≫=_ = bind topology _ _
-
- module _ (topology : LT-topology) where
-
+module Sheaf {𝓤 : Universe} (topology : LT-topology) where
   open LTNotation topology
 
   is-sheaf : {𝓥 : Universe} (A : 𝓥 ̇) → 𝓤 ⁺ ⊔ 𝓥  ̇
@@ -52,6 +23,68 @@ module Sheaf { 𝓤 : Universe} where
   glue-unique : {𝓥 : Universe} {A : 𝓥 ̇} (h : is-sheaf A)
               → (P : Ω 𝓤) (p : T P holds) (x : A) → glue h P p (λ _ → x) ＝ x
   glue-unique = pr₂
+
+
+  record sheafification-exist : 𝓤ω where
+   field
+    𝓓 : {𝓥 : Universe} → 𝓥 ̇ → 𝓥 ̇
+
+    -- Constructors (note that 𝐞 is a higher constructor)
+
+    β : {𝓥 : Universe} {A : 𝓥 ̇}
+      → A → 𝓓 A
+
+    ǫ : {𝓥 : Universe} {A : 𝓥 ̇}
+        (P : Ω 𝓤) → T P holds → (P holds → 𝓓 A) → 𝓓 A
+
+    𝐞 : {𝓥 : Universe} {A : 𝓥 ̇}
+        (P : Ω 𝓤) (p : T P holds) (d : 𝓓 A) → ǫ P p (λ _ → d) ＝ d
+
+    -- Dependent eliminator
+
+    𝓓rec : {𝓥 𝓦 : Universe} {A : 𝓥 ̇} (F : 𝓓 A → 𝓦 ̇)
+           (hβ : (a : A) → F (β a))
+           (hǫ : (P : Ω 𝓤) (p : T P holds) (ϕ : P holds → 𝓓 A)
+               → ((q : P holds) → F (ϕ q))
+               → F (ǫ P p ϕ))
+           (h𝐞 : (P : Ω 𝓤) (p : T P holds) (d : 𝓓 A) (h : F d)
+               → transport F (𝐞 P p d) (hǫ P p (λ _ → d) (λ _ → h)) ＝ h)
+         → (d : 𝓓 A) → F d
+
+    -- Computation rules for the eliminator
+
+    𝓓rec-β : {𝓥 𝓦 : Universe} {A : 𝓥 ̇} (F : 𝓓 A → 𝓦 ̇)
+             (hβ : (a : A) → F (β a))
+             (hǫ : (P : Ω 𝓤) (p : T P holds) (ϕ : P holds → 𝓓 A)
+                 → ((q : P holds) → F (ϕ q))
+                 → F (ǫ P p ϕ))
+             (h𝐞 : (P : Ω 𝓤) (p : T P holds) (d : 𝓓 A) (h : F d)
+                 → transport F (𝐞 P p d) (hǫ P p (λ _ → d) (λ _ → h)) ＝ h)
+             (a : A)
+           → 𝓓rec F hβ hǫ h𝐞 (β a) ＝ hβ a
+
+    𝓓rec-ǫ : {𝓥 𝓦 : Universe} {A : 𝓥 ̇} (F : 𝓓 A → 𝓦 ̇)
+             (hβ : (a : A) → F (β a))
+             (hǫ : (P : Ω 𝓤) (p : T P holds) (ϕ : P holds → 𝓓 A)
+                 → ((q : P holds) → F (ϕ q))
+                 → F (ǫ P p ϕ))
+             (h𝐞 : (P : Ω 𝓤) (p : T P holds) (d : 𝓓 A) (h : F d)
+                 → transport F (𝐞 P p d) (hǫ P p (λ _ → d) (λ _ → h)) ＝ h)
+             (P : Ω 𝓤) (p : T P holds) (ϕ : P holds → 𝓓 A)
+           → 𝓓rec F hβ hǫ h𝐞 (ǫ P p ϕ) ＝ hǫ P p ϕ (λ q → 𝓓rec F hβ hǫ h𝐞 (ϕ q))
+
+    𝓓rec-𝐞 : {𝓥 𝓦 : Universe} {A : 𝓥 ̇} (F : 𝓓 A → 𝓦 ̇)
+             (hβ : (a : A) → F (β a))
+             (hǫ : (P : Ω 𝓤) (p : T P holds) (ϕ : P holds → 𝓓 A)
+                 → ((q : P holds) → F (ϕ q))
+                 → F (ǫ P p ϕ))
+             (h𝐞 : (P : Ω 𝓤) (p : T P holds) (d : 𝓓 A) (h : F d)
+                 → transport F (𝐞 P p d) (hǫ P p (λ _ → d) (λ _ → h)) ＝ h)
+             (P : Ω 𝓤) (p : T P holds) (d : 𝓓 A)
+           → apd (𝓓rec F hβ hǫ h𝐞) (𝐞 P p d) ＝
+               ap (transport F (𝐞 P p d)) (𝓓rec-ǫ F hβ hǫ h𝐞 P p (λ _ → d)) ∙
+                 h𝐞 P p d (𝓓rec F hβ hǫ h𝐞 d)
+
 
   is-T-stable : Ω 𝓤 → 𝓤  ̇
   is-T-stable P = T P holds → P holds
