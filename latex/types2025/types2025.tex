@@ -22,26 +22,8 @@
 % \usepackage{rotating}
 % \usepackage{pdflscape}
 
-\usepackage{amsmath}
-\usepackage{amssymb}
-\usepackage{amsfonts}
 \usepackage{amsthm}
-\usepackage{newtxmath}
-\usepackage{url}
-\usepackage{tikz-cd}
-\usepackage{quiver}
-\usepackage{scalefnt}
-\usepackage{microtype}
-\usepackage{subfiles}
-\usepackage{mathpartir}
-\usepackage[bb=dsserif]{mathalpha}
-\usepackage{bm}
-\usepackage{mathtools}
-\usepackage{cleveref}
-\usepackage{xspace}
-\usepackage{multirow}
-\usepackage{ulem}
-\usepackage{contour}
+\usepackage{amssymb}
 
 \newtheorem{thrm}{Theorem}
 \newtheorem{lemm}[thrm]{Lemma}
@@ -99,7 +81,7 @@
   \(\Box : \Omega \to \Omega\) on it, we develop a realizability \(\E\)-tripos
   using the internal logic of the topos.
   %
-  Instantiating \(\E\) with a category of sheaves, we recover a notion of
+  Instantiating \(\E\) with a category of presheaves, we recover a notion of
   realizability with choice sequences.
 \end{abstract}
 
@@ -123,8 +105,8 @@
 %Paragraph about early investigations of Brouwer's intuitionism. Maybe
 %Kreisel, Moschovakis, Kripke, etc?
 
-It was in \textit{Brouwer's second act of intuitionism} that choice sequences
-first appeared.
+Choice sequences first appeared in \textit{Brouwer's second act of
+  intuitionism}~\cite{vanattenBrouwer2004}.
 %
 Brouwer envisioned an idealised mathematician that would
 generate entries of an infinitely proceeding sequence
@@ -147,7 +129,7 @@ In~\cite{coquandComputationalInterpretationForcing2012} the authors give a
 computational account of forcing.
 %
 Based on this view of forcing the authors
-of~\cite{coquandIndependenceMarkovsPrinciple2017} produce a model of \MLTT{}
+of~\cite{coquandIndependenceMarkovsPrinciple2016} produce a model of \MLTT{}
 falsifying Markov's principle.
 %
 This interpretation of choice sequences is combined with term models in a series
@@ -155,7 +137,7 @@ of papers~\cite{bickfordComputabilityChurchTuringChoice2018,
   bickfordOpenBarBrouwerian2021, cohenSeparatingMarkovsPrinciples2024,
   rahliValidatingBrouwersContinuity2018, forsterMarkovsPrinciplesConstructive}
 to explore principles such as bar induction, continuity of functions on the
-Baire space and different versions of Markov's principles.
+Baire space and different versions of Markov's principle.
 %
 As pointed out by~\cite{sterlingHigherOrderFunctions2021}, there is a common
 thread of constructions internal to sheaf models which links all the foregoing
@@ -166,25 +148,31 @@ sheaves over a preordered set \(\mathbb{W}\) of worlds and carrying out
 the standard operational constructions internally to this model, we should
 expect to recover models akin to the above.
 
-In the sequel we will start from this observation in an attempt to connect these
-realizability constructions in the form of PER models with choice sequences to
-categorical realizability over categories of sheaves rather than the category of
+In what follows, we will start from this observation and attempt to connect these
+realizability constructions, in the form of PER models with choice sequences, to
+categorical realizability over categories of sheaves, rather than the category of
 sets.
 %
 As in the abstract, we fix a topos \(\E\) and a Lawvere-Tierney topology
 \(\Box : \Omega \to \Omega\) and proceed to define a realizability tripos over
 \(\E\).
 %
-We define partial combinatory algebras (pca) using \(\preccurlyeq\) as opposed
-to \(\simeq\).
-%
-It is shown in~\cite{faberEffectiveOperationsType2016} that any
-``weak'' pca, that is using \(\preccurlyeq\), is isomorphic to a ``strong'' pca,
-that is using \(\simeq\), hence this is mainly an aesthetic decision.
-%
-For the former, we have \(a \preccurlyeq b\) if when \(a \downarrow\) then
-\(b \downarrow\) and their values agree, while \(a \simeq b\) holds if
-\(a \preccurlyeq b\) and \(b \preccurlyeq a\).
+We refer to~\cite{johnstoneSketchesElephantTopos2002} for an introduction to
+topos theory, in particular section A4.4 for a treatment of Lawvere-Tierney
+topologies.
+
+\begin{defn}
+  Given objects \(X\) and \(Y\) of \(\E\), we define
+  \definiendum{partial morphisms from \(X\) to \(Y\)} as morphisms
+  from \(X\) to \(Y_{\bot}\), where \(Y_{\bot}\) is the partial map classifier
+  of \(Y\)~\cite[\S A2.4]{johnstoneSketchesElephantTopos2002}.
+  %
+  In the internal logic, given elements \(x\) and \(y\) of \(X_{\bot}\), we use
+  \(x \downarrow\) to mean that \(x\) is defined, \(x \preccurlyeq y\) to mean
+  that if \(x\) is defined then so is \(y\) and their values agree, and
+  \(x \simeq y\) for the conjunction of \(x \preccurlyeq y\) and
+  \(y \preccurlyeq x\).
+\end{defn}
 
 \begin{defn}
   An \definiendum{internal partial combinatory algebra} consists of
@@ -201,6 +189,19 @@ For the former, we have \(a \preccurlyeq b\) if when \(a \downarrow\) then
   \end{array}\]
 \end{defn}
 
+We define partial combinatory algebras (pca) using \(\preccurlyeq\) as opposed
+to \(\simeq\).
+%
+It is shown in~\cite{faberEffectiveOperationsType2016} that any
+``weak'' pca, that is using \(\preccurlyeq\), is isomorphic to a ``strong'' pca,
+that is using \(\simeq\), hence this is mainly an aesthetic decision.
+%
+Note that weak pcas differ from ordered
+pcas~\cite[\S1.8]{oostenRealizabilityIntroductionIts2008}.
+%
+Whereas an ordered pca comes equipped with an ordering on the underlying object
+\(\A\), weak pcas simply use the ordering \(\preccurlyeq\) on partial
+terms \(\A_{\bot}\).
 
 The usual story with partial combinatory algebras carries over to the
 internal setting.
@@ -208,6 +209,9 @@ internal setting.
 We can still show that a pca is functionally complete and with that we get
 access to most programming constructs needed for realizability such as pairings,
 booleans, coproducts, and whatever else the mind might dream of.
+%
+See~\cite[\S 1.1]{oostenRealizabilityIntroductionIts2008} for an elaboration on pcas and
+how to program with them.
 
 With an internal pca we could now define a realizability tripos akin to the
 usual set-based realizability triposes.
@@ -216,8 +220,6 @@ In fact this is done in~\cite{vanoostenSemanticalProofJonghs1991}, in which the
 author takes a pca internal to a category of presheaves, takes its
 sheafification to get a pca internal to the relevant category of sheaves, and
 then implicitly works in the realizability topos arising out of said pca object.
-%
-
 
 \begin{defn}
   Given an object \(\X\) we define the type of \definiendum{realizability
@@ -241,10 +243,27 @@ then implicitly works in the realizability topos arising out of said pca object.
       }
     }
   \]
-  %
-  %We will say that \definiendum{\(e\) evidences \(\varphi \leq \psi\)} if
-  %it witnesses the existential quantifier above.
 \end{defn}
+
+Given a realizability predicate \(\varphi : \RealPred{\X}\), for each \(x : \X\)
+we think of the subobject~\(\varphi(x) \hookrightarrow \A\) as the programs
+which evidence that \(x\) satisfies \(\varphi\), i.e.\ its \textit{realizers}.
+%
+We say that \(\varphi\) implies \(\psi\), written~\(\varphi\leq\psi\), if there
+exists a program \(e\) which for every \(x\), will take evidence that \(x\)
+satisfies \(\varphi\) and convert it to evidence that \(x\) satisfies \(\psi\).
+%
+We include the modality \(\IBoxSym\) to accommodate for choice sequences.
+%
+For example suppose the program \(e\) relies on the sixth entry of a choice
+sequence \(\alpha\), but so far we have only generated the first three entries.
+%
+In such a case, the \(\IBoxSym\) lets us generate more entries for \(\alpha\)
+before requiring that \(\IAp{e}{a}\) be defined.
+%
+If we did not use the modality then we would not be able to generate more
+entries in \(\alpha\), effectively disallowing the use of choice sequences as
+realizers.
 
 Using the internal language of \(\E\) we can show that realizability predicates
 on an object \(\X\) with this particular ordering form a pre-ordered set.
@@ -253,29 +272,79 @@ Furthermore, we can define reindexing pre-Heyting algebra morphisms by
 precomposition, show these have left and right adjoints (as monotone maps)
 satisfying the Beck-Chevalley condition, and finally we can give an appropriate
 generic element giving us an \(\E\)-tripos.
+%
+For an introduction to the theory of realizability triposes and constructions on
+these we refer the reader to~\cite[\S2]{oostenRealizabilityIntroductionIts2008}.
+%
+The definitions of the required left and right adjoints, and generic
+element are very similar with the ones in the usual setting.
 
-Instantiating \(\E\) to the category of presheaves over a poset \(\mathbb{W}\)
-and using the \(\Box\) arising from some notion of sheaves, we recover a notion
-of realizability with choice sequences similar to the notions studied
-previously.
+In~\cite{vandenbergAspectsPredicativeAlgebraic2011} the authors also use the
+internal logic of a category \(\E\) to define categories of assemblies and show
+that these still give models of constructive set theories.
+%
+While the authors assume less about the category \(\E\) to define assemblies,
+they stick to defining assemblies over the internal version of Kleene's first
+algebra \(\mathcal{K}_{1}\).
+%
+So while the tools used are similar, the classes of models considered are
+different.
+
+To talk about choice sequences we instantiate \(\E\) to the category of
+presheaves over a poset~\(\mathbb{W}\).
+%
+In the prototypical case where we want our pca to have a single choice sequence
+code \(\delta\), we may take this poset to be the set of lists of natural
+numbers inversely ordered by prefix.
+%
+The generated values of \(\delta\) at each world would then be decided by the
+underlying list of natural numbers.
+%
+For the modality \(\IBoxSym\), we take the Lawvere-Tierney topology associated
+with the following notion of covering: an upwards closed set
+\(\mathcal{U} \subseteq \mathbb{W}\) covers a world \(w : \mathbb{W}\) if all
+increasing sequences of worlds starting at \(w\) intersect with~\(\mathcal{U}\).
 %
 The category of assemblies arising out of this tripos seems like a particularly
-good setting for studying the realizability of choice sequences themselves.
+good setting for studying the realizability of choice sequences themselves,
+it should contain interpretations of the natural numbers and the Baire space
+while being simpler to work with than the realizability topos.
+
+In this setting, an internal pca will consists of a pca \(\A_{w}\) for each
+world \(w:\mathbb{W}\) with application maps \((-)\cdot_{w}(-)\) and transition
+maps \((-)|_{w \sqsubseteq v} : \A_{v} \to \A_{w}\).
+%
+The application maps, which are partial functions, have to be monotone in their
+domain as well as natural.
 %
 By choosing different pca objects we expect to be able to handle different
 versions of choice sequences, from fully lawless choice sequences, to lawful
 choice sequences and any variation sitting in between these.
 %
-This contrasts the situation with a sheafified pca object, as by sheafifying
-we inadvertently add realizers for many choice sequences which may not
-have been realized before.
+This contrasts the situation with a sheafified pca
+object~\cite{vanoostenSemanticalProofJonghs1991}, where sheafification
+inadvertently adds realizers which may not have been computable before.
 %
-Towards this goal, we now suggest two assemblies of interest: that of
-pure natural numbers and that of effectful natural numbers.
+For example, consider the pca object given by \(\mathcal{K}_{1}\) at every
+world.
 %
-In these definitions, \(-\cdot_{w}-\) is the pca application which is now
-indexed by worlds \(w\), and \(-|_{w}\) is used for the transition maps
-of our presheaves.
+In particular, application of terms is independent of the world and so we have
+no choice sequence realizers, as their behaviour will be the same at every
+world.
+%
+If we take its sheafification, a realizer at a world \(w\) won't be a single
+element \(e : \mathcal{K}_{1}\) anymore, but will instead be a compatible family
+of realizers \({(e_{u})}_{u\in\mathcal{U}}\) indexed by a cover of \(w\).
+%
+Aside from being compatible~\cite[Definition 2.1.2 in \S
+C2.1]{johnstoneSketchesElephantTopos2002}, we have no restrictions on this
+family of realizers, so sheafification has added realizers whose behaviour can
+vary wildly between different worlds, despite starting with a pca object without
+choice sequences.
+
+Towards the study of realizability of choice sequences, we now suggest two
+assemblies of interest: that of pure natural numbers and that of effectful
+natural numbers.
 
 \begin{defn}
   The \definiendum{pure natural numbers assembly}, denoted
@@ -290,25 +359,29 @@ of our presheaves.
   \(\mathsf{N}_\mathsf{eff}\), consists of the sheafification of \(\Delta\mathbb{N}\).
   %
   As for the realizability relation, if we have \(\mathcal{U}\) covering \(w\)
-  and \(n : \mathcal{U} \to \mathbb{N}\), then
-  \(e \vDash_{w} (\mathcal{U}, n)\), if and only if there exists a cover
-  \(\mathcal{V}\) of \(w\) such that for all
+  and and a compatible family \(n_{u}\) of natural numbers, then
+  \(e \vDash_{w} {(n_{u})}_{u\in\mathcal{U}}\), if and only if there exists a
+  cover \(\mathcal{V}\) of \(w\) and for all
   \(v \in \mathcal{U} \cap \mathcal{V}\) and \(a : \A_{v}\),
-  \({e|_{v}} \cdot_{v} a\) is defined and equals the Church encoding of
+  \({(e|_{v \sqsubseteq w})} \cdot_{v} a\) is defined and equals the Church encoding of
   \(n_{v}\) at \(v\).
 \end{defn}
 
 At the level of underlying presheaves, the later is the sheafification of the
 former, so we hope to find an analogous universal property to justify it as the
-correct definition of effectful natural numbers in this setting.
+correct definition of effectful natural numbers.
 %
 With this, we can then study choice sequences as the exponential object
 \(\IFun{\mathsf{N}_{\mathsf{eff}}}{\mathsf{N}_{\mathsf{eff}}}\) in this category.
 
+We intend on using a theorem prover to formalise the arguments in the internal
+logic of \(\E\) as done in~\cite{sterlingGuardedComputationalType2018}.
+%
+The formalisation is currently in its early stages, but we hope to progress
+more on it once definitions are more settled.
+
+
 \bibliographystyle{plain}
-%\bibliographystyle{alpha}
-%\bibliographystyle{unsrt}
-%\bibliographystyle{abbrv}
 \bibliography{references}
 
 %------------------------------------------------------------------------------
