@@ -13,6 +13,89 @@ open import LawvereTierney
 module Sheaf {𝓤 : Universe} (topology : LT-topology) where
  open LTNotation topology
 
+ -- TODO eventually these will be added to type topology,
+ -- make sure to remove them later
+ apd-nondep : {𝓥 : Universe} {X : 𝓥 ̇ } {Y : 𝓦 ̇ } (f : X → Y)
+              {x y : X} (p : x ＝ y)
+            → apd f p ＝ transport-const p ∙ ap f p
+ apd-nondep f refl = refl
+
+ transport-const-commutes : {𝓥 𝓦 : Universe} {A : 𝓥 ̇} {B : 𝓦 ̇}
+                            {x y : A} (p : x ＝ y)
+                            {z w : B} (q : z ＝ w)
+  → ap (transport (λ _ → B) p) q ∙ transport-const p ＝ transport-const p ∙ q
+ transport-const-commutes p q =
+  homotopies-are-natural _ _ (λ _ → transport-const p) {_} {_} {q} ⁻¹ ∙
+  ap (transport-const p ∙_) (ap-id-is-id q)
+
+ transport-along-＝' : {𝓥 𝓦 : Universe}
+                      {A : 𝓥 ̇} {B : 𝓦 ̇}
+                      (f g : A → B)
+                      {x y : A} (q : x ＝ y)
+                      (p : f x ＝ g x)
+                   → transport (λ - → f - ＝ g -) q p ＝ ap f q ⁻¹ ∙ p ∙ ap g q
+ transport-along-＝' f g refl p =
+  p                            ＝⟨ refl-left-neutral ⁻¹ ⟩
+  refl ∙ p                     ＝⟨ ap (_∙ p) (ap-refl f) ⟩
+  ap f refl ⁻¹ ∙ p             ＝⟨ ap (ap f refl ⁻¹ ∙ p ∙_) (ap-refl g)  ⟩
+  ap f refl ⁻¹ ∙ p ∙ ap g refl ∎
+
+ ap-on-left-is-assoc : {𝓥 : Universe} {X : 𝓥 ̇ } {x y z z' w : X} (l : x ＝ y)
+                       {p : y ＝ z} {q : y ＝ z'} {r : z ＝ w} {s : z' ＝ w}
+                     → p ∙ r ＝ q ∙ s
+                     → (l ∙ p) ∙ r ＝ (l ∙ q) ∙ s
+ ap-on-left-is-assoc l {p} {q} {r} {s} α = l ∙ p ∙ r   ＝⟨ ∙assoc l p r ⟩
+                                           l ∙ (p ∙ r) ＝⟨ ap (l ∙_) α ⟩
+                                           l ∙ (q ∙ s) ＝⟨ ∙assoc l q s ⁻¹ ⟩
+                                           l ∙ q ∙ s   ∎
+
+ ap-on-left-is-assoc' : {𝓥 : Universe} {X : 𝓥 ̇ } {x y z z' : X} (l : x ＝ y)
+                        (p : y ＝ z') (q : y ＝ z) (s : z ＝ z')
+                      → p ＝ q ∙ s
+                      → l ∙ p ＝ (l ∙ q) ∙ s
+ ap-on-left-is-assoc' l p q s α = l ∙ p        ＝⟨ ap (l ∙_) α ⟩
+                                  l ∙ (q ∙ s)  ＝⟨ ∙assoc l q s ⁻¹ ⟩
+                                  l ∙ q ∙ s    ∎
+
+ ap-on-left-is-assoc'' : {𝓥 : Universe} {X : 𝓥 ̇ } {x y z z' : X} (l : x ＝ y)
+                         (p : y ＝ z) (q : y ＝ z') (s : z ＝ z')
+                       → p ∙ s ＝ q
+                       → (l ∙ p) ∙ s ＝ l ∙ q
+ ap-on-left-is-assoc'' l p q s α =
+  ap-on-left-is-assoc' l q p s (α ⁻¹) ⁻¹
+
+ ap-left-inverse : {𝓥 : Universe} {X : 𝓥 ̇ } {x y z : X} (l : x ＝ y)
+                   {p : x ＝ z} {q : y ＝ z}
+                 → p ＝ l ∙ q
+                 → l ⁻¹ ∙ p ＝ q
+ ap-left-inverse l {p} {q} α =
+  l ⁻¹ ∙ p     ＝⟨ ap-on-left-is-assoc' (l ⁻¹) p l q α ⟩
+  l ⁻¹ ∙ l ∙ q ＝⟨ ap (_∙ q) (left-inverse l) ⟩
+  refl ∙ q     ＝⟨ refl-left-neutral ⟩
+  q            ∎
+
+ ap-left-inverse' : {𝓥 : Universe} {X : 𝓥 ̇ } {x y z : X} (l : x ＝ y)
+                    {p : x ＝ z} {q : y ＝ z}
+                  → l ⁻¹ ∙ p ＝ q
+                  → p ＝ l ∙ q
+ ap-left-inverse' l {p} {q} α =
+  p            ＝⟨ refl-left-neutral ⁻¹ ⟩
+  refl ∙ p     ＝⟨ ap (_∙ p) (sym-is-inverse' l) ⟩
+  l ∙ l ⁻¹ ∙ p ＝⟨ ap-on-left-is-assoc'' l (l ⁻¹) q p α ⟩
+  l ∙ q        ∎
+
+ ap-right-inverse : {𝓥 : Universe} {X : 𝓥 ̇ } {x y z : X} (r : y ＝ z)
+                    {p : x ＝ z} {q : x ＝ y}
+                  → p ＝ q ∙ r
+                  → p ∙ r ⁻¹ ＝ q
+ ap-right-inverse refl α = α
+
+ ap-right-inverse' : {𝓥 : Universe} {X : 𝓥 ̇ } {x y z : X} (r : y ＝ z)
+                     {p : x ＝ z} {q : x ＝ y}
+                   → p ∙ r ⁻¹ ＝ q
+                   → p ＝ q ∙ r
+ ap-right-inverse' refl α = α
+
  is-sheaf : {𝓥 : Universe} (A : 𝓥 ̇) → 𝓤 ⁺ ⊔ 𝓥  ̇
  is-sheaf A =
   Σ glue ꞉ ((P : Ω 𝓤) → T P holds → (P holds → A) → A) ,
@@ -24,6 +107,106 @@ module Sheaf {𝓤 : Universe} (topology : LT-topology) where
  glue-unique : {𝓥 : Universe} {A : 𝓥 ̇} (h : is-sheaf A)
              → (P : Ω 𝓤) (p : T P holds) (x : A) → glue h P p (λ _ → x) ＝ x
  glue-unique = pr₂
+
+ glue-natural : {𝓥 𝓦 : Universe}
+              → funext 𝓤 𝓥
+              → funext 𝓤 𝓦
+              → {A : 𝓥 ̇} {B : 𝓦 ̇}
+              → (h : is-sheaf A) (j : is-sheaf B)
+                (f : A → B)
+                (P : Ω 𝓤) (p : T P holds) (ϕ : P holds → A)
+              → f (glue h P p ϕ) ＝ glue j P p (f ∘ ϕ)
+ glue-natural fe₁ fe₂ h j f P p ϕ =
+  f (glue h P p ϕ)
+   ＝⟨ glue-unique j P p (f (glue h P p ϕ)) ⁻¹ ⟩
+  glue j P p (λ _ → f (glue h P p ϕ))
+   ＝⟨ ap (glue j P p) (dfunext fe₂ aux) ⟩
+  glue j P p (f ∘ ϕ) ∎
+  where
+   aux : (λ _ → f (glue h P p ϕ)) ∼ f ∘ ϕ
+   aux i =
+    f (glue h P p ϕ)
+     ＝⟨ ap (λ g → f (glue h P p g))
+           (dfunext fe₁ (λ j → ap ϕ (holds-is-prop P j i))) ⟩
+    f (glue h P p (λ _ → ϕ i))
+     ＝⟨ ap f (glue-unique h P p (ϕ i)) ⟩
+    f (ϕ i) ∎
+
+ dfunext-const : {𝓥 𝓦 : Universe}
+                 (fe : funext 𝓥 𝓦)
+                 {A : 𝓥  ̇} {B : 𝓦  ̇}
+                 {x y : B} (p : x ＝ y)
+               → dfunext fe (λ (_ : A) → p) ＝ ap (λ x _ → x) p
+ dfunext-const fe {x = x} refl = dfunext-refl fe (λ _ → x) ∙ ap-refl (λ x _ → x) ⁻¹
+
+ ap-glue-unique : {𝓥 𝓦 : Universe}
+                  (fe₁ : funext 𝓤 𝓥)
+                  (fe₂ : funext 𝓤 𝓦)
+                  {A : 𝓥 ̇} {B : 𝓦 ̇}
+                  (h : is-sheaf A) (j : is-sheaf B)
+                  (f : A → B)
+                  (P : Ω 𝓤) (p : T P holds) (x : A)
+                →  glue-natural fe₁ fe₂ h j f P p (λ _ → x) ∙
+                    glue-unique j P p (f x) ＝
+                     ap f (glue-unique h P p x)
+ ap-glue-unique fe₁ fe₂ h j f P p x =
+  glue-unique j P p (f (glue h P p (λ _ → x))) ⁻¹ ∙ ap (glue j P p) (dfunext fe₂ aux) ∙ glue-unique j P p (f x)
+   ＝⟨ I ⟩
+  glue-unique j P p (f (glue h P p (λ _ → x))) ⁻¹ ∙ ap (glue j P p) (dfunext fe₂ (λ _ →  ap f (glue-unique h P p x))) ∙ glue-unique j P p (f x)
+   ＝⟨ II ⟩
+  glue-unique j P p (f (glue h P p (λ _ → x))) ⁻¹ ∙ ap (glue j P p) (ap (λ x _ → x) (ap f (glue-unique h P p x))) ∙ glue-unique j P p (f x)
+   ＝⟨ III ⟩
+  glue-unique j P p (f (glue h P p (λ _ → x))) ⁻¹ ∙ ap (glue j P p) (ap (λ x _ → f x) (glue-unique h P p x)) ∙ glue-unique j P p (f x)
+   ＝⟨ IV ⟩
+  glue-unique j P p (f (glue h P p (λ _ → x))) ⁻¹ ∙ ap (λ a → glue j P p (λ _ → f a)) (glue-unique h P p x) ∙ glue-unique j P p (f x)
+   ＝⟨ V ⟩
+  ap f (glue-unique h P p x) ∎
+  where
+   -- auxiliary definition from glue-natural
+   aux : (λ _ → f (glue h P p (λ _ → x))) ∼ (λ _ → f x)
+   aux i = ap (λ g → f (glue h P p g)) (dfunext fe₁ (λ j → ap (λ _ → x) (holds-is-prop P j i))) ∙ ap f (glue-unique h P p x)
+
+   -- in the constant family case we can simplify aux to use glue-unique
+   aux-simp : aux ∼ (λ _ →  ap f (glue-unique h P p x))
+   aux-simp i =
+    ap (λ g → f (glue h P p g)) (dfunext fe₁ (λ j → ap (λ _ → x) (holds-is-prop P j i))) ∙ ap f (glue-unique h P p x)
+     ＝⟨ I ⟩
+    ap (λ g → f (glue h P p g)) (dfunext fe₁ (λ j → refl)) ∙ ap f (glue-unique h P p x)
+     ＝⟨ II ⟩
+    refl ∙ ap f (glue-unique h P p x)
+     ＝⟨ refl-left-neutral ⟩
+    ap f (glue-unique h P p x) ∎
+    where
+     I = ap
+      (λ α → ap (λ g → f (glue h P p g)) (dfunext fe₁ α) ∙ ap f (glue-unique h P p x))
+      (dfunext fe₁ (λ j → ap-const x (holds-is-prop P j i)))
+     II = ap
+      (λ α →  ap (λ g → f (glue h P p g)) α ∙ ap f (glue-unique h P p x))
+      (dfunext-refl fe₁ _)
+
+
+   I = ap
+    (λ α → glue-unique j P p (f (glue h P p (λ _ → x))) ⁻¹ ∙ ap (glue j P p) (dfunext fe₂ α) ∙ glue-unique j P p (f x))
+    (dfunext fe₂ aux-simp)
+   II = ap
+    (λ α → glue-unique j P p (f (glue h P p (λ _ → x))) ⁻¹ ∙ ap (glue j P p) α ∙ glue-unique j P p (f x))
+    (dfunext-const fe₂ (ap f (glue-unique h P p x)))
+   III = ap
+    (λ α → glue-unique j P p (f (glue h P p (λ _ → x))) ⁻¹ ∙ ap (glue j P p) α ∙ glue-unique j P p (f x))
+    (ap-ap f (λ x _ → x) (glue-unique h P p x))
+   IV = ap
+    (λ α → glue-unique j P p (f (glue h P p (λ _ → x))) ⁻¹ ∙ α ∙ glue-unique j P p (f x))
+    (ap-ap (λ x _ → f x) (glue j P p) (glue-unique h P p x))
+   V = homotopies-are-natural'' (λ a → glue j P p (λ _ → f a)) f (glue-unique j P p ∘ f) {_} {_} {glue-unique h P p x}
+
+ glue-natural' : {𝓥 : Universe}
+               → funext 𝓤 𝓥
+               → {A B : 𝓥 ̇}
+               → (h : is-sheaf A) (j : is-sheaf B)
+                 (f : A → B)
+                 (P : Ω 𝓤) (p : T P holds) (ϕ : P holds → A)
+               → f (glue h P p ϕ) ＝ glue j P p (f ∘ ϕ)
+ glue-natural' fe = glue-natural fe fe
 
 
  record sheafification-exist : 𝓤ω where
@@ -91,6 +274,21 @@ module Sheaf {𝓤 : Universe} (topology : LT-topology) where
 
   open sheafification-exist se
 
+  𝓓-is-sheaf : {𝓥 : Universe} {A : 𝓥 ̇}
+             → is-sheaf (𝓓 A)
+  𝓓-is-sheaf = ǫ , 𝐞
+
+  ap-𝐞 : {𝓥 𝓦 : Universe}
+         (fe₁ : funext 𝓤 𝓥)
+         (fe₂ : funext 𝓤 𝓦)
+         {A : 𝓥 ̇} {B : 𝓦 ̇}
+         (j : is-sheaf B) (f : 𝓓 A → B)
+         (P : Ω 𝓤) (p : T P holds) (d : 𝓓 A)
+       → ap f (glue-unique 𝓓-is-sheaf P p d) ＝
+          glue-natural fe₁ fe₂ 𝓓-is-sheaf j f P p (λ _ → d) ∙
+           glue-unique j P p (f d)
+  ap-𝐞 fe₁ fe₂ j f P p d = ap-glue-unique fe₁ fe₂ 𝓓-is-sheaf j f P p d ⁻¹
+
   𝓓-nondep-rec : {𝓥 𝓦 : Universe} {A : 𝓥 ̇} {B : 𝓦 ̇}
                  (hβ : A → B)
                  (hǫ : (P : Ω 𝓤) → T P holds → (P holds → B) → B)
@@ -127,27 +325,6 @@ module Sheaf {𝓤 : Universe} (topology : LT-topology) where
    (λ P p ϕ → hǫ P p)
    (λ P p d b → transport-const (𝐞 P p d) ∙ h𝐞 P p b)
 
-
-  -- TODO figure out if this exists in TypeTopology already
-  apd-nondep : {𝓥 : Universe} {X : 𝓥 ̇ } {Y : 𝓦 ̇ } (f : X → Y)
-               {x y : X} (p : x ＝ y)
-             → apd f p ＝ transport-const p ∙ ap f p
-  apd-nondep f refl = refl
-
-  transport-const-left-cancellable : {𝓥 𝓦 : Universe} {A : 𝓥 ̇} {B : 𝓦 ̇}
-                                     {x y : A} (r : x ＝ y)
-                                     {z w : B} (p q : z ＝ w)
-   → transport-const r ∙ p ＝ transport-const r ∙ q
-   → p ＝ q
-  transport-const-left-cancellable refl p q h =
-   refl-left-neutral ⁻¹ ∙ h ∙ refl-left-neutral
-
-  transport-const-commutes : {𝓥 𝓦 : Universe} {A : 𝓥 ̇} {B : 𝓦 ̇}
-                             {x y : A} (p : x ＝ y)
-                             {z w : B} (q : z ＝ w)
-   → ap (transport (λ _ → B) p) q ∙ transport-const p ＝ transport-const p ∙ q
-  transport-const-commutes refl refl = refl
-
   𝓓-nondep-rec-𝐞 : {𝓥 𝓦 : Universe} {A : 𝓥 ̇} {B : 𝓦 ̇}
                    (hβ : A → B)
                    (hǫ : (P : Ω 𝓤) → T P holds → (P holds → B) → B)
@@ -158,8 +335,7 @@ module Sheaf {𝓤 : Universe} (topology : LT-topology) where
                     𝓓-nondep-rec-ǫ hβ hǫ h𝐞 P p (λ _ → d) ∙
                      h𝐞 P p (𝓓-nondep-rec hβ hǫ h𝐞 d)
   𝓓-nondep-rec-𝐞 {A = A} {B} hβ hǫ h𝐞 P p d =
-   transport-const-left-cancellable (𝐞 P p d) _ _
-    (simplify-lhs ∙ apply-𝓓rec-𝐞 ∙ simplify-rhs)
+   cancel-left (simplify-lhs ∙ apply-𝓓rec-𝐞 ∙ simplify-rhs)
    where
     𝓓rec-𝐞-lhs-simp = transport-const (𝐞 P p d) ∙ ap (𝓓-nondep-rec hβ hǫ h𝐞) (𝐞 P p d)
 
@@ -199,6 +375,110 @@ module Sheaf {𝓤 : Universe} (topology : LT-topology) where
   𝓓-extend : {𝓥 𝓦 : Universe} {A : 𝓥 ̇} {B : 𝓦 ̇}
            → is-sheaf B → (A → B) → 𝓓 A → B
   𝓓-extend {A = A} {B} h f = 𝓓-nondep-rec f (glue h) (glue-unique h)
+
+  𝓓-extend-β : {𝓥 𝓦 : Universe} {A : 𝓥 ̇} {B : 𝓦 ̇}
+               (h : is-sheaf B) (f : A → B)
+               (a : A)
+             → f a ＝ 𝓓-extend h f (β a)
+  𝓓-extend-β h f a = 𝓓-nondep-rec-β f (glue h) (glue-unique h) a ⁻¹
+
+  𝓓-extend-ǫ : {𝓥 𝓦 : Universe} {A : 𝓥 ̇} {B : 𝓦 ̇}
+               (h : is-sheaf B) (f : A → B)
+               (P : Ω 𝓤) (p : T P holds) (ϕ : P holds → 𝓓 A)
+             → glue h P p (𝓓-extend h f ∘ ϕ) ＝ 𝓓-extend h f (ǫ P p ϕ)
+  𝓓-extend-ǫ h f P p ϕ = 𝓓-nondep-rec-ǫ f (glue h) (glue-unique h) P p ϕ ⁻¹
+
+  𝓓-extension-is-unique : {𝓥 𝓦 : Universe}
+                        → funext 𝓤 𝓥
+                        → funext 𝓤 𝓦
+                        → {A : 𝓥 ̇} {B : 𝓦 ̇}
+                        → (j : is-sheaf B) (f : A → B) (g h : 𝓓 A → B)
+                        → g ∘ β ∼ f
+                        → h ∘ β ∼ f
+                        → g ∼ h
+  𝓓-extension-is-unique fe₁ fe₂ {A} {B} j f g h H Q =
+   𝓓rec (λ d → g d ＝ h d) β-case ǫ-case 𝐞-case
+   where
+    β-case : (a : A) → g (β a) ＝ h (β a)
+    β-case a = H a ∙ Q a ⁻¹
+
+    ǫ-case : (P : Ω 𝓤) (p : T P holds) (ϕ : P holds → 𝓓 A)
+           → (g ∘ ϕ ∼ h ∘ ϕ )
+           → g (ǫ P p ϕ) ＝ h (ǫ P p ϕ)
+    ǫ-case P p ϕ R =
+     g (ǫ P p ϕ)
+      ＝⟨ glue-natural fe₁ fe₂ 𝓓-is-sheaf j g P p ϕ ⟩
+     glue j P p (g ∘ ϕ)
+      ＝⟨ ap (glue j P p) (dfunext fe₂ R) ⟩
+     glue j P p (h ∘ ϕ)
+      ＝⟨ glue-natural fe₁ fe₂ 𝓓-is-sheaf j h P p ϕ ⁻¹ ⟩
+     h (ǫ P p ϕ)
+      ∎
+
+    𝐞-case : (P : Ω 𝓤) (p : T P holds) (d : 𝓓 A)
+             (e : g d ＝ h d)
+           → transport (λ d → g d ＝ h d) (𝐞 P p d)
+              (ǫ-case P p (λ _ → d) (λ _ → e)) ＝ e
+    𝐞-case P p d e =
+     transport (λ d → g d ＝ h d) (𝐞 P p d) (glue-natural fe₁ fe₂ 𝓓-is-sheaf j g P p (λ _ → d) ∙ (ap (glue j P p) (dfunext fe₂ (λ _ → e)) ∙ glue-natural fe₁ fe₂ 𝓓-is-sheaf j h P p (λ _ → d) ⁻¹))
+      ＝⟨ transport-along-＝' g h (𝐞 P p d) _ ⟩
+     ap g (𝐞 P p d) ⁻¹ ∙ (glue-natural fe₁ fe₂ 𝓓-is-sheaf j g P p (λ _ → d) ∙ (ap (glue j P p) (dfunext fe₂ (λ _ → e)) ∙ glue-natural fe₁ fe₂ 𝓓-is-sheaf j h P p (λ _ → d) ⁻¹)) ∙ ap h (𝐞 P p d)
+      ＝⟨ I ⟩
+     (glue-natural fe₁ fe₂ 𝓓-is-sheaf j g P p (λ _ → d) ⁻¹ ∙ ap g (𝐞 P p d)) ⁻¹ ∙ ap (glue j P p) (dfunext fe₂ (λ _ → e)) ∙ (glue-natural fe₁ fe₂ 𝓓-is-sheaf j h P p (λ _ → d) ⁻¹ ∙ ap h (𝐞 P p d))
+      ＝⟨ II ⟩
+     glue-unique j P p (g d) ⁻¹ ∙ ap (glue j P p) (dfunext fe₂ (λ _ → e)) ∙ (glue-natural fe₁ fe₂ 𝓓-is-sheaf j h P p (λ _ → d) ⁻¹ ∙ ap h (𝐞 P p d))
+      ＝⟨ III ⟩
+     glue-unique j P p (g d) ⁻¹ ∙ ap (glue j P p) (dfunext fe₂ (λ _ → e)) ∙ glue-unique j P p (h d)
+      ＝⟨ IV ⟩
+     glue-unique j P p (g d) ⁻¹ ∙ ap (glue j P p) (ap (λ x _ → x) e) ∙ glue-unique j P p (h d)
+      ＝⟨ V ⟩
+     glue-unique j P p (g d) ⁻¹ ∙ ap (λ x → glue j P p (λ _ → x)) e ∙ glue-unique j P p (h d)
+      ＝⟨ VI ⟩
+     ap id e
+      ＝⟨ ap-id-is-id e ⟩
+     e ∎
+     where
+      rearrange : {x1 x2 x3 x4 x5 x6 : B}
+          (p : x2 ＝ x1) (q : x2 ＝ x3) (r : x3 ＝ x4) (s : x4 ＝ x5) (t : x5 ＝ x6)
+        → p ⁻¹ ∙ (q ∙ (r ∙ s)) ∙ t ＝ (q ⁻¹ ∙ p) ⁻¹ ∙ r ∙ (s ∙ t)
+      rearrange p q r s t =
+       p ⁻¹ ∙ (q ∙ (r ∙ s)) ∙ t     ＝⟨ ap (_∙ t) (∙assoc (p ⁻¹) q (r ∙ s) ⁻¹) ⟩
+       p ⁻¹ ∙ q ∙ (r ∙ s) ∙ t       ＝⟨ ∙assoc (p ⁻¹ ∙ q) (r ∙ s) t  ⟩
+       p ⁻¹ ∙ q ∙ ((r ∙ s) ∙ t)     ＝⟨ ap (p ⁻¹ ∙ q ∙_) (∙assoc r s t) ⟩
+       p ⁻¹ ∙ q ∙ (r ∙ (s ∙ t))     ＝⟨ ∙assoc ((p ⁻¹ ∙ q)) r (s ∙ t) ⁻¹ ⟩
+       p ⁻¹ ∙ q ∙ r ∙ (s ∙ t)       ＝⟨ ap (λ α → (p ⁻¹ ∙ α) ∙ r ∙ (s ∙ t)) (⁻¹-involutive q ⁻¹) ⟩
+       p ⁻¹ ∙ q ⁻¹ ⁻¹ ∙ r ∙ (s ∙ t) ＝⟨ ap (λ α → α ∙ r ∙ (s ∙ t)) (⁻¹-contravariant (q ⁻¹) p) ⟩
+       (q ⁻¹ ∙ p) ⁻¹ ∙ r ∙ (s ∙ t)  ∎
+
+      I = rearrange
+           (ap g (𝐞 P p d))
+           (glue-natural fe₁ fe₂ 𝓓-is-sheaf j g P p (λ _ → d))
+           (ap (glue j P p) (dfunext fe₂ (λ _ → e)))
+           (glue-natural fe₁ fe₂ 𝓓-is-sheaf j h P p (λ _ → d) ⁻¹)
+           (ap h (𝐞 P p d))
+      II = ap
+       (λ α → α ⁻¹ ∙ ap (glue j P p) (dfunext fe₂ (λ _ → e)) ∙ (glue-natural fe₁ fe₂ 𝓓-is-sheaf j h P p (λ _ → d) ⁻¹ ∙ ap h (𝐞 P p d)))
+       (ap-left-inverse _ {_} {glue-unique j P p (g d)} (ap-glue-unique fe₁ fe₂ 𝓓-is-sheaf j g P p d ⁻¹))
+      III = ap
+       (λ α → glue-unique j P p (g d) ⁻¹ ∙ ap (glue j P p) (dfunext fe₂ (λ _ → e)) ∙ α)
+       (ap-left-inverse _ {_} {glue-unique j P p (h d)} (ap-glue-unique fe₁ fe₂ 𝓓-is-sheaf j h P p d ⁻¹))
+      IV = ap
+       (λ α → glue-unique j P p (g d) ⁻¹ ∙ ap (glue j P p) α ∙ glue-unique j P p (h d))
+       (dfunext-const fe₂ e)
+      V = ap
+       (λ α → glue-unique j P p (g d) ⁻¹ ∙ α ∙ glue-unique j P p (h d))
+       (ap-ap (λ x _ → x) (glue j P p) e)
+      VI = homotopies-are-natural'' (λ x → glue j P p (λ _ → x)) id (glue-unique j P p) {_} {_} {e}
+
+  𝓓-extend-unique : {𝓥 𝓦 : Universe}
+                  → funext 𝓤 𝓥
+                  → funext 𝓤 𝓦
+                  → {A : 𝓥 ̇} {B : 𝓦 ̇}
+                  → (j : is-sheaf B) (f : A → B) (g : 𝓓 A → B)
+                  → g ∘ β ∼ f
+                  → g ∼ 𝓓-extend j f
+  𝓓-extend-unique fe₁ fe₂ j f g H =
+   𝓓-extension-is-unique fe₁ fe₂ j f g (𝓓-extend j f) H (λ a → 𝓓-extend-β j f a ⁻¹)
 
 \end{code}
 
