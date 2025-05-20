@@ -209,6 +209,104 @@ module Sheaf {𝓤 : Universe} (topology : LT-topology) where
  glue-natural' fe = glue-natural fe fe
 
 
+ 𝟙-is-sheaf : {𝓥 : Universe} → is-sheaf {𝓥} 𝟙
+ 𝟙-is-sheaf = (λ _ _ _ → ⋆) , (λ _ _ _ → refl)
+
+ is-sheaf-exponentiable : {𝓥 𝓦 : Universe}
+                        → funext 𝓥 𝓦
+                        → {A : 𝓥 ̇} {F : A → 𝓦 ̇}
+                        → ((a : A) → is-sheaf (F a))
+                        → is-sheaf ((a : A) → F a)
+ is-sheaf-exponentiable fe {A} {F} h =
+  →-glue , λ P p f → dfunext fe (→-glue-unique P p f)
+  where
+   →-glue : (P : Ω 𝓤) → T P holds → (P holds → (a : A) → F a) → (a : A) → F a
+   →-glue P p ϕ a = glue (h a) P p (λ i → ϕ i a)
+
+   →-glue-unique : (P : Ω 𝓤) (p : T P holds) (f : (a : A) → F a)
+                 → →-glue P p (λ _ → f) ∼ f
+   →-glue-unique P p f a = glue-unique (h a) P p (f a)
+
+ Σ-preserves-is-sheaf : {𝓥 𝓦 : Universe}
+                      → funext 𝓤 𝓥
+                      → funext 𝓤 𝓦
+                      → {A : 𝓥 ̇} {F : A → 𝓦 ̇}
+                      → is-sheaf A
+                      → ((a : A) → is-sheaf (F a))
+                      → is-sheaf (Σ a ꞉ A , F a)
+ Σ-preserves-is-sheaf fe₁ fe₂ {A} {F} h j = Σ-glue , Σ-glue-unique
+  where
+   eq : (P : Ω 𝓤) (p : T P holds) (ϕ : P holds → Σ a ꞉ A , F a) (q : P holds)
+      → pr₁ (ϕ q) ＝ glue h P p (λ q → pr₁ (ϕ q))
+   eq P p ϕ q =
+    pr₁ (ϕ q)
+     ＝⟨ glue-unique h P p (pr₁ (ϕ q)) ⁻¹ ⟩
+    glue h P p (λ _ → pr₁ (ϕ q))
+     ＝⟨ ap (glue h P p) (dfunext fe₁ (λ r → ap (pr₁ ∘ ϕ) (holds-is-prop P q r))) ⟩
+    glue h P p (λ r → pr₁ (ϕ r)) ∎
+
+   eq-simp : (P : Ω 𝓤) (p : T P holds) (t : Σ a ꞉ A , F a) (q : P holds)
+           → eq P p (λ _ → t) q ＝ glue-unique h P p (pr₁ t) ⁻¹
+   eq-simp P p t q =
+    glue-unique h P p (pr₁ t) ⁻¹ ∙ ap (glue h P p) (dfunext fe₁ (λ r → ap (λ _ → pr₁ t) (holds-is-prop P q r)))
+     ＝⟨ ap
+         (λ α → glue-unique h P p (pr₁ t) ⁻¹ ∙ ap (glue h P p) (dfunext fe₁ α))
+         (dfunext fe₁ λ r → ap-const (pr₁ t) (holds-is-prop P q r)) ⟩
+    glue-unique h P p (pr₁ t) ⁻¹ ∙ ap (glue h P p) (dfunext fe₁ (λ _ → refl))
+     ＝⟨ ap
+         (λ α → glue-unique h P p (pr₁ t) ⁻¹ ∙ ap (glue h P p) α)
+         (dfunext-refl fe₁ (λ _ → pr₁ t)) ⟩
+    glue-unique h P p (pr₁ t) ⁻¹ ∙ ap (glue h P p) refl
+     ＝⟨ ap
+         (glue-unique h P p (pr₁ t) ⁻¹ ∙_)
+         (ap-refl (glue h P p)) ⟩
+    glue-unique h P p (pr₁ t) ⁻¹ ∎
+
+
+   Σ-glue : (P : Ω 𝓤) → T P holds → (P holds → Σ a ꞉ A , F a) → Σ a ꞉ A , F a
+   Σ-glue P p ϕ = glue h P p (pr₁ ∘ ϕ)
+                , glue (j (glue h P p (pr₁ ∘ ϕ))) P p
+                   (λ q → transport F (eq P p ϕ q) (pr₂ (ϕ q)))
+
+   Σ-glue-unique : (P : Ω 𝓤) (p : T P holds) (t : Σ a ꞉ A , F a)
+                 → Σ-glue P p (λ _ → t) ＝ t
+   Σ-glue-unique P p (a , b) = to-Σ-＝ (glue-unique h P p a , V)
+    where
+     I = ap
+      (λ α → transport F (glue-unique h P p a) ((glue (j (glue h P p (λ _ → a))) P p α)))
+      (dfunext fe₂ λ q → ap (λ α → transport F α b) (eq-simp P p (a , b) q))
+     II = ap
+      (transport F (glue-unique h P p a))
+      (glue-natural' fe₂ (j a) (j (glue h P p (λ _ → a))) (transport F (glue-unique h P p a ⁻¹)) P p (λ _ → b) ⁻¹)
+     III = back-and-forth-transport (glue-unique h P p a)
+     IV = glue-unique (j a) P p b
+
+     V =
+      transport F (glue-unique h P p a) (glue (j (glue h P p (λ _ → a))) P p (λ q → transport F (eq P p (λ _ → (a , b)) q) b))
+       ＝⟨ I ⟩
+      transport F (glue-unique h P p a) (glue (j (glue h P p (λ _ → a))) P p (λ _ → transport F (glue-unique h P p a ⁻¹) b))
+       ＝⟨ II ⟩
+      transport F (glue-unique h P p a) (transport F (glue-unique h P p a ⁻¹) (glue (j a) P p (λ _ → b)))
+       ＝⟨ III ⟩
+      glue (j a) P p (λ _ → b)
+       ＝⟨ IV ⟩
+      b ∎
+
+ ×-preserves-is-sheaf : {𝓥 𝓦 : Universe}
+                      → {A : 𝓥 ̇} {B : 𝓦 ̇}
+                      → is-sheaf A
+                      → is-sheaf B
+                      → is-sheaf (A × B)
+ ×-preserves-is-sheaf {_} {_} {A} {B} h j = ×-glue , ×-glue-unique
+  where
+   ×-glue : (P : Ω 𝓤) → T P holds → (P holds → A × B) → A × B
+   ×-glue P p ϕ = glue h P p (pr₁ ∘ ϕ) , glue j P p (pr₂ ∘ ϕ)
+
+   ×-glue-unique : (P : Ω 𝓤) (p : T P holds) (t : A × B)
+                 → ×-glue P p (λ _ → t) ＝ t
+   ×-glue-unique P p t =
+    ap₂ _,_ (glue-unique h P p (pr₁ t)) (glue-unique j P p (pr₂ t))
+
  record sheafification-exist : 𝓤ω where
   field
    𝓓 : {𝓥 : Universe} → 𝓥 ̇ → 𝓥 ̇
@@ -534,7 +632,7 @@ preserves implication, as we will show.
  ΩT-is-sheaf pe fe = ΩT-glue , ΩT-glue-unique
   where
    ΩT-glue : (P : Ω 𝓤) → T P holds → (P holds → ΩT) → ΩT
-   ΩT-glue P p f = R , R-is-T-stable
+   ΩT-glue P _ f = R , R-is-T-stable
     where
      Q : P holds → Ω 𝓤
      Q = pr₁ ∘ f
@@ -551,12 +649,12 @@ preserves implication, as we will show.
 
    ΩT-glue-unique : (P : Ω 𝓤) (p : T P holds) (Q : ΩT)
                   → ΩT-glue P p (λ _ → Q) ＝ Q
-   ΩT-glue-unique P p Q = ΩT-extensionality pe fe forward backward
+   ΩT-glue-unique P p (Q , Q-is-T-stable) = ΩT-extensionality pe fe forward backward
     where
-     forward : (P holds → Q holds') → Q holds'
-     forward f = pr₂ Q (p ≫= (η ∘ f))
+     forward : (P holds → Q holds) → Q holds
+     forward f = Q-is-T-stable (p ≫= (η ∘ f))
 
-     backward : Q holds' → (P holds → Q holds')
+     backward : Q holds → (P holds → Q holds)
      backward q _ = q
 
  module _ (pe : propext 𝓤) (fe : Fun-Ext) (se : sheafification-exist) where
