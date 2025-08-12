@@ -111,6 +111,19 @@ module Sheaf {𝓤 : Universe} (topology : LT-topology) where
              → (P : Ω 𝓤) (p : T P holds) (x : A) → glue h P p (λ _ → x) ＝ x
  glue-unique = pr₂
 
+ foo : {𝓥 : Universe}
+     → funext 𝓤 𝓥
+     → {A : 𝓥 ̇}
+       (h : is-sheaf A)
+       (P : Ω 𝓤) (r : T P holds) (ϕ : P holds → A)
+     → (λ _ → glue h P r ϕ) ∼ ϕ
+ foo fe h P r ϕ p =
+  glue h P r (λ i → ϕ i)
+   ＝⟨ ap (glue h P r) (dfunext fe (λ i → ap ϕ (holds-is-prop P i p))) ⟩
+  glue h P r (λ _ → ϕ p)
+   ＝⟨ glue-unique h P r (ϕ p) ⟩
+  ϕ p ∎
+
  glue-natural : {𝓥 𝓦 : Universe}
               → funext 𝓤 𝓥
               → funext 𝓤 𝓦
@@ -145,6 +158,64 @@ module Sheaf {𝓤 : Universe} (topology : LT-topology) where
                  (P : Ω 𝓤) (p : T P holds) (ϕ : P holds → A)
                → f (glue h P p ϕ) ＝ glue j P p (f ∘ ϕ)
  glue-natural' fe = glue-natural fe fe
+
+ dfunext-comp : {𝓥 𝓦 : Universe}
+                (fe : funext 𝓥 𝓦)
+                {A : 𝓥 ̇} {B : 𝓦 ̇}
+                {f g h : A → B}
+                (H : f ∼ g) (J : g ∼ h)
+              → dfunext fe (λ i → H i ∙ J i) ＝ dfunext fe H ∙ dfunext fe J
+ dfunext-comp fe H J = happly-lc fe _ _ I
+  where
+   I : happly (dfunext fe (λ i → H i ∙ J i)) ＝ happly (dfunext fe H ∙ dfunext fe J)
+   I =
+    happly (dfunext fe (λ i → H i ∙ J i))
+     ＝⟨ happly-funext fe _ _ (λ i → H i ∙ J i) ⟩
+    (λ i → H i ∙ J i)
+     ＝⟨ ap₂ (λ H J i → H i ∙ J i) (happly-funext fe _ _ H ⁻¹) (happly-funext fe _ _ J ⁻¹) ⟩
+    (λ i → ap (λ - → - i) (dfunext fe H) ∙ ap (λ - → - i) (dfunext fe J))
+     ＝⟨ dfunext fe (λ i → ap-∙ (λ - → - i) (dfunext fe H) (dfunext fe J) ⁻¹) ⟩
+    (λ i → ap (λ - → - i) (dfunext fe H ∙ dfunext fe J)) ∎
+
+ -- TODO: figure out what to do with this, as it stands I think it is false,
+ -- we would need to add an extra condition to is-sheaf
+ -- (as Eric pointed out during one of my lab lunches)
+ --glue-natural-id : {𝓥 : Universe}
+ --                  (fe : funext 𝓤 𝓥)
+ --                  {A : 𝓥 ̇}
+ --                  (h j : is-sheaf A)
+ --                  (P : Ω 𝓤) (p : T P holds) (ϕ : P holds → A)
+ --                → refl ＝
+ --                   glue-natural' fe h j id P p ϕ ∙
+ --                    glue-natural' fe j h id P p ϕ
+ --glue-natural-id fe {A} h j P p ϕ =
+ -- refl
+ --  ＝⟨ {!!} ⟩
+ -- glue-unique j P p (glue h P p ϕ) ⁻¹ ∙ ap (glue j P p) (dfunext fe II-h') ∙ (glue-unique h P p (glue j P p ϕ) ⁻¹ ∙ ap (glue h P p) (dfunext fe II-j))
+ --  ＝⟨ {!!} ⟩
+ -- glue-unique j P p (glue h P p ϕ) ⁻¹ ∙ ap (glue j P p) (dfunext fe II-h) ∙ (glue-unique h P p (glue j P p ϕ) ⁻¹ ∙ ap (glue h P p) (dfunext fe II-j)) ∎
+ -- where
+ --  I : (i : P holds) → ϕ ∼ (λ _ → ϕ i)
+ --  I i j = ap ϕ (holds-is-prop P j i)
+
+ --  II-h : (λ _ → glue h P p ϕ) ∼ ϕ
+ --  II-h i =
+ --   glue h P p ϕ
+ --    ＝⟨ ap (glue h P p) (dfunext fe (I i)) ⟩
+ --   glue h P p (λ _ → ϕ i)
+ --    ＝⟨ ap id (glue-unique h P p (ϕ i)) ⟩
+ --   ϕ i ∎
+
+ --  II-h' : (λ _ → glue h P p ϕ) ∼ ϕ
+ --  II-h' i = ap (glue h P p) (dfunext fe (I i)) ∙ glue-unique h P p (ϕ i)
+
+ --  II-j : (λ _ → glue j P p ϕ) ∼ ϕ
+ --  II-j i =
+ --   glue j P p ϕ
+ --    ＝⟨ ap (glue j P p) (dfunext fe (I i)) ⟩
+ --   glue j P p (λ _ → ϕ i)
+ --    ＝⟨ ap id (glue-unique j P p (ϕ i)) ⟩
+ --   ϕ i ∎
 
  glue-functorial-action : {𝓥 : Universe}
                         → funext 𝓤 𝓥
@@ -198,18 +269,6 @@ module Sheaf {𝓤 : Universe} (topology : LT-topology) where
    ＝⟨ glue-functorial-action fe h (P ∧ Q) Q (T-pair p q) pr₂ ϕ ⟩
   glue h (P ∧ Q) (T-pair p q) (ϕ ∘ pr₂) ∎
 
- is-sheaf-is-prop : {𝓥 : Universe}
-                  → Fun-Ext
-                  → {A : 𝓥 ̇}
-                  → is-set A
-                  → is-prop (is-sheaf A)
- is-sheaf-is-prop fe A-is-set h j = to-Σ-＝
-  (dfunext fe (λ P →
-    dfunext fe (λ p →
-     dfunext fe (λ ϕ → glue-natural' fe h j id P p ϕ))),
-   dfunext fe (λ P →
-    dfunext fe (λ p →
-     dfunext fe (λ x → A-is-set _ _))))
 
  dfunext-const : {𝓥 𝓦 : Universe}
                  (fe : funext 𝓥 𝓦)
@@ -276,6 +335,46 @@ module Sheaf {𝓤 : Universe} (topology : LT-topology) where
     (λ α → glue-unique j P p (f (glue h P p (λ _ → x))) ⁻¹ ∙ α ∙ glue-unique j P p (f x))
     (ap-ap (λ x _ → f x) (glue j P p) (glue-unique h P p x))
    V = homotopies-are-natural'' (λ a → glue j P p (λ _ → f a)) f (glue-unique j P p ∘ f) {_} {_} {glue-unique h P p x}
+
+ -- TODO: either modify is-sheaf to add the extra condition or add assumption
+ -- that A is a set
+ --is-sheaf-is-prop : {𝓥 : Universe}
+ --                 → Fun-Ext
+ --                 → {A : 𝓥 ̇}
+ --                 → is-prop (is-sheaf A)
+ --is-sheaf-is-prop fe {A} h j = to-Σ-＝ (eq , eq')
+ -- where
+ --  eq : glue h ＝ glue j
+ --  eq = dfunext fe (λ P →
+ --        dfunext fe (λ p →
+ --         dfunext fe (λ ϕ → glue-natural' fe h j id P p ϕ)))
+
+
+ --  I : (P : Ω 𝓤) (p : T P holds) (ϕ : P holds → A)
+ --    → glue h P p ϕ ＝ glue j P p ϕ
+ --  I P p ϕ =
+ --   glue h P p ϕ                    ＝⟨ {!!} ⟩
+ --   glue j P p (λ _ → glue h P p ϕ) ＝⟨ {!!} ⟩
+ --   glue j P p ϕ ∎
+
+
+ --  eq' : transport (λ glue' → (P : Ω 𝓤) (p : T P holds) (x : A) → glue' P p (λ _ → x) ＝ x) eq (pr₂ h) ＝ pr₂ j
+ --  eq' = dfunext fe (λ P →
+ --         dfunext fe (λ p →
+ --          dfunext fe λ x →
+ --   transport (λ glue' → (P : Ω 𝓤) (p : T P holds) (x : A) → glue' P p (λ _ → x) ＝ x) (dfunext fe (λ P → dfunext fe (λ p → dfunext fe (λ ϕ → glue-natural' fe h j id P p ϕ)))) (glue-unique h) P p x
+ --    ＝⟨ {!!} ⟩
+ --   transport (_＝ x) (glue-natural' fe h j id P p (λ _ → x)) (glue-unique h P p x)
+ --    ＝⟨ {!!} ⟩ -- using transport-along-＝' with id and const x  to prove transport (λ - → - ＝ x) q p ＝ ap id q ⁻¹ ∙ p ∙ ap (const x) q
+ --   ap id (glue-natural' fe h j id P p (λ _ → x)) ⁻¹ ∙ glue-unique h P p x ∙ ap (λ _ → x) (glue-natural' fe h j id P p (λ _ → x))
+ --    ＝⟨ {!!} ⟩
+ --   glue-natural' fe h j id P p (λ _ → x) ⁻¹ ∙ glue-unique h P p x
+ --    ＝⟨ {!!} ⟩
+ --   glue-natural' fe j h id P p (λ _ → x) ∙ glue-unique h P p x
+ --    ＝⟨  ap-glue-unique fe fe j h id P p x  ⟩
+ --   ap id (glue-unique j P p x)
+ --    ＝⟨ ap-id-is-id (glue-unique j P p x) ⟩
+ --   glue-unique j P p x ∎))
 
  𝟙-is-sheaf : {𝓥 : Universe} → is-sheaf {𝓥} 𝟙
  𝟙-is-sheaf = (λ _ _ _ → ⋆) , (λ _ _ _ → refl)
@@ -373,6 +472,37 @@ module Sheaf {𝓤 : Universe} (topology : LT-topology) where
                  → ×-glue P p (λ _ → t) ＝ t
    ×-glue-unique P p t =
     ap₂ _,_ (glue-unique h P p (pr₁ t)) (glue-unique j P p (pr₂ t))
+
+
+ ＝-preserves-is-sheaf : {𝓥 : Universe}
+                      → funext 𝓤 𝓥
+                      → {A : 𝓥 ̇}
+                      → is-sheaf A
+                      → (a b : A)
+                      → is-sheaf (a ＝ b)
+ ＝-preserves-is-sheaf fe h a b = ＝-glue , ＝-unique
+  where
+   ＝-glue : (P : Ω 𝓤) → T P holds → (P holds → a ＝ b) → a ＝ b
+   ＝-glue P r ϕ =
+    a
+     ＝⟨ glue-unique h P r a ⁻¹ ⟩
+    glue h P r (λ _ → a)
+     ＝⟨ ap (glue h P r) (dfunext fe ϕ) ⟩
+    glue h P r (λ _ → b)
+     ＝⟨ glue-unique h P r b ⟩
+    b ∎
+
+   ＝-unique : (P : Ω 𝓤) (r : T P holds) (p : a ＝ b) → ＝-glue P r (λ _ → p) ＝ p
+   ＝-unique P r refl =
+    glue-unique h P r a ⁻¹ ∙ (ap (glue h P r) (dfunext fe (λ _ → refl)) ∙ glue-unique h P r a)
+     ＝⟨ ∙assoc (glue-unique h P r a ⁻¹) (ap (glue h P r) (dfunext fe (λ _ → refl))) (glue-unique h P r a) ⁻¹ ⟩
+    glue-unique h P r a ⁻¹ ∙ ap (glue h P r) (dfunext fe (λ _ → refl)) ∙ glue-unique h P r a
+     ＝⟨ ap
+          (λ α → glue-unique h P r a ⁻¹ ∙ ap (glue h P r) α ∙ glue-unique h P r a)
+          (dfunext-const fe refl) ⟩
+    glue-unique h P r a ⁻¹ ∙ glue-unique h P r a
+     ＝⟨ left-inverse (glue-unique h P r a) ⟩
+    refl ∎
 
  record sheafification-exist : 𝓤ω where
   field
@@ -643,6 +773,11 @@ module Sheaf {𝓤 : Universe} (topology : LT-topology) where
   𝓓-extend-unique fe₁ fe₂ j f g H =
    𝓓-extension-is-unique fe₁ fe₂ j f g (𝓓-extend j f) H (𝓓-extend-β j f)
 
+  𝓓-map : {𝓥 𝓦 : Universe} {A : 𝓥 ̇} {B : 𝓦 ̇}
+        → (A → B)
+        → 𝓓 A → 𝓓 B
+  𝓓-map f = 𝓓-extend 𝓓-is-sheaf (β ∘ f)
+
   𝓓-extend₂ : {𝓥 𝓦 𝓧 : Universe} {A : 𝓥 ̇} {B : 𝓦 ̇} {C : 𝓧 ̇}
             → funext 𝓦 𝓧
             → is-sheaf C
@@ -778,101 +913,333 @@ module Sheaf {𝓤 : Universe} (topology : LT-topology) where
 
 \end{code}
 
-Let us consider the subobject classifier for sheaves as a study case for these
-definitions of sheaves and sheafification.
+From the non-dependent universal property of sheafification, we can recover a
+dependent elimination for sheafification. Of course, since we do not have a
+universe of sheaves which is itself a sheaf, this form of dependent elimination
+is restricted when compared to dependent elimination for usual inductive types.
 
-In general the sheafification of Ω should not be the subobject classifier
-of sheaves. This should only happen if the corresponding LT topology
-preserves implication, as we will show.
+Regardless, if we axiomatise what we need for a "universe" we can still recover
+a lot of dependent induction principles. For example, we can recover
+induction for identity types of sheaves, T-stable propositions and so on.
 
 \begin{code}
 
- is-T-stable : Ω 𝓤 → 𝓤  ̇
- is-T-stable P = T P holds → P holds
+  𝓓-dep-extend : {𝓥 𝓦 𝓧 : Universe} {A : 𝓥 ̇} {B : 𝓦 ̇}
+                → is-sheaf B
+                → (B → 𝓧 ̇)
+                → (A → B)
+                → 𝓓 A → 𝓧 ̇
+  𝓓-dep-extend B-is-sheaf El f = El ∘ 𝓓-extend B-is-sheaf f
 
- ΩT : 𝓤 ⁺ ̇
- ΩT = Σ P ꞉ Ω 𝓤 , is-T-stable P
+  𝓓-dep-extend-induction : {𝓥 𝓦 𝓧 : Universe}
+                         → funext 𝓤 𝓥
+                         → funext 𝓤 𝓧
+                         → {A : 𝓥 ̇} {B : 𝓦 ̇}
+                           (B-is-sheaf : is-sheaf B)
+                           (El : B → 𝓧 ̇)
+                           (El-is-sheaf : (b : B) → is-sheaf (El b))
+                           (f : A → B)
+                         → ((a : A) → El (f a))
+                         → (d : 𝓓 A)
+                         → 𝓓-dep-extend B-is-sheaf El f d
+  𝓓-dep-extend-induction fe₁ fe₂ {A} B-is-sheaf El El-is-sheaf f h d =
+   transport (𝓓-dep-extend B-is-sheaf El f)
+             (s-is-section-of-pr₁ d)
+             (pr₂ (s d))
+   where
+    total-space-is-sheaf : is-sheaf (Σ d ꞉ 𝓓 A , El (𝓓-extend B-is-sheaf f d))
+    total-space-is-sheaf = Σ-preserves-is-sheaf fe₁ fe₂ 𝓓-is-sheaf λ d →
+     El-is-sheaf (𝓓-extend B-is-sheaf f d)
 
- being-T-stable-is-prop : funext 𝓤 𝓤
-                  → (P : Ω 𝓤) → is-prop (is-T-stable P)
- being-T-stable-is-prop fe P = Π-is-prop fe (λ _ → holds-is-prop P)
+    pre-s : A → Σ d ꞉ 𝓓 A , 𝓓-dep-extend B-is-sheaf El f d
+    pre-s a = β a , transport El (𝓓-extend-β B-is-sheaf f a ⁻¹) (h a)
 
- to-Ω : ΩT → Ω 𝓤
- to-Ω = pr₁
+    s : 𝓓 A → Σ d ꞉ 𝓓 A , 𝓓-dep-extend B-is-sheaf El f d
+    s = 𝓓-extend total-space-is-sheaf pre-s
 
- _holds' : ΩT → 𝓤  ̇
- _holds' = _holds ∘ to-Ω
+    s-is-section-of-pr₁ : pr₁ ∘ s ∼ id
+    s-is-section-of-pr₁ = 𝓓-extension-is-unique fe₁ fe₁ 𝓓-is-sheaf
+     β
+     (pr₁ ∘ s)
+     id
+     (λ a → ap pr₁ (𝓓-extend-β total-space-is-sheaf pre-s a))
+     (λ a → refl)
 
- holds'-is-prop : (P : ΩT) → is-prop (P holds')
- holds'-is-prop = holds-is-prop ∘ to-Ω
+  𝓓-＝-induction' : {𝓥 𝓦 : Universe}
+                → funext 𝓤 𝓥
+                → funext 𝓤 𝓦
+                → {A : 𝓥 ̇} {B : 𝓦 ̇}
+                  (B-is-sheaf : is-sheaf B)
+                → (f g : A → B)
+                → (f ∼ g)
+                → (d : 𝓓 A)
+                → 𝓓-extend B-is-sheaf f d ＝ 𝓓-extend B-is-sheaf g d
+  𝓓-＝-induction' fe₁ fe₂ {A} {B} B-is-sheaf f g H d = Idtofun (eq ⁻¹) aux
+   where
+    h : A → B × B
+    h a = f a , g a
 
- ΩT-elements-are-T-stable : (P : ΩT) → is-T-stable (to-Ω P)
- ΩT-elements-are-T-stable = pr₂
+    El : B × B → _
+    El = uncurry _＝_
 
- to-ΩT-＝ : funext 𝓤 𝓤
-         → {P Q : 𝓤 ̇ }
-           {i : is-prop P} {j : is-prop Q}
-           {h : is-T-stable (P , i)} {k : is-T-stable (Q , j)}
-         → P ＝ Q
-         → ((P , i) , h) ＝[ ΩT ] ((Q , j) , k)
- to-ΩT-＝ fe h = to-subtype-＝ (being-T-stable-is-prop fe) (to-Ω-＝ fe h)
+    B²-is-sheaf : is-sheaf (B × B)
+    B²-is-sheaf = ×-preserves-is-sheaf B-is-sheaf B-is-sheaf
 
- ΩT-extensionality : propext 𝓤
-                   → funext 𝓤 𝓤
-                   → {p q : ΩT}
-                   → (p holds' → q holds')
-                   → (q holds' → p holds')
-                   → p ＝ q
- ΩT-extensionality pe fe {p} {q} f g =
-  to-ΩT-＝ fe (pe (holds'-is-prop p) (holds'-is-prop q) f g)
+    F : 𝓓 A → _
+    F = 𝓓-dep-extend B²-is-sheaf (uncurry _＝_) h
 
- ΩT-is-sheaf : propext 𝓤 → funext 𝓤 𝓤 → is-sheaf ΩT
- ΩT-is-sheaf pe fe = ΩT-glue , ΩT-glue-unique
-  where
-   ΩT-glue : (P : Ω 𝓤) → T P holds → (P holds → ΩT) → ΩT
-   ΩT-glue P _ f = R , R-is-T-stable
-    where
-     Q : P holds → Ω 𝓤
-     Q = pr₁ ∘ f
+    El-is-sheaf : (p : B × B) → is-sheaf (El p)
+    El-is-sheaf (x , y) = ＝-preserves-is-sheaf fe₂ B-is-sheaf x y
 
-     Q-is-T-stable : (h : P holds) → is-T-stable (Q h)
-     Q-is-T-stable = pr₂ ∘ f
+    aux : F d
+    aux = 𝓓-dep-extend-induction fe₁ fe₂ B²-is-sheaf El El-is-sheaf  h H d
 
-     R : Ω 𝓤
-     R = ((h : P holds) → (Q h) holds) ,
-         Π-is-prop fe (λ h → holds-is-prop (Q h))
+    eq : (𝓓-extend B-is-sheaf f d ＝ 𝓓-extend B-is-sheaf g d) ＝ F d
+    eq = ap (uncurry _＝_) (𝓓-extend-unique fe₁ fe₂ B²-is-sheaf
+          h
+          _
+          (λ a → ap₂ _,_ (𝓓-extend-β B-is-sheaf f a) (𝓓-extend-β B-is-sheaf g a))
+          d)
 
-     R-is-T-stable : T R holds → R holds
-     R-is-T-stable q h = Q-is-T-stable h (q ≫= λ r → η (r h))
+  𝓓-＝-induction : {𝓥 𝓦 : Universe}
+                → funext 𝓤 𝓥
+                → funext 𝓤 𝓦
+                → {A : 𝓥 ̇} {B : 𝓦 ̇}
+                → is-sheaf B
+                → (f g : 𝓓 A → B)
+                → (f ∘ β ∼ g ∘ β)
+                → (d : 𝓓 A)
+                → f d ＝ g d
+  𝓓-＝-induction fe₁ fe₂ B-is-sheaf f g H d =
+   f d
+    ＝⟨ 𝓓-extend-unique fe₁ fe₂ B-is-sheaf (f ∘ β) f (λ _ → refl) d ⟩
+   𝓓-extend B-is-sheaf (f ∘ β) d
+    ＝⟨ 𝓓-＝-induction' fe₁ fe₂ B-is-sheaf (f ∘ β) (g ∘ β) H d ⟩
+   𝓓-extend B-is-sheaf (g ∘ β) d
+    ＝⟨ 𝓓-extend-unique fe₁ fe₂ B-is-sheaf (g ∘ β) g (λ _ → refl) d ⁻¹ ⟩
+   g d ∎
 
-   ΩT-glue-unique : (P : Ω 𝓤) (p : T P holds) (Q : ΩT)
-                  → ΩT-glue P p (λ _ → Q) ＝ Q
-   ΩT-glue-unique P p (Q , Q-is-T-stable) = ΩT-extensionality pe fe forward backward
-    where
-     forward : (P holds → Q holds) → Q holds
-     forward f = Q-is-T-stable (p ≫= (η ∘ f))
+\end{code}
 
-     backward : Q holds → (P holds → Q holds)
-     backward q _ = q
+We now introduce the subobject classifier of sheaves and the induction principle
+from the sheafification into T-stable propositions.
 
+\begin{code}
+
+  is-T-stable : Ω 𝓤 → 𝓤  ̇
+  is-T-stable P = T P holds → P holds
+
+  image-of-T-is-T-stable : (ϕ : Ω 𝓤) → is-T-stable (T ϕ)
+  image-of-T-is-T-stable ϕ = _≫= id
+
+  T-stable-implies-is-sheaf : {P : Ω 𝓤} → is-T-stable P → is-sheaf (P holds)
+  T-stable-implies-is-sheaf {P} P-is-T-stable = P-glue , P-glue-unique
+   where
+    P-glue : (Q : Ω 𝓤) → T Q holds → (Q holds → P holds) → P holds
+    P-glue Q q ϕ = P-is-T-stable (T-action ϕ q)
+
+    P-glue-unique : (Q : Ω 𝓤) (q : T Q holds) (h : P holds)
+                  → P-glue Q q (λ _ → h) ＝ h
+    P-glue-unique Q q h = holds-is-prop P (P-glue Q q (λ _ → h)) h
+
+  ΩT : 𝓤 ⁺ ̇
+  ΩT = Σ P ꞉ Ω 𝓤 , is-T-stable P
+
+  being-T-stable-is-prop : funext 𝓤 𝓤
+                   → (P : Ω 𝓤) → is-prop (is-T-stable P)
+  being-T-stable-is-prop fe P = Π-is-prop fe (λ _ → holds-is-prop P)
+
+  to-Ω : ΩT → Ω 𝓤
+  to-Ω = pr₁
+
+  _holds' : ΩT → 𝓤  ̇
+  _holds' = _holds ∘ to-Ω
+
+  holds'-is-prop : (P : ΩT) → is-prop (P holds')
+  holds'-is-prop = holds-is-prop ∘ to-Ω
+
+  ΩT-elements-are-T-stable : (P : ΩT) → is-T-stable (to-Ω P)
+  ΩT-elements-are-T-stable = pr₂
+
+  to-ΩT-＝ : funext 𝓤 𝓤
+          → {P Q : 𝓤 ̇ }
+            {i : is-prop P} {j : is-prop Q}
+            {h : is-T-stable (P , i)} {k : is-T-stable (Q , j)}
+          → P ＝ Q
+          → ((P , i) , h) ＝[ ΩT ] ((Q , j) , k)
+  to-ΩT-＝ fe h = to-subtype-＝ (being-T-stable-is-prop fe) (to-Ω-＝ fe h)
+
+  ΩT-extensionality : propext 𝓤
+                    → funext 𝓤 𝓤
+                    → {p q : ΩT}
+                    → (p holds' → q holds')
+                    → (q holds' → p holds')
+                    → p ＝ q
+  ΩT-extensionality pe fe {p} {q} f g =
+   to-ΩT-＝ fe (pe (holds'-is-prop p) (holds'-is-prop q) f g)
+
+  ΩT-is-sheaf : propext 𝓤 → funext 𝓤 𝓤 → is-sheaf ΩT
+  ΩT-is-sheaf pe fe = ΩT-glue , ΩT-glue-unique
+   where
+    ΩT-glue : (P : Ω 𝓤) → T P holds → (P holds → ΩT) → ΩT
+    ΩT-glue P _ f = R , R-is-T-stable
+     where
+      Q : P holds → Ω 𝓤
+      Q = pr₁ ∘ f
+
+      Q-is-T-stable : (h : P holds) → is-T-stable (Q h)
+      Q-is-T-stable = pr₂ ∘ f
+
+      R : Ω 𝓤
+      R = ((h : P holds) → (Q h) holds) ,
+          Π-is-prop fe (λ h → holds-is-prop (Q h))
+
+      R-is-T-stable : T R holds → R holds
+      R-is-T-stable q h = Q-is-T-stable h (q ≫= λ r → η (r h))
+
+    ΩT-glue-unique : (P : Ω 𝓤) (p : T P holds) (Q : ΩT)
+                   → ΩT-glue P p (λ _ → Q) ＝ Q
+    ΩT-glue-unique P p (Q , Q-is-T-stable) = ΩT-extensionality pe fe forward backward
+     where
+      forward : (P holds → Q holds) → Q holds
+      forward f = Q-is-T-stable (p ≫= (η ∘ f))
+
+      backward : Q holds → (P holds → Q holds)
+      backward q _ = q
+
+  𝓓-equiv-to-T : funext 𝓤 𝓤
+               → (ϕ : Ω 𝓤)
+               → T ϕ holds ≅ 𝓓 (ϕ holds)
+  𝓓-equiv-to-T fe ϕ = f , g , gf , fg
+   where
+    f : T ϕ holds → 𝓓 (ϕ holds)
+    f p = ǫ ϕ p β
+
+    g : 𝓓 (ϕ holds) → T ϕ holds
+    g = 𝓓-extend (T-stable-implies-is-sheaf (image-of-T-is-T-stable ϕ)) η
+
+    fgβ : f ∘ g ∘ β ∼ β
+    fgβ p =
+     ǫ ϕ _ β
+      ＝⟨ ap (ǫ ϕ _) (dfunext fe (λ q → ap β (holds-is-prop ϕ q p))) ⟩
+     ǫ ϕ _ (λ _ → β p)
+      ＝⟨ 𝐞 ϕ _ (β p) ⟩
+     β p ∎
+
+    fg : f ∘ g ∼ id
+    fg = 𝓓-＝-induction fe fe 𝓓-is-sheaf (f ∘ g) id fgβ
+
+    gf : g ∘ f ∼ id
+    gf p = holds-is-prop (T ϕ) (g (f p)) p
+
+
+
+
+\end{code}
  module _ (pe : propext 𝓤) (fe : Fun-Ext) (se : sheafification-exist) where
 
   open sheafification-exist se
 
-  open import UF.Logic
+  T-stable-predicate-extension : {𝓥 : Universe} {A : 𝓥 ̇}
+                                 (P : A → Ω 𝓤)
+                               → ((a : A) → is-T-stable (P a))
+                               → 𝓓 A → Ω 𝓤
+  T-stable-predicate-extension P h =
+   to-Ω ∘ 𝓓-extend se (ΩT-is-sheaf pe fe) (λ a → P a , h a)
+
+  T-stable-predicate-extension-β : {𝓥 : Universe} {A : 𝓥 ̇}
+                                   (P : A → Ω 𝓤)
+                                   (h : (a : A) → is-T-stable (P a))
+                                   (a : A)
+                                 → T-stable-predicate-extension P h (β a) ＝ P a
+  T-stable-predicate-extension-β P h a =
+   ap to-Ω (𝓓-extend-β se (ΩT-is-sheaf pe fe) (λ a → P a , h a) a)
+
+  T-stable-predicate-extension-is-T-stable : {𝓥 : Universe} {A : 𝓥 ̇}
+                                             (P : A → Ω 𝓤)
+                                             (h : (a : A) → is-T-stable (P a))
+                                             (d : 𝓓 A)
+                                           → is-T-stable (T-stable-predicate-extension P h d)
+  T-stable-predicate-extension-is-T-stable P h d =
+   ΩT-elements-are-T-stable (𝓓-extend se (ΩT-is-sheaf pe fe) (λ a → P a , h a) d)
+
+  T-stable-predicate-induction : {𝓥 : Universe}
+                               → {A : 𝓥 ̇}
+                                 (P : A → Ω 𝓤)
+                                 (h : (a : A) → is-T-stable (P a))
+                               → ((a : A) → P a holds)
+                               → (d : 𝓓 A)
+                               → T-stable-predicate-extension P h d holds
+  T-stable-predicate-induction {_} {A} P h i d =
+   transport (λ d → T-stable-predicate-extension P h d holds)
+             (g-is-section-of-pr₁ d)
+             (pr₂ (g d))
+   where
+    total-space-is-sheaf : is-sheaf (Σ d ꞉ 𝓓 A , T-stable-predicate-extension P h d holds)
+    total-space-is-sheaf = Σ-preserves-is-sheaf fe fe
+     (𝓓-is-sheaf se) (λ d →
+      T-stable-implies-is-sheaf (T-stable-predicate-extension-is-T-stable P h d))
+
+    f : A → Σ d ꞉ 𝓓 A , T-stable-predicate-extension P h d holds
+    f a = β a , transport _holds (T-stable-predicate-extension-β P h a ⁻¹) (i a)
+
+    g : 𝓓 A → Σ d ꞉ 𝓓 A , T-stable-predicate-extension P h d holds
+    g = 𝓓-extend se total-space-is-sheaf f
+
+    g-is-section-of-pr₁ : pr₁ ∘ g ∼ id
+    g-is-section-of-pr₁ = 𝓓-extension-is-unique se fe fe (𝓓-is-sheaf se)
+     β
+     (pr₁ ∘ g)
+     id
+     (λ a → ap pr₁ (𝓓-extend-β se total-space-is-sheaf f a))
+     (λ a → refl)
+
+  result : (ϕ : Ω 𝓤)
+           (P : ϕ holds → Ω 𝓤)
+           (h : (r : ϕ holds) → is-T-stable (P r))
+           (m : 𝓓 (ϕ holds))
+         → T-stable-predicate-extension P h m holds
+         → 𝓓 (Σ r ꞉ ϕ holds , P r holds)
+  result ϕ P h m = 𝓓-extend se {!!} {!!} m
+   where
+    Q : (m : 𝓓 (ϕ holds)) → Ω 𝓤
+    Q m = (T-stable-predicate-extension P h m holds → 𝓓 (Σ r ꞉ ϕ holds , P r holds))
+        , Π-is-prop fe {!!}
+
+    aux : ϕ holds → T-stable-predicate-extension P h m holds → 𝓓 (Σ r ꞉ ϕ holds , P r holds)
+    aux = {!!}
+
+
+  --T-stable-predicate-extension-unique : {𝓥 : Universe} {A : 𝓥 ̇}
+  --                                      (P : A → Ω 𝓤)
+  --                                      (h : (a : A) → is-T-stable (P a))
+  --                                      (Q : 𝓓 A → Ω 𝓤)
+  --                                    → ((a : A) → P a holds → Q (β a) holds)
+  --                                    → ((a : A) → Q (β a) holds → (P a) holds)
+  --                                    → T-stable-predicate-extension P h ∼ Q
+  --T-stable-predicate-extension-unique P h Q f b d =
+  -- to-Ω (𝓓-extend se (ΩT-is-sheaf pe fe) (λ a → P a , h a) d)
+  --  ＝⟨ {!!} ⟩
+  -- to-Ω (Q d , Q-is-T-stable d)
+  --  ＝⟨ refl ⟩
+  -- Q d ∎
+  -- where
+  --  Q-is-T-stable : (d : 𝓓 _) → is-T-stable (Q d)
+  --  Q-is-T-stable d q = {!!}
+  --  -- Q d
+  --  -- Q (glue (𝓓-is-sheaf _) (Q d) q (λ _ → d))
+
+
   open UF.Logic.Implication fe
 
-  --ΩT-is-sheafification-implies-T-preserves-⇒ : ΩT ≃ 𝓓 (Ω 𝓤)
-  --                                           → (P Q : Ω 𝓤)
-  --                                           → T (P ⇒ Q) ＝ (T P ⇒ T Q)
-  --ΩT-is-sheafification-implies-T-preserves-⇒ (f , _ , g , _) P Q =
-  -- Ω-extensionality pe fe forwards backwards
-  -- where
-  --  forwards : T (P ⇒ Q) holds → (T P holds → T Q holds)
-  --  forwards r p = r ≫= λ r' → p ≫= λ p' → η (r' p')
-
-  --  backwards : (T P holds → T Q holds) → T (P ⇒ Q) holds
-  --  backwards α = {!α ∘ η!}
-
+  --bar : {𝓥 : Universe}
+  --    → {A : 𝓥 ̇}
+  --      (P Q : A → Ω 𝓤)
+  --      (hP : (a : A) → is-T-stable (P a))
+  --      (hQ : (a : A) → is-T-stable (Q a))
+  --      (d : 𝓓 A)
+  --    → T-stable-predicate-extension (λ a → P a ⇒ Q a) {!!} d
+  --    → (T-stable-predicate-extension P hP d ⇒ T-stable-predicate-extension Q hQ d) holds
+  --bar P Q hP hQ d α β = {!!}
 
 \end{code}

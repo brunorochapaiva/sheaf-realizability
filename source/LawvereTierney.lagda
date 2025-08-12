@@ -2,6 +2,9 @@
 
 open import MLTT.Spartan
 open import UF.SubtypeClassifier
+open import UF.Logic
+
+open Conjunction
 
 module LawvereTierney {𝓤 : Universe} where
 
@@ -33,5 +36,11 @@ module LawvereTierney {𝓤 : Universe} where
 
   _≫=_ : {P Q : Ω 𝓤} → T P holds → (P holds → T Q holds) → T Q holds
   _≫=_ = bind topology _ _
+
+  T-action : {P Q : Ω 𝓤} → (P holds → Q holds) → T P holds → T Q holds
+  T-action f = _≫= (η ∘ f)
+
+  T-pair : {P Q : Ω 𝓤} → T P holds → T Q holds → T (P ∧ Q) holds
+  T-pair r s = r ≫= (λ p → T-action (p ,_) s)
 
 \end{code}
