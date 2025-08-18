@@ -1,5 +1,5 @@
 main=main
-collectionID=FX2URPTD
+collectionID=QPWE3B3N
 
 default:
 	latexmk ${main}.tex -pdf -synctex=1

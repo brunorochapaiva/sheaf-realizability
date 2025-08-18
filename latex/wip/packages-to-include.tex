@@ -23,17 +23,14 @@
   eprint=false,
 ]{biblatex}
 \addbibresource{references.bib}
-\AtEveryBibitem{\clearname{editor}} % Always remove editor information
 
-\usepackage[]{hyperref}
-\hypersetup{
-    colorlinks=false,
-}
-
+\usepackage[colorlinks=false]{hyperref}
+\usepackage{aliascnt}
 \usepackage{amsmath}
 \usepackage{amssymb}
 \usepackage{amsfonts}
 \usepackage{amsthm}
+\usepackage{cleveref}
 \usepackage{newtxmath}
 \usepackage{url}
 \usepackage{tikz-cd}
@@ -50,9 +47,9 @@
 \else
 \usepackage[disable]{todonotes}
 \fi
-\usepackage{cleveref}
 \usepackage{xspace}
 \usepackage{multirow}
 \usepackage{ulem}
 \usepackage{contour}
 \usepackage{xcolor}
+\usepackage{booktabs}

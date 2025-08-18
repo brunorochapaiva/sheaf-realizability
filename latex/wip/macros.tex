@@ -31,12 +31,15 @@
 \renewcommand{\L}{\ensuremath{{L}}} % arbitrary lattice
 \newcommand{\X}{\ensuremath{X}} % arbitrary sheaf
 \newcommand{\E}{\mathcal{E}} % arbitrary topos
+\newcommand{\Ej}{\mathcal{E}_\IBoxSym} % arbitrary topos of sheaves
 
 \newcommand{\Par}[1]{{#1}_\bot}
 \newcommand{\ParTo}{\rightharpoonup}
 \newcommand{\ParCat}[1]{{#1}^\ParTo}
 
 \newcommand{\PresheafCat}{\hat{\C}}
+
+\newcommand{\Sub}[1]{\mathsf{Sub}({#1})}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% VERNACULAR COMMANDS %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -108,6 +111,21 @@
 
 % Types
 \newcommand{\IPower}[1]{\mathcal{P}{#1}}
+\newcommand{\IPowerCl}[1]{\mathcal{P}_{\IBoxSym}{#1}}
+\newcommand{\IProp}{\Omega}
+\newcommand{\IPropCl}{\Omega_\IBoxSym}
+\newcommand{\IHolds}[1]{|{#1}|}
+
+%% Universe
+\newcommand{\IUni}{\mathcal{U}}
+
+%% Empty type
+\newcommand{\IEmpty}{\mathbb{0}}
+\newcommand{\IEmptyM}[1]{!_{#1}}
+
+%% Unit type
+\newcommand{\IUnit}{\mathbb{1}}
+\newcommand{\IUnitM}[1]{{\langle\rangle}_{#1}}
 
 %% Product types
 \newcommand{\IProd}[2]{{#1}\times{#2}}
@@ -120,7 +138,9 @@
 \newcommand{\IEqualiser}[2]{\mathsf{Eq({#1,#2})}}
 
 %% Function types
-\newcommand{\IFun}[2]{{{#2}^{#1}}}
+\newcommand{\IFun}[2]{{{#1}\to{#2}}}
+\newcommand{\ILam}[2]{{\mathop{\lambda({#1}).}{#2}}}
+
 \newcommand{\IId}[1]{\mathbb{1}_{#1}}
 
 % INTERNAL PCA
@@ -136,12 +156,12 @@
 %% Polynomial abstraction
 \newcommand{\IAbs}[2]{\Lambda{#1}.\,{#2}}
 
-%% Partial element is defined
-\newcommand{\ITotal}[1]{{#1}\downarrow}
-
 %% Partial element ordering
 \newcommand{\IPLeqSym}{\preccurlyeq}
 \newcommand{\IPLeq}[2]{{#1}\IPLeqSym{#2}}
+
+\newcommand{\IPSimSym}{\simeq}
+\newcommand{\IPSim}[2]{{#1}\IPSimSym{#2}}
 
 \newcommand{\IIdentCode}{\texttt{id}}
 
@@ -158,12 +178,44 @@
 \newcommand{\IMatchCode}{\texttt{match}}
 
 
+%% Sheafification
+\newcommand{\ISheafSym}{\mathcal{D}}
+\newcommand{\ISheaf}[1]{\ISheafSym{#1}}
+\newcommand{\ISheafExt}[1]{{#1}^\sharp}
+\newcommand{\ISheafIndSym}{\mathcal{D}_\text{ind}}
+\newcommand{\ISheafInd}[1]{\ISheafIndSym\,{#1}}
+
+\newcommand{\IGlueSym}{\text{glue}}
+\newcommand{\IGlue}[1]{\IGlueSym_{#1}}
+
+\newcommand{\ILeafSym}{\eta}
+\newcommand{\ILeaf}[1]{\eta\,{#1}}
+
+\newcommand{\IBranchSym}{\beta}
+\newcommand{\IBranch}[3]{\beta(#1,#2,#3)}
+
+%% Lifting monad
+
+\newcommand{\IPar}[1]{{#1}_\bot}
+\newcommand{\ITotal}[1]{{{#1}\!\downarrow}}
+\newcommand{\IValSym}{\text{value}}
+\newcommand{\IVal}[1]{\IValSym\,{#1}}
+
+\newcommand{\ISquashSym}{{\Downarrow}}
+\newcommand{\ISquash}[1]{\ISquashSym\,{#1}}
+
+\newcommand{\IParExtSym}{\Diamond}
+\newcommand{\IParExt}[1]{\IParExtSym{#1}}
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% TRIPOS %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+%% Tripos
+\newcommand{\Trip}{T_\IBoxSym}
+
 %% Realizability Predicates
-\newcommand{\RealPred}[1]{\IPower{(\IProd{#1}{\A})}}
+\newcommand{\RealPred}[1]{\IPowerCl{(\IProd{#1}{\A})}}
 
 % Tripos language
 
@@ -184,8 +236,12 @@
 \newcommand{\TImplies}[3]{{#1}\TImpliesSym{#3}{#2}}
 
 \newcommand{\TPull}[1]{{#1}^\ast}
+\newcommand{\TExists}[1]{\exists_{#1}}
+\newcommand{\TForall}[1]{\forall_{#1}}
 
 %% Category of assemblies
 \newcommand{\AsmSym}{\mathbf{Asm}}
 \newcommand{\Asm}[3]{\AsmSym_{(#2,#3)}(#1)}
 \newcommand{\AsmCat}{\Asm{\A}{\E}{\Box}}
+
+\newcommand{\Adj}[2]{{#1}[{#2}]}

@@ -11,7 +11,17 @@
 
 \input{packages-to-include}
 
-\newtheorem{thrm}{Theorem}[section]
+% Need this nonsense so that cleveref uses the correct names for references
+\let\oldtheorem\newtheorem
+\RenewDocumentCommand{\newtheorem}{s m o m O{}}{%
+\IfBooleanTF{#1}%
+{\oldtheorem{#2}{#4}}%
+{\IfNoValueTF{#3}{\oldtheorem{#2}{#4}[#5]}%
+{\newaliascnt{#2}{#3}%
+\oldtheorem{#2}[#2]{#4}%
+\aliascntresetthe{#2}}}}
+
+\newtheorem{thrm}{Theorem}[subsection]
 \newtheorem{lemm}[thrm]{Lemma}
 \newtheorem{prop}[thrm]{Proposition}
 \newtheorem{defn}[thrm]{Definition}
@@ -33,252 +43,506 @@
 
 We begin a treatment of realizability internal to categories of sheaves.
 
-%\section{Internal Language of a Presheaf Topos}
+\section{Preliminaries on working internally}
+
+For the whole of this section we define and prove things in the internal
+language of an elementary topos \(\E\).
+
+\subsection{Lawvere-Tierney topologies}%
+\label{sub:lawvere-tierney-internal}
+
+Lawvere-Tierney topologies are an internal representation for subtoposes
+of \(\E\).
+
+\begin{defn}\label{defn:lawvere-tierney}
+  A \definiendum{Lawvere-Tierney topology} on is a function
+  \(\IBoxSym : \Omega \to \Omega\) such that for all propositions \(P,Q\), both
+  \(\IImplies{P}{\IBox{P}}\) and
+  \(\IImplies{(\IImplies{P}{\IBox{Q}})}{\IImplies{\IBox{P}}{\IBox{Q}}}\) hold.
+\end{defn}
+
+\subsection{Sheaves}%
+\label{sub:sheaves-internal}
+
+Once we have fixed a Lawvere-Tierney topology \(\IBoxSym : \IProp \to \IProp\),
+we have the following internal definition of sheaves:
+
+\begin{defn}
+  A type \(A\) is a \definiendum{sheaf} if we have a function
+  %
+  \[
+    \IGlue{A} : (P : \IProp) \to \IHolds{\IBox{P}} \to (\IHolds{P} \to A) \to A
+  \]
+  %
+  such that for all propositions \(P\) and proofs \(q : \IHolds{\IBox{P}}\),
+  we have the following equivalence of types:
+  %
+  \[
+    \IGlue{A}\,P\,q : (\IHolds{P} \to A) \cong A : \text{const}
+  \]
+\end{defn}
+
+We note that as we ask that the \(\text{const}\) function be an equivalence,
+being a sheaf is a property of a type \(A\) and not extra structure.
 %
-%A typical course in mathematical logic may start by looking at formal systems
-%such as natural deduction or the sequent calculus, giving rise to a notion of
-%truth, namely the provability of formulas. A natural next step is to then look
-%at the semantics of said proof system. These semantics can vary significantly
-%depending on the chosen logic such as boolean valuations for propositional
-%logic, Kripke frames for modal logic, \(\mathcal{L}\)-structures for predicate
-%logic, etc. Regardless, in each case we can consider whether a formula is valid,
-%i.e.\ true in every model and this gives rise to yet to a second notion of
-%truth. Remarkably, these two notions of truth often coincide, provided the right
-%proof system and semantics are chosen. While provability quantifies
-%existentially over proofs, asking whether a formal proof exists, validity is a
-%universal statement asking that the interpretation of a formula hold in all
-%models. This duality is powerful: to show a formula \(\phi\) is not provable by
-%proof-theoretic means is difficult. Typical methods start by identifying some
-%property of proofs \(P\) such that any proof of any formula \(\psi\) can be
-%transformed to another proof of \(\psi\) satisfying \(P\). From here, if we can
-%show that no proof of \(\phi\) satisfying \(P\) exists, then that must mean no
-%proof exists in general. Typical examples of properties \(P\) can be that the
-%proof does not make use of the \textbf{Cut} rule in sequent calculus or
-%alternatively for natural deduction that there exist no \(\beta\)-redexs. While
-%these are interesting and useful results to have, in this case the semantics
-%offers an easier route. To show \(\phi\) is not valid it suffices to demonstrate
-%a model in which the interpretation of \(\phi\) does not hold and this is
-%generally easier than the syntactic route.
+In the case that the type \(A\) is a set, which is always true in our setting,
+then it is equivalent to prove only that the composite
+\((\IGlue{A}\,P\,q) \circ \text{const}\) sends each \(a : A\) to itself.
+
+Any map \(f : A \to B\) induces a map
+\((f\circ-) : (\IHolds{P} \to A) \to (\IHolds{P} \to B)\) by post-composition.
 %
-%At a first glance the power of this duality seems to be in dispatching of syntax
-%and work purely with models. As we move to more and more complicated languages,
-%going beyond first-order logic to its higher-order counterparts, then the needle
-%begins to move back. In particular, consider (your favourite version of)
-%Martin-L\"of Type Theory (\MLTT{}) with \(\Pi\)-types and \(\Sigma\)-types.
-%Semantics for \MLTT{} are usually categorically, either through categories with
-%families, contextual categories, natural models, the list goes on. Fixing your
-%favourite notion of model, categories of presheaves \(\PresheafCat\) generally
-%give rise to a model of dependent type theory. That means if we prove some
-%statement in \MLTT{}, then by taking the interpretation of said statement in
-%\(\PresheafCat\) we will get a true statement about presheaves over \(\C\).
-%Working with presheaves can be quite labourious and often becomes an exercise
-%in bookkeeping of indices.
+In the case that \(A\) and \(B\) are both sheaves, then the gluing function
+will give a natural transformation.
+
+\begin{prop}
+  Given sheaves \(A\) and \(B\), a function \(f : A \to B\), a proposition \(P\)
+  and \(q : \IHolds{P}\), then the following naturality square commutes:
+  %
+  \[\begin{tikzcd}
+      (\IHolds{P} \to A) \arrow[rr , "\IGlue{A}\,P\,q"] \arrow[d, "(f\circ-)"'] && A \arrow[d, "f"]\\
+      (\IHolds{P} \to B) \arrow[rr , "\IGlue{B}\,P\,q"] && B
+    \end{tikzcd}\]
+\end{prop}
+\begin{proof}
+  Fix \(f : A \to B\), a proposition \(P\), \(q : \IHolds{P}\) and
+  \(\phi : \IHolds{P} \to A\) so we are left to show that
+  \(f(\IGlue{A}\,P\,q\,\phi) = \IGlue{B}\,P\,q\,(f \circ \phi)\).
+  %
+  Well, we have the following sequence of equalities:
+  %
+  \begin{align*}
+    &f(\IGlue{A}\,P\,q\,\phi)\\
+    &\quad=
+      f(\IGlue{A}\,P\,q\,(\ILam{p':\IHolds{P}}\phi\,p'))
+      \\
+    &\quad=
+      \IGlue{B}\,P\,q\,(\ILam{p:\IHolds{P}}{f(\IGlue{A}\,P\,q\,(\ILam{p':\IHolds{P}}\phi\,p'))})
+      \\
+    &\quad=
+      \IGlue{B}\,P\,q\,(\ILam{p:\IHolds{P}}{f(\IGlue{A}\,P\,q\,(\ILam{p':\IHolds{P}}\phi\,p))})
+      \\
+    &\quad=
+      \IGlue{B}\,P\,q\,(\ILam{p:\IHolds{P}}{f(\phi\,p)})
+      \\
+    &\quad=\IGlue{B}\,P\,q\,(f \circ \phi)
+  \end{align*}
+  %
+  where the first and last equalities are \(\eta\)-expansions,
+  the second and second to last equalities hold since gluing a constant
+  family gives the original element, and the third equality holds
+  since \(p\) and \(p'\) are both elements of the same proposition, so they
+  are necessarily equal.
+\end{proof}
+
+Sheaves have nice closure properties with regards to the constructors of type
+theory.
+
+\begin{prop}
+  Given a type family \(F : A \to \IUni\) such that for \(Fa\) is a sheaf for
+  all \(a : A\), then the dependent product \((a : A) \to Fa\) is also a
+  sheaf.
+\end{prop}
+
+\begin{prop}%
+\label{prop:sums-preserve-sheaf}
+  Given a type family \(F : A \to \IUni\) such that \(A\) is a sheaf and \(Fa\)
+  is a sheaf for all \(a : A\), then the dependent sum \((a : A) \times Fa\)
+  is also a sheaf.
+\end{prop}
+
+\begin{prop}
+  Given a sheaf \(A\) and elements \(a\ b : A\), the identity type \(a = b\) is
+  also a sheaf.
+\end{prop}
+
+Though we have these closure properties, we have not yet actually seen
+any examples of sheaves.
 %
-%\subsection{Exponentials}
+For now, the only basic examples of sheaves we have are all related to
+\(\IBoxSym\) stable propositions.
+
+\begin{prop}\label{prop:t-stable-iff-sheaf}
+  For \(P : \IProp\), the proposition \(\IImplies{\IBox{P}}{P}\) holds if and
+  only if \(\IHolds{P}\) is a sheaf.
+\end{prop}
+
+\begin{coro}
+  The unit type \(\mathbb{1}\) is a sheaf. The empty type
+  \(\mathbb{0}\) is a sheaf if and only if \(\IBox{\bot} = \bot\).
+\end{coro}
+
+And for the first example of a sheaf which is not a proposition we
+have the subtype of propositions which are \(\IBoxSym\)-stable.
+
+\begin{defn}
+  The \definiendum{subobject classifier of sheaves}, denoted \(\IPropCl\), is
+  given by the subtype of \(\IBoxSym\)-stable propositions, more explicitly it
+  is the dependent sum \((P : \IProp) \times \IHolds{\IImplies{\IBox{P}}{P}}\).
+\end{defn}
+
+\begin{prop}
+  The type \(\IPropCl\) of \(\IBoxSym\)-stable propositions is a sheaf.
+\end{prop}
+
+\subsection{Sheafification}%
+\label{sub:sheafification-internal}
+
+We are now faced with the fact that there really are not any more sheaves we
+can talk about internally, which leaves us at an impasse.
 %
-%Given two types \(A, B\), the type of functions from \(A\) to \(B\),
-%denoted \(\IFun{A}{B}\), behaves like the usual function type in type theory.
-%%
-%As for its categorical semantics we have the following
+Luckily, we can burrow our way out, for we are taking our semantics in \(\E\),
+where a myriad of sheaves exist.
 %
-%\begin{defn}
-%  Given two objects \(A, B\), their exponential is an object \(\IFun{A}{B}\)
-%  along with a morphism \(\EEval : A \times \IFun{A}{B} \to B\) such that
-%  for all \(f : C \times A \to B\) there exists a unique
-%  \(\tilde{f}: C \to \IFun{A}{B}\) making the following triangle commutes
-%  %
-%  \[\begin{tikzcd}
-%    {C \times \IFun{A}{B}} && B \\
-%    \\
-%    {C\times A}
-%    \arrow["{\EEval}", from=1-1, to=1-3]
-%    \arrow["{C\times\tilde{f}}", from=3-1, to=1-1]
-%    \arrow["f"', from=3-1, to=1-3]
-%  \end{tikzcd}\]
-%\end{defn}
+In particular, for every object \(A\) in \(\E\) there exists a free sheaf on
+\(A\); provided we can axiomatise this to a satisfactory degree we can then use
+it inside the internal language to talk about many more examples of sheaves.
+
+As usual, we characterise free constructions as left adjoints, so first we
+assume we have a sheafification type former
+\(\ISheafSym : \IUni \to \IUni\) such that for all \(a : A\), we have
+\(\ILeafSym : A \to \ISheaf{A}\) and proof that \(\ISheaf{A}\) is a sheaf.
 %
-%\subsubsection{Exponentials of Presheaves}
+Our second requirement is that, given a type \(A\) and a sheaf \(B\), the
+pre-composition map
+\(-\circ\ILeafSym : (\ISheaf{A} \to B) \to (A \to B)\) is an equivalence.
 %
-%The exponential of two presheaves \(X,Y\) is a presheaf
-%\(\IFun{X}{Y}\) with action on objects given by
-%%
-%\[
-%  (\IFun{X}{Y})_{w} \IsDefined \mathsf{Nat}(\yo(w) \times X, Y)
-%\]
-%%
-%and action on morphisms defined as follows
-%%
-%\[\begin{array}{l}
-%  \IFun{X}{Y}_{f:u \to w} :
-%    \mathsf{Nat}(\yo(w) \times X, Y) \to \mathsf{Nat}(\yo(u) \times X, Y)\\
-%  (\IFun{X}{Y}_{f:u \to w}(\alpha))_{v}(g : v \to u, x : X_{v})
-%    \IsDefined \alpha_{v}(fg, x)
-%\end{array}\]
+Given \(f : A \to B\), we denote its transpose across the equivalence by
+\(\ISheafExt{f} : \ISheaf{A} \to B\).
+
+While this adjunction lets us define non-dependent maps out of sheafified
+types, we would currently get stuck trying to prove any properties
+about these maps.
 %
-%The evaluation map is a natural transformation
-%\(\EEval : X \times \IFun{X}{Y} \to Y\) defined for each object
-%\(w\) by
-%%
-%\[\begin{array}{l}
-%  \EEval_{w} : X \times \mathsf{Nat}(\yo(w) \times X, Y) \to Y\\
-%  \EEval_{w}(x, \alpha) \IsDefined \alpha_{w}(\mathsf{id}, x)
-%\end{array}\]
-%%
-%Naturality of \(\EEval\) means for all \(x : X_{w}\),
-%\(\alpha : \mathsf{Nat}(\yo(w) \times X, Y)\) and \(f : v \to w\) we have
-%\[
-%  Y_{f}(\alpha_{w}(\mathsf{id}, x)) =
-%  Y_{f}(\EEval_{w}(x, \alpha)) =
-%  \EEval_{v}(X_{f}(x), \IFun{X}{Y}_{f}(\alpha)) =
-%  (\IFun{X}{Y}_{f}(\alpha))_{v}(\mathsf{id}, X_{f}(x)) =
-%  \alpha_{v}(f, X_{f}(x))
-%\]
+For that, we need to recover a dependent elimination principle, which we
+can do through the use of the total space of a type family.
+
+\begin{prop}%
+\label{prop:sheafification-elim-principle}
+Given a type \(A\) and a type family \(F : \ISheaf{A} \to \IUni\) such that
+\(Fd\) is a sheaf for all \(d : \ISheaf{A}\), then for any
+\(f : (a : A) \to F(\ILeaf{a})\) there exists a unique function
+\(\ISheafInd{f} : (d : \ISheaf{A}) \to Fd\) satisfying
+\(f = \ISheafInd{f} \circ \ILeafSym\).
+\end{prop}
+\begin{proof}
+  The adjunction only lets us transpose non-dependent maps out of \(A\),
+  so we first define:
+  \begin{align*}
+    &s : A \to \IProd{(d : \ISheaf{A})}{Fd}\\
+    &s\,a \IsDefined \IPair{\ILeaf{a}}{f\,a}
+  \end{align*}
+  %
+  Since \(\ISheaf{A}\) is a sheaf, and so are all the fibers of \(F\), we know
+  by~\Cref{prop:sums-preserve-sheaf} that the total space of \(F\) is a sheaf,
+  hence we can take the transpose of \(s\) to get a map
+  \(\ISheafExt{s} : \ISheaf{A} \to \IProd{(d : \ISheaf{A})}{Fd}\).
+  %
+  A quick computation shows that
+  \(\IFst \circ \ISheafExt{s} \circ \ILeafSym = \IFst \circ s = \ILeafSym\),
+  but pre-composition with \(\ILeafSym\) is an equivalence so that
+  implies that \(\IFst \circ \ISheafExt{s}\) is the identity.
+  %
+  From the fact that \(\ISheafExt{s}\) is a section of \(\IFst\), we see that
+  \(\ISnd \circ \ISheafExt{s}\) has the type required, so we are left to
+  show the required equation.
+  %
+  This holds as we have~\(f = \ISnd \circ s = \ISnd \circ \ISheafExt{s} \circ \ILeafSym\).
+  %
+  For the uniqueness part suppose we have two candidates
+  \(g,h : (d : \ISheaf{A}) \to Fd\) satisfying
+  \(f = g\circ\ILeafSym = h\circ\ILeafSym\), then
+  \(\IProd{\text{id}}{g} = \IProd{\text{id}}{h}\) because these agree on
+  the image of \(\ILeafSym\).
+  %
+  But now
+  \(g = \ISnd \circ (\IProd{\text{id}}{g}) = \ISnd \circ (\IProd{\text{id}}{h}) = h\) as needed.
+\end{proof}
+
+As a corollary of this elimination principle, we now see how to reason
+about predicates on sheafified types.
 %
-%\subsection{Substitution and Logical Quantification}
+In particular, we only have a good grasp on these if they are
+\(\IBoxSym\)-stable.
+
+\begin{coro}
+  Given a predicate \(P : X \to \IPropCl\), if \(P x\) holds for all \(x : X\),
+  then also \(\ISheafExt{P}d\) holds for all \(d : \ISheaf{X}\).
+\end{coro}
+\begin{proof}
+  The type family
+  \(F\,X \IsDefined \IHolds{P\,X}\) is fiberwise a sheaf, so we may
+  apply~\Cref{prop:sheafification-elim-principle}.
+\end{proof}
+
+As we saw, the property of being a sheaf is a well-behaved one with respect
+to constructors of type theory.
 %
-%Any topos is able to interpret both proof-relevant and proof-irrelevant
-%universal and existential quantification.
-%%
-%Let us focus on proof-irrelevant quantification, that is quantification yielding
-%propositions.
-%%
-%For any map \(f : X \to Y\) we have a reindexing map
-%\(f^{*} : \mathsf{Sub}(Y) \to \mathsf{Sub}(X)\) by precomposition with \(f\).
-%%
-%This reindexing preserves all Heyting algebra structure and gives our
-%interpretation of substitution of terms in predicates.
-%%
-%As we are in a topos, we also happen to have left and right adjoints
-%\(\exists_{f} \dashv f^{*} \dashv \forall_{f}\), though this time they are only
-%monotone maps and do not preserve all the Heyting algebra structure.
-%%
-%These adjoints can be shown to satisfy the Beck-Chevalley conditions, so they
-%form, respectively, our interpretation of existential and universal quantifiers.
+It is no surprise then that sheafification also seems to play well with these,
+for example commuting with dependent sums and products.
 %
-%Focusing on existential quantification first, suppose we have a predicate
-%\(\phi : \mathsf{Sub}(X \times Y)\) in two typed variables \(x\) and \(y\).
-%%
-%Considering the projection \(\pi : X \times Y \to X\), we can get a predicate
-%\(\exists_{\pi}\phi : \mathsf{Sub}(X)\).
-%%
-%Abusing some notation, if initially we saw \(\phi\) as the interpretation of
-%some syntactical predicate \(\phi(x,y)\), then we would see this new predicate
-%as the interpretation of the predicate \(\exists y : Y, \phi(x,y)\)
-%with a single free variable \(x\).
-%%
-%In fact, from adjointness gives us the expected introduction and elimination
-%rules.
-%%
-%Suppose we have a term \(t(x)\) of type \(Y\) such that we can prove
-%\(\phi(x,t(x))\).
-%%
-%From the denotation of \(t(x)\) we expect to get some morphism \(X \to Y\)
-%which we can get extend to a section of \(\pi : X \times Y \to X\)
+The result for dependent sums will be of particular interest later since
+we will use these to extend predicates to partial elements.
+
+\begin{prop}
+  Given a type \(A\) and a family \(F : \ISheaf{A} \to \IUni\) which is
+  fiberwise a sheaf, then we have the following equivalences of types:
+  %
+  \begin{align*}
+    \ISheaf{(\IProd{(a : A)}{F(\ILeaf{a})})}
+    &\cong
+    \IProd{(d : \ISheaf{A})}{F\,d}
+    \\
+    \ISheaf{(\IFun{(a : A)}{F(\ILeaf{a})})}
+    &\cong
+    \IFun{(d : \ISheaf{A})}{F\,d}
+  \end{align*}
+\end{prop}
+\begin{proof}
+  First we focus on the equivalence for dependent sums. For the forward
+  direction, as \(F\) is fiberwise a sheaf, it suffices to give a map
+  \(\IProd{(a : A)}{F(\ILeaf{a})} \to \IProd{(d : \ISheaf{A})}{F\,d}\).
+  %
+  This map is given coordinate wise as \(\IProd{\ILeafSym}{\text{id}}\).
+  %
+  For the reverse direction, by using the dependent elimination principle and
+  uncurrying, all we are left to do is define a function
+  \((a : A) \to F(\ILeaf{a}) \to \ISheaf{(\IProd{(a : A)}{F(\ILeaf{a})})}\).
+  %
+  For this we use \(\ILam{a:A}{\ILam{x:F(\ILeaf{a})}{\ILeaf{\IPair{a}{x}}}}\).
+  %
+  We are left to show that both round-trips are equal to the identity and
+  for this we simply need to check them on the image of \(\ILeafSym\).
+  %
+  This amounts to the fact that for all \(a : A\) and \(x : F(\ILeaf{a})\)
+  we have:
+
+  \begin{minipage}[c]{0.25\textwidth}
+    \begin{align*}
+      &\ISheafExt{(\IProd{\ILeafSym}{\text{id}})}(\ILeaf{\IPair{a}{x}})
+      \\
+      &\quad=
+        (\IProd{\ILeafSym}{\text{id}})\IPair{a}{x}
+      \\
+      &\quad=
+        \IPair{\ILeaf{a}}{x}
+    \end{align*}
+  \end{minipage}
+  \begin{minipage}[c]{0.74\textwidth}
+    \begin{align*}
+      &\text{uncurry}(\ISheafExt{(\ILam{a:A}{\ILam{x:F(\ILeaf{a})}{\ILeaf{\IPair{a}{x}}}})})\IPair{\ILeaf{a}}{x}
+      \\
+      &\quad=
+        \ISheafExt{(\ILam{a:A}{\ILam{x:F(\ILeaf{a})}{\ILeaf{\IPair{a}{x}}}})}\,(\ILeaf{a})\,x
+      \\
+      &\quad=
+        (\ILam{a:A}{\ILam{x:F(\ILeaf{a})}{\ILeaf{\IPair{a}{x}}}})\,a\,x
+      \\
+      &\quad=
+        \ILeaf{\IPair{a}{x}}
+    \end{align*}
+  \end{minipage}
+
+  \hspace{0pt}
+
+  The ideas for the dependent product equivalence are similar.
+  %
+  For the forwards direction we use the extension \(\ISheafExt{\ISheafIndSym}\),
+  while for the backwards directions we use the map
+  \(\ILeafSym \circ (-\circ\ILeafSym)\).
+  %
+  First we check the forward then backwards round-trip: given some
+  \(f : \ISheaf{(\IFun{(a:A)}{F(\ILeaf{a})})}\to\IFun{(d:\ISheaf{A})}{Fd}\),
+  we have
+  \(
+    (\ISheafExt{\ISheafIndSym}(\ILeafSym (f\circ\ILeafSym)))
+    =
+    \ISheafInd{(f\circ\ILeafSym)}
+  \).
+  %
+  To check the right-hand side equals \(f\), we can just check they agree
+  when precomposed with \(\ILeafSym\).
+  %
+  This is true as
+  \(\ISheafInd{(f\circ\ILeafSym)}\circ\ILeafSym = f\circ\ILeafSym\)
+  holds by \Cref{prop:sheafification-elim-principle}.
+  %
+  For the other round-trip we again check that both maps
+  agree when precomposed with \(\ILeafSym\): given
+  \(f : \IFun{(a:A)}{F(\ILeaf{a})}\) we have
+  %
+  \(
+    \ILeafSym{(\ISheafExt{\ISheafIndSym}(\ILeafSym{f})\circ\ILeafSym)}
+    =
+    \ILeafSym{(\ISheafInd{f}\circ\ILeafSym)}
+    =
+    \ILeafSym{f}
+   \).
+\end{proof}
+
+\begin{prop}
+  For a proposition \(P : \IProp\), its sheafification \(\ISheaf{\IHolds{P}}\)
+  is equivalent as a type to~\(\IHolds{\IBox{P}}\).
+\end{prop}
+\begin{proof}
+  First we define the forward direction
+  \(f : \IHolds{\IBox{P}} \to \ISheaf{\IHolds{P}}\):
+  %
+  given \(q : \IHolds{\IBox{P}}\), since \(\ISheaf{\IHolds{P}}\) is a sheaf,
+  we have the map
+  \(\IGlue{\ISheaf{\IHolds{P}}}\,P\,q : (\IHolds{P} \to \ISheaf{\IHolds{P}}) \to \IHolds{P}\)
+  so we set
+  \(f(q) \IsDefined \IGlue{\ISheaf{\IHolds{P}}}\,P\,q\,\ILeafSym\).
+  %
+  For the backwards direction we wish to define
+  \(g : \ISheaf{\IHolds{P}} \to \IHolds{\IBox{P}}\).
+  %
+  By~\Cref{prop:t-stable-iff-sheaf} we know that \(\IHolds{\IBox{P}}\)
+  is a sheaf, so it suffices to define a map
+  \(\IHolds{P} \to \IHolds{\IBox{P}}\) which follows from the
+  definition of a Lawvere-Tierney topology.
+
+  We must still check that both composites are equal to the identity.
+  %
+  The composite \(g\circ f\) is immediately equal to the identity as
+  \(\IHolds{\IBox{P}}\) is a proposition.
+  %
+  As for \(f \circ g\), it suffices to check that
+  \(f\circ g\circ \ILeafSym = \ILeafSym\).
+  %
+  So given \(p : \IHolds{P}\) we have:
+  %
+  \begin{align*}
+    (f \circ g \circ \ILeafSym)\,p
+    &=
+      \IGlue{\ISheaf{\IHolds{P}}}\,P\,(gp)\,(\ILam{q:\IHolds{P}}{\ILeaf{q}})
+    \\
+    &=
+      \IGlue{\ISheaf{\IHolds{P}}}\,P\,(gp)\,(\ILam{q:\IHolds{P}}{\ILeaf{p}})
+    \\
+    &=
+      \ILeaf{p}
+  \end{align*}
+  %
+  where in the first equality we simply unfolded definitions and did some
+  \(\eta\)-expansion, the second equality holds as \(P\) is a proposition and so
+  \(p = q\), and the third equality holds by the uniqueness condition of gluing.
+\end{proof}
+
+\begin{coro}
+  Given a type \(A\) and a \(\IBoxSym\)-stable predicate
+  \(P:A\to\IPropCl\), then we have
+  %
+  \[
+    \IBox{(\IForall{a:A}{Pa})}
+    \Leftrightarrow
+    \IForall{d:\ISheaf{A}}{\ISheafExt{P}d}
+  \]
+  %
+  In the case of a proposition \(Q:\IProp\) and
+  a \(\IBoxSym\)-stable predicate \(P:\IHolds{Q}\to\IPropCl\), then we also have
+  %
+  \[
+    \IBox{(\IExists{q:\IHolds{Q}}{Pq})}
+    \Leftrightarrow
+    \IExists{h:\IHolds{\IBox{Q}}}{\ISheafExt{P}q}
+  \]
+\end{coro}
+
+\subsection{Lifting monad and partiality}
+
+We may define the lifting monad in any topos internally, which will then
+let us speak of partial functions --- a crucial ingredient of realizability
+and even more so when we look at choice sequences.
+
+\begin{defn}\label{defn:lifting}
+  We define the \definiendum{lifting of a type \(X\)} as the dependent sum
+  \(\IPar{X} \IsDefined \IProd{(P : \IProp)}{\IHolds{P}\to X}\).
+  %
+  Given an element \(x : \IPar{X}\) we denote its first projection by
+  \(\ITotal{x} : \IProp\) and its second projection by
+  \(\IVal{x}: \IHolds{\ITotal{x}} \to X\).
+\end{defn}
+
+\begin{prop}
+  The lifting of a type \(\IPar{(-)}\) gives a monad.
+\end{prop}
+
+The monadic structure of partial elements is by itself not enough to get
+a realizability tripos though, we must also know how to extend predicates on
+a type \(X\) to predicates on its lifting.
 %
-%some kind of morphism \(\llbracket t(x) \rrbracket : X \to Y\)
-%
-% for some term \(t(x)\), then
-%from said term we expect to
-%
-%\subsubsection{Quantifiers in Presheaves}
-%
-%Fix a map \(\phi : X \to Y\) of presheaves and a subpresheaf
-%\(S \hookrightarrow X\), with which we can look at both types of quantifiers.
-%
-%For existentials, we apply \(\exists_{\phi}\) to \(S\) giving us a subpresheaf
-%of \(Y\) which is described by
-%%
-%\[
-%  {(\exists_{\phi}S)}_{w} =
-%  \{y : Y_{w} \mid \exists x \in S_{w}, \phi_{w}(x) = y\} \subseteq Y_{w}
-%\]
-%%
-%or equivalently described by
-%%
-%\[
-%  {(\exists_{\phi}S)}_{w} =
-%  \{y : Y_{w} \mid
-%  \forall f : v \to w, \exists x \in S_{v}, \phi_{v}(x) = Y_{f}(y) \}
-%\]
-%%
-%as if we have \(x \in S_{w}\) such that \(\phi_{w}(x)=y\) then, by naturality of
-%\(\phi\), we can see that for all \(f : v \to w\) we have
-%\(\phi_{v}(X_{f}(x))=Y_{f}(\phi_{w}(x))=Y_{f}(y)\) meaning that \(X_{f}(x)\)
-%witnesses \(\exists x \in S_{v}, \phi_{v}(x) = Y_{f}(y)\).
-%
-%For universals, applying \(\forall_{\phi}\) to \(S\) gives the following
-%subpresheaf
-%%
-%\[
-%  {(\forall_{\phi}S)}_{w} =
-%  \{y : Y_{w} \mid
-%  \forall f : v \to w, \forall x \in X_{v},
-%  \phi_{w}(x) = y \implies x \in S_{v} \} \subseteq Y_{w}
-%\]
-%%
-%Unlike for the existential quantifier, there is no simplification allowing
-%us to remove quantification over morphisms.
-%%
-%This is due to the fact that a subpresheaf must be monotonic, hence
-%the similarity to Kripke semantics of universal quantification.
+This is the role of modal operators~\cite{moggiNotionsComputationMonads1991} and
+modalities~\cite{cohenPartialMonadicCombinatory2025}.
+
+\begin{prop}
+  The function \(\ISquashSym : \IPar{\IProp} \to \IProp\) defined by
+  sending
+  %
+  \(
+    \ISquash{a} \IsDefined \IProd{(h:\IHolds{\ITotal{a}})}{\IHolds{\IVal{a}\,h}}
+  \)
+  %
+  is an algebra for the lifting monad.
+\end{prop}
+
+\begin{defn}
+  We define the \definiendum{lifting of a predicate \(P : X \to \IProp\)} as
+  \(\IParExt{P} : \IPar{X} \to \IProp\) as the composite
+  \(\ISquashSym\circ\IPar{P} : \IPar{X} \to \IPar{\IProp} \to \IProp\).
+  %
+  More explicitly, we have
+  \(\IParExt{P}\,x\IsDefined \IProd{(h:\IHolds{\ITotal{Px}})}{\IHolds{\IVal{(Px)}\,h}}\).
+\end{defn}
 
 
 
+\newpage
 
-%\newpage
-%\section{Internal PCAs}
-%
-%In set-based mathematics, partial functions \(f : X \ParTo Y\) are usually
-%defined as a subset \(\text{dom}(f) \subseteq X\) and a total function
-%\(f : \text{dom}(f) \to Y\) on said subset. With such a definition, the
-%composition of two partial functions \(f : X \ParTo Y\) and \(g : Y \ParTo Z\)
-%will have domain \(\text{dom}(g \circ f) = \text{im}(f) \cap \text{dom}(g)\), on
-%which the composite \(g \circ f\) is total. Associativity of function
-%composition comes down to associativity of subset intersections and as a total
-%function is ``trivially'' partial we also have identity maps satisfying the unit
-%laws. With this, we have just defined a category of sets and partial functions
-%between them. A similar construction can be done for arbitrary categories under
-%the mild condition that pullbacks along monomorphisms exist. Said pullbacks will
-%provide composition of partial morphisms, leading us to the final obstruction,
-%which is that pullbacks are only associative up to (unique) isomorphism. This is
-%remedied by identifying partial maps up to isomorphism of the domains as we will
-%make explicit later.
-%
-%\begin{defn}
-%  Given a category \(\C\) with pullbacks we define the \definiendum{category of
-%    partial maps} in \(\C\), denoted \(\ParCat{\C}\), according to the following:
-%  \begin{itemize}
-%    \item objects of \(\ParCat{\C}\) are exactly those of \(\C\).
-%    \item given objects \(X,Y\), their hom-set \(\ParCat{\C}(X,Y)\) is given by
-%      equivalence classes of spans \(X \xhookleftarrow{m} S \xrightarrow{f} Y\)
-%      with \(m\) monic. Two such spans
-%      \(X \xhookleftarrow{m} S \xrightarrow{f} Y\) and
-%      \(X \xhookleftarrow{n} P \xrightarrow{g} Y\) are equivalent if there
-%      exists an isomorphism \(f : S \cong P\) such that the following commutes
-%      \[\begin{tikzcd}
-%          && S \\
-%          X &&&& Y \\
-%          && P \arrow["m"', hook, from=1-3, to=2-1] \arrow["f", from=1-3, to=2-5] \arrow["f"', from=1-3, to=3-3] \arrow["n", hook', from=3-3, to=2-1] \arrow["g"', from=3-3, to=2-5]
-%        \end{tikzcd}\]
-%    \item Composition of two morphisms
-%      \(X \xhookleftarrow{m} S \xrightarrow{f} Y\) and
-%      \(Y \xhookleftarrow{n} P \xrightarrow{g} Z\) is given by the pullback
-%      \[\begin{tikzcd}
-%          X \\
-%          S & Y \\
-%          {S\times_YP} & P & Z \arrow["m", hook', from=2-1, to=1-1] \arrow["f"', from=2-1, to=2-2] \arrow[from=3-1, to=2-1] \arrow["\lrcorner"{anchor=center, pos=0.125, rotate=90}, draw=none, from=3-1, to=2-2] \arrow[from=3-1, to=3-2] \arrow["n", hook', from=3-2, to=2-2] \arrow["g"', from=3-2, to=3-3]
-%        \end{tikzcd}\]
-%    \item Identity maps are given by the span consisting of two identity maps.
-%  \end{itemize}
-%\end{defn}
-%
-%The associative and unit laws can be checked to follow from the uniqueness (up
-%to isomorphism) of pullbacks. Working through this definition for the category
-%of sets we recover a category isomorphic to our original description. In the
-%specific case of sets we were able to avoid worrying about equivalence classes
-%by using subsets instead of subobjects and subset intersections instead of
-%pullbacks. Similarly, we can give a more concrete description for the category
-%of partial maps of sheaves.
+\todo[inline]{blah blah}
+
+While this principle is helpful, often we will also need to simplify
+the extension of a predicate \(P : X \to \IPropCl\). For that, we have
+the following commutation results:
+
+\begin{prop}
+  Given predicates \(P,Q : X \to \IPropCl\) and \(d : \ISheaf{X}\), we know  mthat
+  %
+  \[\begin{array}{rll}
+    \ISheafExt{(\IAnd{P}{Q})}d &=& \IAnd{\ISheafExt{P}d}{\ISheafExt{Q}d} \\
+    \ISheafExt{(\IBox{(\IOr{P}{Q})})}d &=& \IBox{(\IOr{\ISheafExt{P}d}{\ISheafExt{Q}d})}\\
+    \ISheafExt{(\IImplies{P}{Q})}d &=& \IImplies{\ISheafExt{P}d}{\ISheafExt{Q}d}
+  \end{array} \]
+  %
+Furthermore, for a stable proposition \(R : \IPropCl\), the extension of the
+constant predicate \(\ILam{x:X}{R}\) is the constant predicate
+\(\ILam{d:\ISheaf{X}}{R}\).
+\end{prop}
+\begin{proof}
+  For all of these we will show that the left and right hand sides agree when
+  precomposed with \(\ILeafSym\), then by the uniqueness of extensions the two
+  must be equal.
+  %
+  Fixing \(x : X\), we then have
+  \begin{gather*}
+    \ISheafExt{(\IImplies{P}{Q})}(\ILeaf{x})
+    = (\IImplies{P}{Q})(x)
+    = \IImplies{P(x)}{Q(x)}
+    = \IImplies{\ISheafExt{P}(\ILeaf{x})}{\ISheafExt{Q}(\ILeaf{x})}
+    \\
+    \ISheafExt{(\IAnd{P}{Q})}(\ILeaf{x})
+    = (\IAnd{P}{Q})(x)
+    = \IAnd{P(x)}{Q(x)}
+    = \IAnd{\ISheafExt{P}(\ILeaf{x})}{\ISheafExt{Q}(\ILeaf{x})}
+    \\
+    \ISheafExt{(\lambda\_.P)}(\ILeaf{x})
+    = (\lambda\_.P)(\ILeaf{x})
+    = P
+    =
+  \end{gather*}
+\end{proof}
+
+
 
 \section{A Realizability Tripos}
 
@@ -294,7 +558,7 @@ the proofs in this section.
 
 \begin{defn}\label{defn:tripos-predicates-and-ordering}
   Given a presheaf \(\X\) we define the type of \definiendum{realizability
-    predicates on \(\X\)} as the exponential \(\RealPred{\X} \).
+    predicates on \(\X\)} as the exponential \(\RealPred{\X}\).
   %
   We further define an ordering on realizability
   predicates~\(\varphi, \psi : \RealPred{\X}\) by
@@ -667,7 +931,7 @@ What becomes clear now is that the requirement that \(\IAp{e}{a}\)
 be defined sits outside the purview of the monad \(T\)
 %
 In particular, regardless of the effect on \(X_{T}\) and \(\varphi_{T}\), we
-still require \(\IsTotal{\IAp{e}{a}}\) with no alterations.
+still require \(\ITotal{\IAp{e}{a}}\) with no alterations.
 %
 In the presheaf case this amounts to requiring that \({e}\cdot_{w}{a}\)
 be defined, instead of asking that there exist a bar \(U\) of \(w\)
@@ -1394,39 +1658,284 @@ compare these to the more elementary, direct definition of assemblies.
 
 \subsection{Sheafififcation}
 
-Usually sheaves are described as a reflective subcategory of a category
-of presheaves.
-%
-That means we have an adjoint pair of functors \(L \dashv R\) with
-\(R\) fully faithful.
-%
-The domain of \(R\) is then the category of sheaves, and its codomain the
-category of presheaves.
-%
-We view \(R\) as the inclusion of sheaves into presheaves and \(L\)
-as the sheafification of presheaves.
-%
-From the adjointness condition we recover the property that mapping out
-of the sheafification of a presheaf into a sheaf is equivalent to mapping out
-of the original presheaf into the same sheaf.
+\todo[inline]{Recall sheafification as a reflective subcategory. Maybe cite
+  McLarty Chapter 21 for this?}
 
-For now we look for an analogous sheafification operation in the category
-of assemblies.
+Given a Lawvere-Tierney topology \(\IBoxSym : \IProp \to \IProp\) in \(\E\), we
+can always define a reflective subcategory \(\Ej\) of sheaves.
 %
-Presumably, the action of said operation on the underlying presheaves
-will be actual sheafification.
+That is, we have a reflection functor \(\ISheafSym : \E \to \Ej\) which is
+left adjoint to the functor including \(\Ej\) in \(\E\).
 %
-That leaves the action on the realizability relations up for debate.
+In the case of sheafification, \(\ISheafSym\) preserves finite limits,
+so we actually have a geometric embedding of \(\Ej\) in \(\E\).
 
-For our first attempt, let us deconstruct this in the same way that
-sheafification is deconstructed, so we have a single operation
-\({(-)}^{+}\) which sends an arbitrary presheaf to a separated presheaf,
-and a separated presheaf to a sheaf.
+\todo[inline]{Define geometric morphism between triposes}
+
+We will now define an analogous sheafification operation on
+the realizability topos \(\Adj{\E}{\Trip}\).
 %
-Then sheafification can be done by iterating the \(+\)-operation twice.
+First, notice that the restriction of \(T\) to the subcategory \(\Ej\) gives an
+\(\Ej\)-tripos.
+%
+We only need to check that the power objects in \(\E\) associated with \(T\) are
+sheaves, and hence still exist in \(\Ej\), which holds as \(\Ej\) is an
+exponential ideal of \(\E\).\todo{elaborate on this once description of power
+objects is typed up.}
 
-\todo[inline]{develop this more}
+What we are after now, is a geometric embedding of \(\Adj{\Ej}{T}\) into
+\(\Adj{\E}{T}\), which we expect to act on the underlying objects via
+sheafification.
+%
+For this, it is helpful to pull results
 
+
+%By change of base~\cite[Lemma 2.1.3]{oostenRealizabilityIntroductionIts2008}, we
+%can reindex the \(\E\)-tripos \(T\) to get a tripos
+%\(T\circ\ISheafSym^{\text{op}}\) on the category of sheaves \(\Ej\).
+%%
+%This situation was already considered
+%in~\cite[\S3]{vanoostenExercisesRealizability2018} and Proposition 3.1
+%showed that \(T\circ\ISheafSym^{\text{op}}\) is equivalent to the restriction
+%of \(T\) to \(\)
+%
+%From Proposition 3.1 of~
+
+\todo[inline]{Cite van Oosten to get geometric morphism between realizability
+  toposes and show how definitions compute}
+
+\todo[inline]{Show that sheafification preserves the property ``is a subobject
+  of a constant object PER'', so it restricts to acting on the category of
+  assemblies}
+
+\todo[inline]{Present issue with particular instances where sheafification
+of nat should be isomorphic to pure nats}
+
+\todo[inline]{Give alternate definition which should be more versatile but
+  presumably something breaks? Or is this our free lunch?}
+
+%\subsubsection{An internal description of sheafification}
+%
+%Working internally, we say a type \(A\) is a sheaf if we can equip it with a
+%function
+%%
+%\[
+%  \IGlueSym{A} : (P : \IProp) \to \IBox{P} \to (P \to A) \to A
+%\]
+%%
+%such for all elements \(a : A\), the glueing of the respective constant family
+%is equal to \(a\).
+%%
+%That is, we have \(\IGlue{P}{q}{\lambda i.a}{A} = a\) for all propositions
+%\(P\), proofs \(q : \IBox{P}\) and \(a : A\).
+%
+%\begin{defn}
+%  We define the \definiendum{sheafification of \(X\)} as the following
+%  quotient-inductive type:
+%  %
+%  \begin{mathpar}
+%    \inferrule%
+%    {a : A}%
+%    {\ILeaf{a} : \ISheaf{A}}
+%
+%    \inferrule%
+%    {P : \Omega \\ q : \IBox{P} \\ \phi : P \to \ISheaf{A}}%
+%    {\IBranch{P}{q}{\phi} : \ISheaf{A}}
+%
+%    \inferrule%
+%    {P : \Omega \\ q : \IBox{P} \\ a : \ISheaf{A}}%
+%    {\IBranch{P}{q}{\lambda i. a} = a : \ISheaf{A}}
+%  \end{mathpar}
+%\end{defn}
+
+%\subsubsection{Sheafification in the realizability topos}
+
+%Usually sheaves are described as a reflective subcategory of a category
+%of presheaves.
+%%
+%That means we have an adjoint pair of functors \(L \dashv R\) with
+%\(R\) fully faithful.
+%%
+%The domain of \(R\) is then the category of sheaves, and its codomain the
+%category of presheaves.
+%%
+%We view \(R\) as the inclusion of sheaves into presheaves and \(L\)
+%as the sheafification of presheaves.
+%%
+%From the adjointness condition we recover the property that mapping out
+%of the sheafification of a presheaf into a sheaf is equivalent to mapping out
+%of the original presheaf into the same sheaf.
+%
+%For now we look for an analogous sheafification operation in the category
+%of assemblies.
+%%
+%Presumably, the action of said operation on the underlying presheaves
+%will be actual sheafification.
+%%
+%That leaves the action on the realizability relations up for debate.
+%
+%\begin{defn}\label{defn-sheafification}
+%  Given an object \((X,{\approx})\) of the realizability topos \(\Topos\), we
+%  define the \definiendum{sheafification of \((X,{\approx})\)} as the pair
+%  \((\ISheaf{X},{\ISheafP{\approx}})\), where \(\ISheaf{X}\) denotes the
+%  sheafification of \(X\) and the relation
+%  \({\ISheafP{\approx}} : \ISheaf{X} \times \ISheaf{X} \times \A \to \IPropCl\) is
+%  the canonical extension of \({\approx} : X \times X \times \A \to \IPropCl\)
+%  described by the following sequence of isomorphisms:
+%  %
+%  \[
+%    \arraycolsep=0.2em
+%    \begin{array}{rcl}
+%      X \times X \times \A &\to& \IPropCl \\\midrule\midrule
+%      X \times X &\to& (\IFun{\A}{\IPropCl})\\\midrule\midrule
+%      \ISheaf{(X \times X)} &\to& (\IFun{\A}{\IPropCl})\\\midrule\midrule
+%      \ISheaf{X} \times \ISheaf{X} &\to& (\IFun{\A}{\IPropCl})\\\midrule\midrule
+%      \ISheaf{X} \times \ISheaf{X} \times \A &\to& \IPropCl
+%    \end{array}
+%  \]
+%  %
+%  where we made use of the fact that sheaves form an exponential ideal and
+%  that sheafification preserves limits.
+%\end{defn}
+%\begin{proof}
+%  We must check that \({\ISheafP{\approx}}\) is still symmetric and
+%  transitive in the internal logic of our realizability tripos.
+%  %
+%  For symmetry we have to check that given \(x,y : X\),
+%  \(\ILeaf{x} \ISheafP{\approx} \ILeaf{y}\) implies
+%  \(\ILeaf{y} \ISheafP{\approx} \ILeaf{x}\).
+%  %
+%  By definition of \({\ISheafP{\approx}}\), this amounts to showing that
+%  \(x \approx y\) implies \(y \approx x\), which is true by assumption.
+%  %
+%  We must also check that given \(P, Q : \IProp\), proofs \(r : \IBox{P}\) and
+%  \(s : \IBox{Q}\), and families \(\phi : \IFun{P}{\ISheaf{X}}\) and
+%  \(\psi : \IFun{Q}{\ISheaf{X}}\) such that \(\phi\) and \(\psi\) are pointwise
+%  related by \(\ISheafP{\approx}\), then
+%  \(\IBranch{P}{r}{\phi} \ISheafP{\approx} \IBranch{Q}{s}{\psi}\) implies
+%  \(\IBranch{Q}{s}{\psi} \ISheafP{\approx} \IBranch{P}{r}{\phi}\).
+%  %
+%  Unfolding the definition of \({\ISheafP{\approx}}\) on branches, we see it
+%  suffices to show that for all proofs \(p : P\) and \(q : Q\) we have
+%  \(\phi(p) \ISheafP{\approx} \psi(q)\) then
+%  \(\psi(q) \ISheafP{\approx} \phi(p)\), which is true by the inductive
+%  hypothesis.
+%  %
+%  We must also show this new relation is transitive, which is proved
+%  by a similar induction.
+%\end{proof}
+
+\newpage
+
+\section{Presheaf pcas for choice sequences}
+
+\begin{defn}\label{defn-choice-sequence-pca-gadget}
+  A \definiendum{presheaf gadget} consists of a set \(\mathbb{W}\) of worlds
+  partially ordered by \(\leq\), a set \(\mathsf{C}\) of codes, two
+  distinguished codes \(k\ s : \mathsf{C}\), and for each world both an
+  equivalence relation \({\equiv_{w}}\) on \(\mathsf{C}\) and a partial function
+  \(- \cdot_{w} - : \mathsf{C} \times \mathsf{C} \rightharpoonup \mathsf{C}\),
+  subject to the following conditions:
+  \begin{gather}
+    w \leq v \implies (a \equiv_{w}b  \implies a \equiv_{v} b) \land \IPLeq{a \cdot_{w} b}{a \cdot_{v} b}\\
+    a \equiv_{w} a' \land b \equiv_{w} b' \land \ITotal{a \cdot_{w} b}
+        \implies a \cdot_{w}  \\
+    k \cdot_{w} a = k \cdot_{v} a \qquad
+    k \cdot_{w} a \cdot_{w} b = a \\
+    s \cdot_{w} a = s \cdot_{v} a \qquad
+    s \cdot_{w} a \cdot_{w} b = s \cdot_{v} a \cdot_{v} b \qquad
+    \IPLeq{a \cdot_{w} c \cdot_{w} (b \cdot_{w} c)}{s \cdot_{w} a \cdot_{w} b \cdot_{w} c}
+  \end{gather}
+\end{defn}
+
+%\begin{defn}\label{defn-choice-sequence-pca-gadget}
+%  A \definiendum{presheaf gadget} consists of the following
+%  data:
+%  \begin{itemize}
+%    \item A set \(\mathbb{W}\) of worlds partially ordered by \(\leq\);
+%    \item A set \(\mathsf{C}\) of codes;
+%    \item For each world \(w\), an equivalence relation
+%      \({\equiv_{w}} \subseteq \mathsf{C} \times \mathsf{C}\), such that
+%      \(w \leq v\) implies \({\equiv_{v}} \subseteq {\equiv_{w}}\);
+%    \item For each world \(w\), a partial function
+%      \(- \cdot_{w} - : \mathsf{C} \times \mathsf{C} \rightharpoonup \mathsf{C}\)
+%      which is a congruence for \(\equiv_{w}\) and such that \(w \leq v\)
+%      implies \(\IPLeq{a \cdot_{v} b}{a \cdot_{w} b}\);
+%    \item A code \(k : C\) such that for all codes \(a\ b:C\) and worlds
+%      \(w \leq v\) we have
+%      %
+%      \[
+%        k \cdot_{w} a = k \cdot_{v} a
+%        \qquad
+%        k \cdot_{w} a \cdot_{w} b = a
+%      \]
+%    \item A code \(s : C\) such that for all codes \(a\ b\ c : C\) and worlds
+%      \(w \leq v\) we have
+%      %
+%      \[
+%        s \cdot_{w} a = s \cdot_{v} a
+%        \qquad
+%        s \cdot_{w} a \cdot_{w} b = s \cdot_{v} a \cdot_{v} b
+%        \qquad
+%        \IPLeq{a \cdot_{w} c \cdot_{w} (b \cdot_{w} c)}{s \cdot_{w} a \cdot_{w} b \cdot_{w} c}
+%      \]
+%  \end{itemize}
+%\end{defn}
+
+From a presheaf gadget we can easily define a pca object in
+the category of presheaves on~\(\mathbb{W}^{\text{op}}\) and all of the examples
+we are interested in will be of this form.
+%
+In the data for a presheaf gadget we ask for an indexed system of equivalence
+relations \(\equiv_{w}\), which play the role of conversion relations: as we
+move to later worlds, terms that once were neutrals due to choice sequences
+may become normalisable, at which point we may wish to equate them.
+%
+The only pca objects we will not be able to talk about via gadgets
+are those in which new codes appear at later worlds.
+%
+For example in world \(v\) which extends \(w\) we could have access to a code
+\(e\) which did not exist in \(w\).
+%
+This seems like a strange instance and it is not entirely clear what
+practical purposes it would allow, perhaps it could be interesting
+to have worlds with only ``computable'' codes and later worlds
+with ``uncomputable'' codes, \`a la relative realizability, but we
+leave such explorations alone for now.
+
+\begin{cons}
+  To each presheaf gadget we associate a pca object \(\A\) in the
+  category~\(\widehat{\mathbb{W}^{\text{op}}}\) whose underlying presheaf
+  is given by the quotient \({\mathsf{C}}/{\equiv_{w}}\) for each world \(w\)
+  and whose transition maps are the relevant quotient maps.
+  %
+  Similarly, the application map \(\A \times \A \rightharpoonup \A\) is given
+  for each world \(w\) by the extension of \(\cdot_{w}\) to
+  \({\mathsf{C}}/{\equiv_{w}}\), and the combinators \(k\) and \(s\) are given
+  by our distinguished codes.
+\end{cons}
+
+\begin{defn}
+  A \definiendum{presheaf gadget with choice sequences} is a
+  presheaf gadget along with the further data:
+  \begin{itemize}
+    \item A Grothendieck topology \(C\) on \(\mathbb{W}^{\text{op}}\);
+    \item A distinguished subset \(\textsf{CS} \subseteq \textsf{C}\) of choice
+      sequences;
+    \item A function
+      \(\textsf{eval} : \textsf{CS} \to \mathbb{W} \to \mathbb{N} \rightharpoonup \mathbb{N}\)
+      such that for all \(\delta : \textsf{CS}\), \(n : \mathbb{N}\) and
+      \(w : \mathbb{W}\), we have that the equivalence
+      \(\IPSim{\delta \cdot_{w} \overline{n}}{\overline{\textsf{eval}(\delta,w,n)}}\)
+      of partial elements of \(\textsf{C}\);
+    \item A function
+      \(\textsf{dom} : \textsf{CS} \to (w : \mathbb{W}) \to C(w)\) such that for
+      all \(\delta : \textsf{CS}\), \(n : \mathbb{N}\) and \(w : \mathbb{W}\),
+      the a priori partial function
+      \(\textsf{eval}(\delta,-,n) : \mathbb{W} \rightharpoonup \mathbb{N}\) is
+      total on \(\textsf{dom}(\delta,w)\subseteq \mathbb{W}\).
+  \end{itemize}
+\end{defn}
 
 \newpage
 \appendix
