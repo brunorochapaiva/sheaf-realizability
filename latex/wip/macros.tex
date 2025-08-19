@@ -181,7 +181,11 @@
 %% Sheafification
 \newcommand{\ISheafSym}{\mathcal{D}}
 \newcommand{\ISheaf}[1]{\ISheafSym{#1}}
+
 \newcommand{\ISheafExt}[1]{{#1}^\sharp}
+\newcommand{\ISheafExtM}[2]{{#1}^{({#2})}}
+\newcommand{\IRPExt}[1]{\ISheafExtM{#1}{\sharp,-}}
+
 \newcommand{\ISheafIndSym}{\mathcal{D}_\text{ind}}
 \newcommand{\ISheafInd}[1]{\ISheafIndSym\,{#1}}
 
@@ -215,7 +219,12 @@
 \newcommand{\Trip}{T_\IBoxSym}
 
 %% Realizability Predicates
-\newcommand{\RealPred}[1]{\IPowerCl{(\IProd{#1}{\A})}}
+\newcommand{\IRealPred}[1]{\IFun{#1}{\IFun{\A}{\IPropCl}}}
+\newcommand{\RealPred}[1]{{\color{red}change!}}
+
+%% Evidence predicate
+\newcommand{\IEvidenceSym}{\IEvidence{(-)}{(-)}}
+\newcommand{\IEvidence}[2]{\text{evidences}_{{#1}\leq{#2}}}
 
 % Tripos language
 

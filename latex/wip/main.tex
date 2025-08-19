@@ -43,10 +43,15 @@
 
 We begin a treatment of realizability internal to categories of sheaves.
 
-\section{Preliminaries on working internally}
+\section{Internally preliminaries}
 
-For the whole of this section we define and prove things in the internal
-language of an elementary topos \(\E\).
+For the whole of this section we give definitions and prove some
+helpful results in the internal language of an elementary topos \(\E\).
+%
+In essence we give definitions, statements and proofs informally in type theory.
+%
+As we are working inside of an elementary topos we may assume propositional
+extensionality, functional extensionality and propositional resizing.
 
 \subsection{Lawvere-Tierney topologies}%
 \label{sub:lawvere-tierney-internal}
@@ -138,14 +143,13 @@ will give a natural transformation.
 Sheaves have nice closure properties with regards to the constructors of type
 theory.
 
-\begin{prop}
+\begin{prop}\label{prop:pi-preserve-sheaf}
   Given a type family \(F : A \to \IUni\) such that for \(Fa\) is a sheaf for
   all \(a : A\), then the dependent product \((a : A) \to Fa\) is also a
   sheaf.
 \end{prop}
 
-\begin{prop}%
-\label{prop:sums-preserve-sheaf}
+\begin{prop}\label{prop:sigma-preserve-sheaf}
   Given a type family \(F : A \to \IUni\) such that \(A\) is a sheaf and \(Fa\)
   is a sheaf for all \(a : A\), then the dependent sum \((a : A) \times Fa\)
   is also a sheaf.
@@ -210,6 +214,29 @@ pre-composition map
 Given \(f : A \to B\), we denote its transpose across the equivalence by
 \(\ISheafExt{f} : \ISheaf{A} \to B\).
 
+\begin{nota}
+  By \Cref{prop:pi-preserve-sheaf} we know that the function type
+  \(\IFun{Y}{X}\) is a sheaf provided that \(X\) is already a sheaf.
+  %
+  This means that functions of type \(\IFun{Z}{\IFun{Y}{Z}}\) can be extended in
+  three distinct ways: \(\IFun{\ISheaf{Z}}{\IFun{Y}{Z}}\),
+  \(\IFun{Z}{\IFun{\ISheaf{Y}}{Z}}\) and
+  \(\IFun{\ISheaf{Z}}{\IFun{\ISheaf{Y}}{Z}}\).
+  %
+  In all cases we glue results in a pointwise fashion along non-sheafified
+  arguments.
+  %
+  To make this clearer, when attempting to sheafify a function
+  with multiple arguments we will give a list with entries in \(\{\sharp,-\}\)
+  to tell which arguments we sheafify and which we do not.
+  %
+  As an example given a function \(f : \IFun{W}{\IFun{Z}{\IFun{Y}{X}}}\), then
+  we would have the corresponding
+  \(\ISheafExtM{f}{\sharp,-,-}: \IFun{\ISheaf{W}}{\IFun{Z}{\IFun{Y}{X}}}\)
+  or
+  \(\ISheafExtM{f}{-,\sharp,\sharp}: \IFun{W}{\IFun{\ISheaf{Z}}{\IFun{\ISheaf{Y}}{X}}}\)
+\end{nota}
+
 While this adjunction lets us define non-dependent maps out of sheafified
 types, we would currently get stuck trying to prove any properties
 about these maps.
@@ -217,8 +244,7 @@ about these maps.
 For that, we need to recover a dependent elimination principle, which we
 can do through the use of the total space of a type family.
 
-\begin{prop}%
-\label{prop:sheafification-elim-principle}
+\begin{prop}\label{prop:sheafification-elim-principle}
 Given a type \(A\) and a type family \(F : \ISheaf{A} \to \IUni\) such that
 \(Fd\) is a sheaf for all \(d : \ISheaf{A}\), then for any
 \(f : (a : A) \to F(\ILeaf{a})\) there exists a unique function
@@ -234,7 +260,7 @@ Given a type \(A\) and a type family \(F : \ISheaf{A} \to \IUni\) such that
   \end{align*}
   %
   Since \(\ISheaf{A}\) is a sheaf, and so are all the fibers of \(F\), we know
-  by~\Cref{prop:sums-preserve-sheaf} that the total space of \(F\) is a sheaf,
+  by~\Cref{prop:sigma-preserve-sheaf} that the total space of \(F\) is a sheaf,
   hence we can take the transpose of \(s\) to get a map
   \(\ISheafExt{s} : \ISheaf{A} \to \IProd{(d : \ISheaf{A})}{Fd}\).
   %
@@ -265,7 +291,7 @@ about predicates on sheafified types.
 In particular, we only have a good grasp on these if they are
 \(\IBoxSym\)-stable.
 
-\begin{coro}
+\begin{coro}\label{prop:stable-predicate-induction}
   Given a predicate \(P : X \to \IPropCl\), if \(P x\) holds for all \(x : X\),
   then also \(\ISheafExt{P}d\) holds for all \(d : \ISheaf{X}\).
 \end{coro}
@@ -449,6 +475,33 @@ we will use these to extend predicates to partial elements.
   \]
 \end{coro}
 
+\begin{prop}\label{prop:heyting-structure-predicate-extension}
+  Given predicates \(P,Q : X \to \IPropCl\) and \(R : X \to Y \to \IPropCl\) we
+  have the following equivalences:
+  \begin{align*}
+    \ISheafExt{(\IAnd{P}{Q})}d
+    &\Leftrightarrow
+      \IAnd{\ISheafExt{P}d}{\ISheafExt{Q}d}
+    \\
+    \ISheafExt{(\IBox{(\IOr{P}{Q})})}d
+    &\Leftrightarrow
+      \IBox{(\IOr{\ISheafExt{P}d}{\ISheafExt{Q}d})}
+    \\
+    \ISheafExt{(\IImplies{P}{Q})}d
+    &\Leftrightarrow
+      \IImplies{\ISheafExt{P}d}{\ISheafExt{Q}d}
+    \\
+    \ISheafExt{(\IForall{y:Y}{R\,(-)\,y})}d
+    &\Leftrightarrow
+      \IForall{y:Y}{\ISheafExtM{R}{\sharp,-}\,d\,y}
+  \end{align*}
+\end{prop}
+\begin{proof}
+  It suffices to show these all agree when precomposed with \(\ILeafSym\), which
+  holds immediately as \(\IAndSym\), \(\IBoxSym\), \(\IOrSym\) and
+  \(\IImpliesSym\) are all extended to act on predicates pointwise.
+\end{proof}
+
 \subsection{Lifting monad and partiality}
 
 We may define the lifting monad in any topos internally, which will then
@@ -492,70 +545,165 @@ modalities~\cite{cohenPartialMonadicCombinatory2025}.
   \(\ISquashSym\circ\IPar{P} : \IPar{X} \to \IPar{\IProp} \to \IProp\).
   %
   More explicitly, we have
-  \(\IParExt{P}\,x\IsDefined \IProd{(h:\IHolds{\ITotal{Px}})}{\IHolds{\IVal{(Px)}\,h}}\).
+  \(\IParExt{P}\,x\IsDefined \IProd{(h:\IHolds{\ITotal{x}})}{\IHolds{P(\IVal\,x\,h)}}\).
 \end{defn}
 
+\begin{prop}\label{prop:boxed-partial-extension}
+  Fix a \(\IBoxSym\)-stable predicate \(P : X \to A \to \IPropCl\)
+  and a partial element \(t : \IPar{A}\),
+  if we let \(Q:X \to \IPropCl\) be given by
+  %
+  \(
+    Q\,x \IsDefined \IBox{(\IParExt{(Px)}\,a)}
+  \)
+  %
+  then the extension of \(Q\)
+  is computed by
+  %
+  \(
+    \ISheafExt{Q}d \Leftrightarrow \IBox{(\IParExt{(\ISheafExt{P}d)}\,a)}
+  \).
+\end{prop}
+\begin{proof}
+  We show \(\ISheafExt{Q}\) is equivalent to
+  \(\ILam{d:\ISheaf{X}}{(\IParExt{(\ISheafExt{P}d)}\,a)}\) by checking that they
+  agree when precomposed by \(\ILeafSym\).
+  %
+  Given \(x : X\), we then compute
+  %
+  \[
+    \ISheafExt{Q}(\ILeaf{x})
+    = Q\,x
+    = \IBox{(\IParExt{(P\,x)}\,a)}
+    = \IBox{(\IParExt{(\ISheafExt{P}(\ILeaf{x}))}\,a)}
+  \]
+  which finishes the proof.
+\end{proof}
+
+\begin{nota}
+  In the rest of this paper we will abuse notation and given
+  a predicate \(P : A \to \IProp\) and partial element \(a : \IPar{A}\),
+  we will write
+  \((\IAnd{\ITotal{a}}{P\,a})\) to mean \(\IParExt{P}\,a\).
+\end{nota}
+
+With this notation, then we may rephrase the result from
+\Cref{prop:boxed-partial-extension} as saying that the extension
+%
+\(
+  \ISheafExt{(\ILam{x:X}{\IBox{(\IAnd{\ITotal{a}}{P\,x\,a})}})}
+\)
+%
+is equal to
+%
+\(
+  \ILam{d:\ISheaf{X}}{\IBox{(\IAnd{\ITotal{a}}{\ISheafExt{P}\,d\,a})}}
+\).
 
 
 \newpage
 
-\todo[inline]{blah blah}
+\section{Realizability Tripos for Sheaf Semantics}
 
-While this principle is helpful, often we will also need to simplify
-the extension of a predicate \(P : X \to \IPropCl\). For that, we have
-the following commutation results:
+In this section we fix a topos \(\E\) along with a Lawvere-Tierney
+topology \(\IBoxSym : \IProp \to \IProp\) and a partial combinatory
+algebra \(\A\) inside \(\E\).
+%
+Unless mentioned otherwise all definitions and results are given
+internally to \(\E\).
 
-\begin{prop}
-  Given predicates \(P,Q : X \to \IPropCl\) and \(d : \ISheaf{X}\), we know  mthat
+\begin{defn}\label{defn:tripos-predicates}
+  Given a type \(X\), we define \definiendum{realizability predicates
+  on \(X\)} as the function space \(\IRealPred{X}\).
+\end{defn}
+
+\begin{defn}\label{defn:tripos-ordering}
+  Given a type \(X\) and realizability predicates \(\phi,\psi : \IRealPred{X}\)
+  we define the \definiendum{evidence predicate for \(\phi\leq\psi\)} as
+  follows:
   %
-  \[\begin{array}{rll}
-    \ISheafExt{(\IAnd{P}{Q})}d &=& \IAnd{\ISheafExt{P}d}{\ISheafExt{Q}d} \\
-    \ISheafExt{(\IBox{(\IOr{P}{Q})})}d &=& \IBox{(\IOr{\ISheafExt{P}d}{\ISheafExt{Q}d})}\\
-    \ISheafExt{(\IImplies{P}{Q})}d &=& \IImplies{\ISheafExt{P}d}{\ISheafExt{Q}d}
-  \end{array} \]
+  \begin{align*}
+    \IEvidence{\phi}{\psi}
+    &: \IFun{X}{\IFun{\A}{\IPropCl}}
+    \\
+    {\IEvidence{\phi}{\psi}\,x\,e}
+    &\IsDefined
+      \IForall%
+      {a:\A}%
+      {\IImplies%
+      {\phi\,x\,a}%
+      {\IBox{(\IAnd{\ITotal{\IAp{e}{a}}}{\psi\,x\,(\IAp{e}{a})})}}}
+  \end{align*}
   %
-Furthermore, for a stable proposition \(R : \IPropCl\), the extension of the
-constant predicate \(\ILam{x:X}{R}\) is the constant predicate
-\(\ILam{d:\ISheaf{X}}{R}\).
-\end{prop}
+  We then define the \definiendum{ordering on evidence predicates}
+  by saying \(\phi\leq\psi\) if there exists a code~\(e : \A\)
+  such that for all \(x : X\) we have \(\IEvidence{\phi}{\psi}\,x\,e\).
+\end{defn}
+
+\subsection{Sheafification}
+
+\begin{lemm}\label{prop:extension-of-evidence-predicate}
+  Extension of realizability predicates commutes with the evidence
+  predicate, that is for all \(d:\ISheaf{X}\) and \(e:\A\) we have
+  %
+  \(
+    \IRPExt{\IEvidence{\phi}{\psi}}\,d\,e
+    \Leftrightarrow
+    \IEvidence{\IRPExt{\phi}}{\IRPExt{\psi}}\,d\,e
+  \).
+\end{lemm}
 \begin{proof}
-  For all of these we will show that the left and right hand sides agree when
-  precomposed with \(\ILeafSym\), then by the uniqueness of extensions the two
-  must be equal.
-  %
-  Fixing \(x : X\), we then have
-  \begin{gather*}
-    \ISheafExt{(\IImplies{P}{Q})}(\ILeaf{x})
-    = (\IImplies{P}{Q})(x)
-    = \IImplies{P(x)}{Q(x)}
-    = \IImplies{\ISheafExt{P}(\ILeaf{x})}{\ISheafExt{Q}(\ILeaf{x})}
-    \\
-    \ISheafExt{(\IAnd{P}{Q})}(\ILeaf{x})
-    = (\IAnd{P}{Q})(x)
-    = \IAnd{P(x)}{Q(x)}
-    = \IAnd{\ISheafExt{P}(\ILeaf{x})}{\ISheafExt{Q}(\ILeaf{x})}
-    \\
-    \ISheafExt{(\lambda\_.P)}(\ILeaf{x})
-    = (\lambda\_.P)(\ILeaf{x})
-    = P
-    =
-  \end{gather*}
+  Unfold the definition of \(\IEvidenceSym\) and apply Propositions
+  \ref{prop:heyting-structure-predicate-extension} and
+  \ref{prop:boxed-partial-extension}.
 \end{proof}
 
+\begin{prop}
+  Given a type \(X\), we have an adjoint equivalence
+  \(\IRPExt{(-)} \dashv (-\circ\ILeafSym)\)
+  between the preorder of realizability predicates on \(X\)
+  and the preorder of realizability predicates on \(\ISheaf{X}\).
+  %
+  Furthermore, this adjoint equivalence is natural in \(X\).
+\end{prop}
+\begin{proof}
+  We must show that the following two maps
+  \[
+    \IRPExt{(-)} : {(\IRealPred{X})} \rightleftarrows {(\IRealPred{\ISheaf{X}})} : (-\circ\ILeafSym)
+  \]
+  give an equivalence of preorders, that the first is left adjoint to the
+  second and that they are natural in \(X\).
+  %
+  From our axiomatisation of sheafification as an adjunction we get
+  for free the naturality in \(X\) and that the two maps are inverses.
+  %
+  To prove that both maps preserve the ordering of realizability predicates
+  we use \Cref{prop:stable-predicate-induction} and
+  the preceding \Cref{prop:extension-of-evidence-predicate}.
+  %
+  Finally we must check that given \(\phi : \IRealPred{X}\)
+  and \(\psi : \IRealPred{\ISheaf{X}}\) that we have
+  \(\IRPExt{\phi}\leq\psi\) if and only if \(\phi \leq \psi\circ\ILeafSym\),
+  which follows from the follow list of equivalences:
+  \begin{align*}
+    &
+      \IForall{d:\ISheaf{X}}{\IEvidence{\IRPExt{\phi}}{\psi}\,d\,e}
+    \\
+    &\quad\Leftrightarrow
+      \IForall{d:\ISheaf{X}}{\IEvidence{\IRPExt{\phi}}{\IRPExt{(\psi\circ\ILeafSym)}}\,d\,e}
+    \\
+    &\quad\Leftrightarrow
+      \IForall{d:\ISheaf{X}}{\IRPExt{\IEvidence{\phi}{(\psi\circ\ILeafSym)}}\,d\,e}
+    \\
+    &\quad\Leftrightarrow
+      \IForall{x:X}{\IEvidence{\phi}{(\psi\circ\ILeafSym)}\,x\,e}
+  \end{align*}
+  which we have for any code \(e:\A\).
+\end{proof}
 
+\newpage
 
-\section{A Realizability Tripos}
-
-In this section we fix a topos \(\mathcal{E}\) along with a Lawvere-Tierney
-topology \(\Box : \Omega \to \Omega\) on this topos.
-%
-I believe for this definition \(\mathcal{E}\) can be an elementary topos,
-but I am less sure how this works out once we start considering sheafification.
-%
-We give our definitions internally to \(\mathcal{E}\), letting us simplify
-the proofs in this section.
-
-
+\todo[inline]{blah blah rewrite}
 \begin{defn}\label{defn:tripos-predicates-and-ordering}
   Given a presheaf \(\X\) we define the type of \definiendum{realizability
     predicates on \(\X\)} as the exponential \(\RealPred{\X}\).
@@ -876,90 +1024,665 @@ the proofs in this section.
  \end{itemize}
 }
 
-\subsection{The need for a modality}
-
-One approach we could try would be to keep the typical ordering
-used in realizability, that is without a modality:
+%\subsection{The need for a modality}
 %
-\[
-    \varphi \leq' \psi
-    \IsDefined
-    \IExists{e : \A}{
-      \IForall{x : \X}{
-        \IForall{a : \A}{
-          \IImplies%
-            {\varphi(a,x)}%
-            {\IAnd%
-              {\ITotal{\IAp{e}{a}}}%
-              {\psi(\IAp{e}{a}, x)}
-            }
-        }
-      }
-    }
-\]
-%
-From here we would hope to find an appropriate monad \(T : \AsmCat \to \AsmCat\)
-on assemblies and use its Kleisli category for semantics.
-
-Given an assembly \((X,\varphi)\), denote its underlying
-object of \(T(X,\varphi)\) by \(X_{T}\) and its realizability relation
-by \(\varphi_{T}:\RealPred{X_{T}}\).
-%
-With this notation fixed, a morphism between \((X,\varphi)\) and \((Y,\psi)\) in
-the Kleisli category of \(T\) would then consist of a morphism
-\(f : X \to Y_{T}\) in the underlying category \(\E\) satisfying
-\(\varphi \leq' \TPull{f}\psi\).
-%
-This requirement on \(f\) unfolds to
-%
-\[
-  \IExists{e : \A}{
-    \IForall{x : \X}{
-      \IForall{a : \A}{
-        \IImplies%
-          {\varphi(a,x)}%
-          {\IAnd%
-            {\ITotal{\IAp{e}{a}}}%
-            {\psi_{T}(\IAp{e}{a}, f(x))}
-          }
-      }
-    }
-  }
-\]
-%
-What becomes clear now is that the requirement that \(\IAp{e}{a}\)
-be defined sits outside the purview of the monad \(T\)
-%
-In particular, regardless of the effect on \(X_{T}\) and \(\varphi_{T}\), we
-still require \(\ITotal{\IAp{e}{a}}\) with no alterations.
-%
-In the presheaf case this amounts to requiring that \({e}\cdot_{w}{a}\)
-be defined, instead of asking that there exist a bar \(U\) of \(w\)
-such that \({e}\cdot_{u}{a}\) is defined for all \(u \in U\).
-
-\subsection{Alternative Definitions}
-
-We have been very particular with where we use the modality \(\Box\) in the
-ordering of realizability predicates, but there are certainly other options.
-%
-We spend a bit of time now considering said options and their logical strength,
-to convince you dear reader that ours is the most canonical.
-
-%\begin{gather}
+%One approach we could try would be to keep the typical ordering
+%used in realizability, that is without a modality:
+%%
+%\[
+%    \varphi \leq' \psi
+%    \IsDefined
 %    \IExists{e : \A}{
 %      \IForall{x : \X}{
 %        \IForall{a : \A}{
 %          \IImplies%
 %            {\varphi(a,x)}%
-%            {(
-%              \IAnd%
+%            {\IAnd%
 %              {\ITotal{\IAp{e}{a}}}%
 %              {\psi(\IAp{e}{a}, x)}
-%            )}
+%            }
 %        }
 %      }
 %    }
-%    \\
+%\]
+%%
+%From here we would hope to find an appropriate monad \(T : \AsmCat \to \AsmCat\)
+%on assemblies and use its Kleisli category for semantics.
+%
+%Given an assembly \((X,\varphi)\), denote its underlying
+%object of \(T(X,\varphi)\) by \(X_{T}\) and its realizability relation
+%by \(\varphi_{T}:\RealPred{X_{T}}\).
+%%
+%With this notation fixed, a morphism between \((X,\varphi)\) and \((Y,\psi)\) in
+%the Kleisli category of \(T\) would then consist of a morphism
+%\(f : X \to Y_{T}\) in the underlying category \(\E\) satisfying
+%\(\varphi \leq' \TPull{f}\psi\).
+%%
+%This requirement on \(f\) unfolds to
+%%
+%\[
+%  \IExists{e : \A}{
+%    \IForall{x : \X}{
+%      \IForall{a : \A}{
+%        \IImplies%
+%          {\varphi(a,x)}%
+%          {\IAnd%
+%            {\ITotal{\IAp{e}{a}}}%
+%            {\psi_{T}(\IAp{e}{a}, f(x))}
+%          }
+%      }
+%    }
+%  }
+%\]
+%%
+%What becomes clear now is that the requirement that \(\IAp{e}{a}\)
+%be defined sits outside the purview of the monad \(T\)
+%%
+%In particular, regardless of the effect on \(X_{T}\) and \(\varphi_{T}\), we
+%still require \(\ITotal{\IAp{e}{a}}\) with no alterations.
+%%
+%In the presheaf case this amounts to requiring that \({e}\cdot_{w}{a}\)
+%be defined, instead of asking that there exist a bar \(U\) of \(w\)
+%such that \({e}\cdot_{u}{a}\) is defined for all \(u \in U\).
+%
+%\subsection{Alternative Definitions}
+%
+%We have been very particular with where we use the modality \(\Box\) in the
+%ordering of realizability predicates, but there are certainly other options.
+%%
+%We spend a bit of time now considering said options and their logical strength,
+%to convince you dear reader that ours is the most canonical.
+%
+%%\begin{gather}
+%%    \IExists{e : \A}{
+%%      \IForall{x : \X}{
+%%        \IForall{a : \A}{
+%%          \IImplies%
+%%            {\varphi(a,x)}%
+%%            {(
+%%              \IAnd%
+%%              {\ITotal{\IAp{e}{a}}}%
+%%              {\psi(\IAp{e}{a}, x)}
+%%            )}
+%%        }
+%%      }
+%%    }
+%%    \\
+%%    \IExists{e : \A}{
+%%      \IForall{x : \X}{
+%%        \IForall{a : \A}{
+%%          \IImplies%
+%%            {\varphi(a,x)}%
+%%            {\IBox{(
+%%              \IAnd%
+%%              {\ITotal{\IAp{e}{a}}}%
+%%              {\psi(\IAp{e}{a}, x)}
+%%            )}}
+%%        }
+%%      }
+%%    }
+%%    \\
+%%    \IExists{e : \A}{
+%%      \IForall{x : \X}{
+%%        \IForall{a : \A}{
+%%          \IImplies%
+%%            {\IBox{(\varphi(a,x))}}%
+%%            {(
+%%              \IAnd%
+%%              {\ITotal{\IAp{e}{a}}}%
+%%              {\psi(\IAp{e}{a}, x)}
+%%            )}
+%%        }
+%%      }
+%%    }
+%%    \\
+%%    \IExists{e : \A}{
+%%      \IForall{x : \X}{
+%%        \IForall{a : \A}{
+%%          \IBox{(\IImplies%
+%%            {\varphi(a,x)}%
+%%            {(
+%%              \IAnd%
+%%              {\ITotal{\IAp{e}{a}}}%
+%%              {\psi(\IAp{e}{a}, x)}
+%%            )})
+%%        }}
+%%      }
+%%    }
+%%    \\
+%%    \IBox{(\IExists{e : \A}{
+%%      \IForall{x : \X}{
+%%        \IForall{a : \A}{
+%%          \IBox{(\IImplies%
+%%            {\varphi(a,x)}%
+%%            {(
+%%              \IAnd%
+%%              {\ITotal{\IAp{e}{a}}}%
+%%              {\psi(\IAp{e}{a}, x)}
+%%            )})
+%%        }}
+%%      }
+%%    })}
+%%    \\
+%%    \IBox{(\IExists{e : \A}{
+%%      \IForall{x : \X}{
+%%        \IForall{a : \A}{
+%%          \IImplies%
+%%            {\varphi(a,x)}%
+%%            {(
+%%              \IAnd%
+%%              {\ITotal{\IAp{e}{a}}}%
+%%              {\psi(\IAp{e}{a}, x)}
+%%            )}}
+%%      }
+%%    })}
+%%\end{gather}
+%
+%First it is helpful to see how \(\IBoxSym\) interacts with Heyting implication.
+%%
+%If we have a single implication \(\IImplies{A}{B}\) then there are 3 positions
+%in which we can place a \(\IBoxSym\), namely in front of the \(A\), in front
+%of the \(B\) and surrounding the whole implication.
+%%
+%Furthermore, as the modality is idempotent, we only need to consider at most
+%one box in each position.
+%%
+%This leaves us with eight possibilities, four of which turn out to be
+%equivalent.
+%%
+%We display all of these below, with the arrows displaying logical implication.
+%%
+%\begin{center}
+%\begin{tikzpicture}
+%  \node (a) at (-4.5,3) {\(\IImplies{A}{\IBox{B}}\)};
+%  \node (b) at (-1.5,3) {\(\IImplies{\IBox{A}}{\IBox{B}}\)};
+%  \node (c) at (1.5,3) {\(\IBox{(\IImplies{\IBox{A}}{\IBox{B}})}\)};
+%  \node (d) at (4.5,3) {\(\IBox{(\IImplies{A}{\IBox{B}})}\)};
+%  \node (e) at (0,2) {\(\IBox{(\IImplies{A}{B})}\)};
+%  \node (f) at (-1.5,1) {\(\IImplies{A}{B}\)};
+%  \node (g) at (1.5,1) {\(\IBox{(\IImplies{\IBox{A}}{B})}\)};
+%  \node (h) at (0,0) {\(\IImplies{\IBox{A}}{B}\)};
+%
+%  \draw[->] (h) -- (f);
+%  \draw[->] (h) -- (g);
+%  \draw[->] (f) -- (e);
+%  \draw[->] (g) -- (e);
+%  \draw[->] (e) -- (a);
+%  \draw[->] (e) -- (b);
+%  \draw[->] (e) -- (c);
+%  \draw[->] (e) -- (d);
+%  \draw[<->] (a) -- (b);
+%  \draw[<->] (b) -- (c);
+%  \draw[<->] (c) -- (d);
+%\end{tikzpicture}
+%\end{center}
+%%
+%\todo[inline]{I think we may also have that \(\IBox{(\IImplies{A}{B})}\) and
+%  \(\IBox{(\IImplies{\IBox{A}}{B})}\) are equivalent to the top formulas.}
+%%
+%%\begin{center}
+%%\begin{tikzpicture}
+%%
+%%  \node (b) at (13,0) {\(\IBox{(\IImplies{\IBox{A}}{\IBox{B}})}\)};
+%%  \node (d) at (11,1) {\(\IBox{(\IImplies{A}{\IBox{B}})}\)};
+%%  \node (f) at (11,-1) {\(\IBox{(\IImplies{\IBox{A}}{B})}\)};
+%%  \node (e) at (8,1) {\(\IBox{(\IImplies{A}{B})}\)};
+%%  \node (c) at (8,-1) {\(\IImplies{\IBox{A}}{\IBox{B}}\)};
+%%  \node (a) at (6,0) {\(\IImplies{A}{\IBox{B}}\)};
+%%
+%%  \node (g) at (4,0) {\(\IImplies{A}{B}\)};
+%%
+%%  \node (h) at (2,0) {\(\IImplies{\IBox{A}}{B}\)};
+%%
+%%  \draw[->] (h) -- (g);
+%%  \draw[->] (g) -- (a);
+%%  \draw[<->] (a) -- (e);
+%%  \draw[<->] (e) -- (d);
+%%  \draw[<->] (d) -- (b);
+%%  \draw[<->] (b) -- (f);
+%%  \draw[<->] (f) -- (c);
+%%  \draw[<->] (c) -- (a);
+%%\end{tikzpicture}
+%%\end{center}
+%%
+%The usual definition of implication in realizability uses Heyting implication
+%without any boxes, which turns out to be too strong a statement in our setting.
+%%
+%The above shows there is only one way of weakening an implication with
+%\(\IBoxSym\).
+%%
+%The usual definition of implication in realizability uses Heyting implication
+%without any boxes, which turns out to be too strong a statement in our setting.
+%%
+%The above shows that we have two possible ways of relaxing this, and
+%we have chosen the most liberal of the two options.
+%
+%We also know that \(\IBoxSym\) commutes with universal quantification, i.e.\ the
+%formulas \(\IBox{(\IForall{y:Y}{A(y)})}\) and \(\IForall{y:Y}{\IBox{A(y)}}\) are
+%logically equivalent.
+%%
+%This means that, were we to place any boxes around the universal quantifiers,
+%we could commute them all inwards, until they would be absorbed
+%by our weakening of Heyting implication.
+%
+%This leaves us with the final question: should we put a \(\IBoxSym\) around
+%the existential quantifier or not.
+%%
+%Unlike boxing the universal quantifiers, this would give us a genuinely weaker
+%logical statement, so it could be worthwhile.
+%%
+%However, it arguable weakens the statement too far, as it means that
+%the code \(e\) is no longer uniform in worlds when working in a
+%category of presheaves, at which point it seems we could just sheafify
+%our pca and work internally to the relevant category of sheaves.
+
+
+%\subsection{Totality}
+%
+%When defining assemblies we will be particularly interested in total
+%predicates.
+%
+%\begin{defn}\label{defn:tripos-total-predicates}
+%  A realizability predicate \(\varphi : \RealPred{X}\) is \definiendum{total}
+%  if it satisfies \(\IForall{x:X}{\IExists{a:\A}{\varphi(x,a)}}\).
+%\end{defn}
+%
+%Building new total predicates is not particularly difficult as shown by
+%the following lemmas.
+%%
+%These will be enough to show that most standard constructions in the
+%category of assemblies have total predicates as needed.
+%
+%\begin{lemm}\label{lemm:pullback-preserves-total}
+%  Given \(\varphi : \RealPred{Y}\) and a map \(f : X \to Y\), if
+%  \(\varphi\) is total then so is \(\TPull{f}\varphi\).
+%\end{lemm}
+%\begin{proof}
+%  Fix \(x:X\), by totality of \(\varphi\) we have some \(a:\A\) such that
+%  \(\varphi(f(x),a)\).
+%  %
+%  By definition, this is the same as saying \((\TPull{f}\varphi)(x,a)\) so
+%  pullback preserves totality.
+%\end{proof}
+%
+%\begin{lemm}\label{lemm:top-total}
+%  The predicate \(\TTop{X}\) is always total.
+%\end{lemm}
+%\begin{proof}
+%  This is equivalent to showing that \(\A\) is inhabited, but a pca
+%  comes equipped with two distinguished elements so this is always the case.
+%\end{proof}
+%
+%\begin{lemm}\label{lemm:meet-total}
+%  Two predicates \(\varphi,\psi : \RealPred{X}\) are total if and only if their
+%  meet \(\TAnd{\varphi}{\psi}{X}\) is total.
+%\end{lemm}
+%\begin{proof}
+%  For the forward direction, for a given \(x:X\) we have \(a:\A\) and \(b:\A\)
+%  such that \(\varphi(x,a)\) and \(\psi(x,b)\) and this means that
+%  \((\TAnd{\varphi}{\psi}{X})(x,\IAp{\IAp{\IPairCode}{a}}{b})\).
+%  %
+%  For the backwards direction, if we have \((\TAnd{\varphi}{\psi}{X})(x,a)\)
+%  then we also have \(\varphi(x,\IAp{\IFstCode}{a})\) and
+%  \(\psi(x,\IAp{\ISndCode}{a})\), so both \(\varphi\) and \(\psi\) are total.
+%\end{proof}
+%
+%\begin{lemm}\label{lemm:join-total}
+%  Given two predicates \(\varphi,\psi : \RealPred{X}\), at least one of them is
+%  total if and only if their join \(\TOr{\varphi}{\psi}{X}\) is total.
+%\end{lemm}
+%\begin{proof}
+%  For the forward direction we suppose that \(\varphi\) is total
+%  and fix some \(x:X\).
+%  %
+%  By totality of \(\varphi\) we have \(a:\A\) such that
+%  \(\varphi(x,a)\), so then \((\TOr{\varphi}{\psi}{X})(x,\IAp{\ILeftCode}{a})\)
+%  which shows that \(\TOr{\varphi}{\psi}{X}\) is total.
+%  %
+%  In the case that \(\psi\) is total the proof follows analogously.
+%  %
+%  For the converse, fix \(x : X\), then by totality of the join
+%  of \(\varphi\) and \(\psi\) we have some \(a:\A\) such that
+%  \((\TOr{\varphi}{\psi}{X})(x,a)\).
+%  %
+%  By definition, this means that there exists \(b:\A\) such that either
+%  \(a = \IAp{\ILeftCode}{b}\) and \(\varphi(x,b)\), in which case \(\varphi\) is
+%  total, or \(a = \IAp{\IRightCode}{b}\) and \(\psi(x,b)\), in which case
+%  \(\psi\) is total.
+%\end{proof}
+%
+%\begin{lemm}\label{lemm:bot-total}
+%  The predicate \(\TBot{X}\) is total if and only if
+%  \(\INot{(\IExists{x:X}\ITop)}\) holds, or equivalently,
+%  if \(X\) is an initial object of \(\E\).
+%\end{lemm}
+%\begin{proof}
+%  First we prove that totality of \(\TBot{X}\) is equivalent to
+%  \(\INot{(\IExists{x:X}\ITop)}\).
+%  %
+%  To do so, notice that
+%  \(\IForall{x:X}{\IExists{a:\A}{\TBot{X}(x,a)}}\)
+%  unfolds to
+%  \(\IForall{x:X}{\IExists{a:\A}{\IBot}}\),
+%  and that is equivalent to
+%  \(\IForall{x:X}{\IBot}\).
+%  %
+%  In turn, this is equivalent to the necessary condition.
+%
+%  For the second equivalence, that \(\INot{(\IExists{x:X}\ITop)}\)
+%  holds if and only if \(X\) is initial, we use the Kripke-Joyal semantics
+%  in \(\E\).
+%  %
+%  Doing so, we see the foregoing statement holds if and only if whenever we have
+%  a span \(X \overset{x}{\leftarrow} Z \overset{p}{\twoheadrightarrow} Y\) with
+%  \(p\) an epimorphism, then \(Y\) is itself initial.
+%  %
+%  For the forward direction we have the span
+%  \(X \leftarrow X \twoheadrightarrow X\) where all maps are the identity,
+%  so by assumption \(X\) is initial.
+%  %
+%  For the converse, assume \(X\) is initial and we have a span
+%  \(X \overset{x}{\leftarrow} Z \overset{p}{\twoheadrightarrow} Y\).
+%  %
+%  Initial objects in a topos are strict, hence \(Z\) is also a strict initial
+%  object.
+%  %
+%  Any map out of a strict initial object is monic, so \(p\) is both
+%  monic and epic, which in a topos implies it is an isomorphism.
+%  %
+%  As \(Y\) is isomorphic to an initial object, it must also be initial
+%  as needed.
+%\end{proof}
+%
+%\subsection{Presheaves with a Lawvere-Tierney Topology}
+%
+%\todo[inline]{adapt to use new realizability predicate type}
+%
+%Fix two realizability predicates \(\phi,\psi : \RealPred{\X}\), that is global
+%elements \(\phi,\psi : 1 \to \RealPred{\X}\).
+%%
+%We will unfold the denotation of \(\phi \leq \psi\) in the case of a preasheaf
+%category with some Lawvere-Tierney topology \(j : \Omega \to \Omega\).
+%%
+%We are, of course, interested in the following mono
+%%
+%\[
+%  \llbracket
+%    \IExists{e : \A}{
+%      \IForall{x : \X}{
+%        \IForall{a \in \varphi(x)}{
+%          \IBox{(
+%            \IAnd%
+%            {\ITotal{\IAp{e}{a}}}%
+%            {\IAp{e}{a} \in \psi(x)}
+%          )}
+%        }
+%      }
+%    }
+%  \rrbracket : \cdot \hookrightarrow 1
+%\]
+%%
+%We interpret the existential along the projection \(\pi_{\A} : 1 \times \A \to 1\)
+%giving us
+%%
+%\[
+%  \exists_{\pi_{\A}}(\underbrace{\llbracket
+%    \IForall{x : \X}{
+%      \IForall{a \in \varphi(x)}{
+%        \IBox{(
+%          \IAnd%
+%          {\ITotal{\IAp{e}{a}}}%
+%          {\IAp{e}{a} \in \psi(x)}
+%        )}
+%      }
+%    }
+%  \rrbracket}_{\text{subobject of }1 \times A})
+%\]
+%%
+%We interpret the universal along the projection
+%\(\pi_{\X} : (1 \times \A) \times \X \to 1 \times \A\) giving
+%%
+%\[
+%  \exists_{\pi_{\A}}\circ\forall_{\pi_{\X}}(\underbrace{\llbracket
+%    \IForall{a \in \varphi(x)}{
+%      \IBox{(
+%        \IAnd%
+%        {\ITotal{\IAp{e}{a}}}%
+%        {\IAp{e}{a} \in \psi(x)}
+%      )}
+%    }
+%  \rrbracket}_{\text{subobject of }(1 \times A) \times \X})
+%\]
+%%
+%Next we need to interpret the relative universal quantifier.
+%%
+%For this, the denotation of the open term
+%\(e : \A, x : \X \vdash \phi(x) : \IPower{\A}\) gives us a mono
+%%
+%\(
+%  m :
+%  S \hookrightarrow ((1 \times \A) \times \X) \times \A
+%\)
+%%
+%and composing this with the projection
+%\(\pi'_{\A} : ((1 \times \A) \times \X) \times \A \to (1 \times \A) \times \X\)
+%will give us the map along which we will interpret the quantifier.
+%%
+%\[
+%  \exists_{\pi_{\A}}\circ
+%  \forall_{\pi_{\X}}\circ
+%  \forall_{\pi'_{\A}\circ m}(\underbrace{\llbracket
+%    \IBox{(
+%      \IAnd%
+%      {\ITotal{\IAp{e}{a}}}%
+%      {\IAp{e}{a} \in \psi(x)}
+%    )}
+%  \rrbracket}_{\text{subobject of } S})
+%\]
+%%
+%Quantifiers are functorial so this is equivalent to the following
+%statement with a single universal
+%%
+%\[
+%  \exists_{\pi_{\A}}\circ
+%  \forall_{\pi_{\X}\circ\pi'_{\A}\circ m}(\underbrace{\llbracket
+%    \IBox{(
+%      \IAnd%
+%      {\ITotal{\IAp{e}{a}}}%
+%      {\IAp{e}{a} \in \psi(x)}
+%    )}
+%  \rrbracket}_{\text{subobject of } S})
+%\]
+%%
+%The modality is interpeted by taking the closure of the subobjects arising
+%out of the Lawvere-Tierney topology \(j:\Omega\to\Omega\).
+%%
+%\[
+%  \exists_{\pi_{\A}}\circ
+%  \forall_{\pi_{\X}}\circ
+%  \forall_{\pi'_{\A}\circ m}
+%  (\overline{\underbrace{\llbracket
+%      \IAnd%
+%      {\ITotal{\IAp{e}{a}}}%
+%      {\IAp{e}{a} \in \psi(x)}
+%  \rrbracket}_{\text{subobject of } S}})
+%\]
+%%
+%Conjunction is interpreted by the meet of subobjects. Such meets are computed
+%by pointwise intersections, but we can safely ignore that for now.
+%%
+%\[
+%  \exists_{\pi_{\A}}\circ
+%  \forall_{\pi_{\X}\circ\pi'_{\A}\circ m}
+%  \underset{\text{both subobjects of } S}%
+%  {(\overline{\underbrace{\llbracket \ITotal{\IAp{e}{a}}\rrbracket}
+%   \wedge
+%   \underbrace{\llbracket\IAp{e}{a} \in \psi(x)\rrbracket}
+%  })}
+%\]
+%%
+%At this point let us see how to interpret the particular terms mentioned.
+%%
+%We interpret the term \(e : \A, x : \X \vdash \phi(x) : \IPower{\A} \) as a
+%morphism \((1 \times \A) \times \X \to \IPower{\A}\) given by preocomposing
+%\(\EEval : X \times \RealPred{\X}\) with the pairing of the projection
+%\((1 \times \A) \times \X \to \X\) and of the map
+%\((1 \times \A) \times \X \to \RealPred{\X}\) which we get by weakening
+%\(\phi : 1 \to \RealPred{\X}\).
+%%
+%For clarity, the natural transformation \(\EEval\) is given by
+%%
+%\begin{align*}
+%  &\EEval_{w} : \X_{w} \times \mathsf{Nat}(\yo(w) \times \X, \IPower{\A})
+%                \to \IPower{\A}_{w}\\
+%  &\EEval_{w}(x, \alpha) = \alpha_{w}(\mathsf{id}, x)
+%\end{align*}
+%%
+%meaning that the denotation \(\llbracket\phi(x)\rrbracket\) is given by
+%%
+%\begin{align*}
+%  &\llbracket\phi(x)\rrbracket_{w} : (1 \times \A) \times \X \to \IPower{\A}\\
+%  &\llbracket\phi(x)\rrbracket_{w}((\star, a), x) =
+%    \EEval_{w}(x, \phi_{w}) = \phi_{w}(\mathsf{id}, x)
+%\end{align*}
+%%
+%Naturality in this case means that for any \(f : u \to w\), \(g : v \to u\)
+%and \(x : \X_{u}\) we have
+%\[
+%  (\alpha_{u}(f, x))\{g\} = \alpha_{v}(fg, x\{g\})
+%\]
+%
+%
+%\[
+%  ([\alpha_{v}(fg, x\{g\})]_{u}(f, a)) = \alpha_{v}(fg, x\{g\})
+%\]
+%
+%We can now define the mono \(m\) from \(\llbracket\phi(x)\rrbracket\) as
+%the mono corresponding to the characteristic function
+%\(\chi_{m} : (1 \times \A) \times \X \to \Omega\) arising by precomposing
+%with the interpretations of \(e : \A, x : \X \vdash a : \A  \)
+%and the weakening of \(e : \A, x : \X \vdash \phi(x) : \IPower{\A}\).
+%%
+%In the end this means that we have
+%\[
+%  (((\star, e), x), a) \in \mathsf{domain}(m)_{w}
+%  \iff
+%  w \in [\phi_{w}(\mathsf{id}, x)]_{w}(\mathsf{id}, a)
+%\]
+%
+%\dots
+%
+%And this leads us to the following external definition of the ordering
+%on realizability predicates.
+%
+%\begin{defn}
+%  We say that \(\phi \leq \psi\) at world \(w\) if there exists a code
+%  \(e : \A_{w}\) such that for all maps \(f : u \to w\), elements
+%  \(x : \X_{u}\) and codes \(a : \A_{u}\), if
+%  %
+%  \[
+%    \mathsf{id}_{u} \in [\phi_{u}(\mathsf{id}_{u}, x)]_{u}(\mathsf{id}_{u},a)
+%  \]
+%  %
+%  then there exists a cover \(\mathcal{V}\) of \(u\) such that for all
+%  \((g : v \to u) \in \mathcal{V}\) we have
+%  %
+%  \[\begin{array}{ccc}
+%  e\{fg\} \cdot_{v} a\{g\} \downarrow &\text{ and }&
+%  \mathsf{id}_{v} \in [\psi_{v}(\mathsf{id}_{v}, x\{g\})]_{v}(\mathsf{id}_{v},e\{fg\} \cdot_{v} a\{g\}).
+%  \end{array}\]
+%\end{defn}
+%
+%In the case that the underlying category is a poset
+%%
+%\begin{defn}[Over a poset]
+%  We say that \(\phi \leq \psi\) at world \(w\) if there exists a code
+%  \(e : \A_{w}\) such that for all extensions \(u \leq w\), elements
+%  \(x : \X_{u}\) and codes \(a : \A_{u}\), if
+%  %
+%  \[
+%    u \in [\psi_{u}(u\leq u, x)]_{u}(u \leq u,a)
+%  \]
+%  %
+%  then there exists a cover \(\mathcal{V}\) of \(u\) such that for all \(v \in \mathcal{V}\) we
+%  have
+%  %
+%  \[\begin{array}{ccc}
+%    e|_{v} \cdot_{v} a|_{v} \downarrow &\text{ and }&
+%    v \in [\psi_{v}(v\leq v, x|_{v})]_{v}(v \leq v,e|_{v} \cdot_{v} a|_{v})
+%  \end{array}\]
+%\end{defn}
+%
+%And further assuming that \(\A\) is a constant presheaf we get
+%%
+%\begin{defn}[Over a poset with constant \(\A\)]
+%  We say that \(\phi \leq \psi\) at world \(w\) if there exists a code
+%  \(e : \A\) such that for all extensions \(u \leq w\), elements
+%  \(x : \X_{u}\) and codes \(a : \A\), if
+%  %
+%  \[
+%    u \in [\phi_{u}(u\leq u, x)]_{u}(u \leq u,a)
+%  \]
+%  %
+%  then there exists a cover \(\mathcal{V}\) of \(u\) such that for all \(v \in \mathcal{V}\) we
+%  have
+%  %
+%  \[\begin{array}{ccc}
+%    e \cdot_{v} a \downarrow &\text{ and }&
+%    v \in [\psi_{v}(v\leq v, x|_{v})]_{v}(v \leq v,e \cdot_{v} a)
+%  \end{array}\]
+%\end{defn}
+%
+%We can also work with uncurried predicates, so now we have
+%\(\phi,\psi : \IPower{(\X\times\A)}\), the previous assumptions and if we
+%also omit the proofs that specific worlds are extensions of others, then
+%we get the following definition, which is what we have been working with
+%already:
+%%
+%\begin{defn}[Lots of simplifications]
+%  We say that \(\phi \leq \psi\) at world \(w\) if there exists a code
+%  \(e : \A\) such that for all extensions \(u \leq w\), elements
+%  \(x : \X_{u}\) and codes \(a : \A\), if
+%  %
+%  \[
+%    u \in \phi_{u}(x, a)
+%  \]
+%  %
+%  then there exists a cover \(\mathcal{V}\) of \(u\) such that for all \(v \in \mathcal{V}\) we
+%  have
+%  %
+%  \[\begin{array}{ccc}
+%    e \cdot_{v} a \downarrow &\text{ and }&
+%    v \in \psi_{v}(x|_{v}, e \cdot_{v} a)
+%  \end{array}\]
+%\end{defn}
+
+\section{Associated Realizability Categories}%
+\label{sec:realizability-categories}
+
+%\subsection{Assemblies}%
+%\label{sub:assemblies}
+%
+%\begin{defn}\label{defn:assembly}
+%  An \definiendum{assembly} is an object \(X\) of \(\E\) with a realizability
+%  predicate \(\varphi : \RealPred{X}\) satisfying the following internal
+%  statement \(\IForall{x:X}{\IExists{a:A}{\varphi(x,a)}}\).
+%  %
+%  We call such a predicates \definiendum{total}.
+%\end{defn}
+%
+%\begin{defn}\label{defn:assembly-morphism}
+%  A \definiendum{morphism of assemblies} from \((X,\varphi)\) to
+%  \((Y,\psi)\) consists of a morphism \(f : X \to Y\) in \(\E\) such that
+%  \(\varphi \leq \TPull{f}\psi\). When \(\varphi \leq \TPull{f}\psi\) holds
+%  we say that \(f\) is \definiendum{tracked}.
+%\end{defn}
+%
+%\begin{remk}
+%  Using the internal language of \(\E\), \(f : X \to Y\) is tracked as above
+%  if we have
+%  %
+%  \[
 %    \IExists{e : \A}{
 %      \IForall{x : \X}{
 %        \IForall{a : \A}{
@@ -968,683 +1691,105 @@ to convince you dear reader that ours is the most canonical.
 %            {\IBox{(
 %              \IAnd%
 %              {\ITotal{\IAp{e}{a}}}%
-%              {\psi(\IAp{e}{a}, x)}
+%              {\psi(\IAp{e}{a}, f(x))}
 %            )}}
 %        }
 %      }
 %    }
-%    \\
-%    \IExists{e : \A}{
-%      \IForall{x : \X}{
-%        \IForall{a : \A}{
-%          \IImplies%
-%            {\IBox{(\varphi(a,x))}}%
-%            {(
-%              \IAnd%
-%              {\ITotal{\IAp{e}{a}}}%
-%              {\psi(\IAp{e}{a}, x)}
-%            )}
-%        }
-%      }
-%    }
-%    \\
-%    \IExists{e : \A}{
-%      \IForall{x : \X}{
-%        \IForall{a : \A}{
-%          \IBox{(\IImplies%
-%            {\varphi(a,x)}%
-%            {(
-%              \IAnd%
-%              {\ITotal{\IAp{e}{a}}}%
-%              {\psi(\IAp{e}{a}, x)}
-%            )})
-%        }}
-%      }
-%    }
-%    \\
-%    \IBox{(\IExists{e : \A}{
-%      \IForall{x : \X}{
-%        \IForall{a : \A}{
-%          \IBox{(\IImplies%
-%            {\varphi(a,x)}%
-%            {(
-%              \IAnd%
-%              {\ITotal{\IAp{e}{a}}}%
-%              {\psi(\IAp{e}{a}, x)}
-%            )})
-%        }}
-%      }
-%    })}
-%    \\
-%    \IBox{(\IExists{e : \A}{
-%      \IForall{x : \X}{
-%        \IForall{a : \A}{
-%          \IImplies%
-%            {\varphi(a,x)}%
-%            {(
-%              \IAnd%
-%              {\ITotal{\IAp{e}{a}}}%
-%              {\psi(\IAp{e}{a}, x)}
-%            )}}
-%      }
-%    })}
-%\end{gather}
-
-First it is helpful to see how \(\IBoxSym\) interacts with Heyting implication.
+%  \]
+%\end{remk}
 %
-If we have a single implication \(\IImplies{A}{B}\) then there are 3 positions
-in which we can place a \(\IBoxSym\), namely in front of the \(A\), in front
-of the \(B\) and surrounding the whole implication.
+%Though we will sometimes use this internal definition, other times it will be
+%easier to use abstract properties of triposes, for example in showing that
+%assemblies form a category.
 %
-Furthermore, as the modality is idempotent, we only need to consider at most
-one box in each position.
+%\begin{cons}
+%  The \definiendum{category of assemblies}, denoted \(\AsmCat\), has as objects
+%  the assemblies and as morphisms the morphisms of assemblies.
+%  %
+%  Identity morphisms and composition are both inherited from \(\E\).
+%\end{cons}
+%\begin{proof}
+%  We claimed that identity morphisms and composition are inherited from \(\E\).
+%  %
+%  For the former, given an assembly \((X,\varphi)\) we have the identity
+%  \(\IId{X}\) which is tracked since \(\TPull{\IId{X}}\) is the identity and
+%  \(\leq\) is reflexive.
+%  %
+%  For composition, suppose we have morphisms of assemblies
+%  \(f : (Y,\psi) \to (X,\varphi)\) and \(g : (Z,\chi)\to(Y,\psi)\).
+%  %
+%  Both of these are tracked hence so \(\psi \leq \TPull{f}\varphi\) and
+%  \(\chi \leq \TPull{g}\psi\), but \(\TPull{g}\) is monotonic so in addition we
+%  also have
+%  \(\chi \leq \TPull{g}\psi \leq \TPull{g}\TPull{f}\varphi=\TPull{(fg)}\varphi\)
+%  which means that \(fg\) is tracked as necessary.
+%  %
+%  The unit and associativity equalities then follow immediately as \(\E\) is a
+%  category.
+%\end{proof}
 %
-This leaves us with eight possibilities, four of which turn out to be
-equivalent.
+%\begin{lemm}\label{lemm:assemblies-finite-limits}
+%  The category of assemblies \(\AsmCat\) has all finite limits.
+%\end{lemm}
+%\begin{proof}
+%  We construct binary products and equalisers from which all finite limits
+%  follow.
 %
-We display all of these below, with the arrows displaying logical implication.
+%  Fix two assemblies \((X,\varphi)\) and \((Y,\psi)\), the underlying object of
+%  their product will be the product \(\IProd{X}{Y}\) and the realizability
+%  relation will be given by
+%  \(\TAnd{(\TPull{\IFst}\varphi)}{(\TPull{\ISnd}\psi)}{\IProd{X}{Y}}\).
+%  %
+%  This is total by lemmas~\ref{lemm:pullback-preserves-total}
+%  and~\ref{lemm:meet-total}.
+%  %
+%  The projections \(\IFst\) and \(\ISnd\) are tracked as we have
+%  \(\TAnd{(\TPull{\IFst}\varphi)}{(\TPull{\ISnd}\psi)}{\IProd{X}{Y}} \leq \TPull{\IFst}\varphi\)
+%  and
+%  \(\TAnd{(\TPull{\IFst}\varphi)}{(\TPull{\ISnd}\psi)}{\IProd{X}{Y}} \leq \TPull{\ISnd}\psi\).
+%  %
+%  This leaves us to show that given morphisms \(f : (Z,\chi) \to (X,\varphi)\)
+%  and \(g : (Z,\chi) \to (Y,\psi)\) that \(\IPair{f}{g} : Z \to \IProd{X}{Y}\)
+%  is tracked.
+%  %
+%  Since \(f\) and \(g\) are tracked we know that
+%  \[
+%    \chi \leq \TAnd{(\TPull{f}\varphi)}{(\TPull{g}\psi)}{Z}
+%         = \TAnd{\TPull{(\IFst\IPair{f}{g})}\varphi}{\TPull{(\ISnd\IPair{f}{g})}\psi}{Z}
+%         = \TPull{\IPair{f}{g}}\left[\TAnd{(\TPull{\IFst}\varphi)}{(\TPull{\ISnd}\psi)}{\IProd{X}{Y}}\right]
+%  \]
+%  which shows that \(\IPair{f}{g}\) is tracked and so the category of assemblies
+%  has binary products.
 %
-\begin{center}
-\begin{tikzpicture}
-  \node (a) at (-4.5,3) {\(\IImplies{A}{\IBox{B}}\)};
-  \node (b) at (-1.5,3) {\(\IImplies{\IBox{A}}{\IBox{B}}\)};
-  \node (c) at (1.5,3) {\(\IBox{(\IImplies{\IBox{A}}{\IBox{B}})}\)};
-  \node (d) at (4.5,3) {\(\IBox{(\IImplies{A}{\IBox{B}})}\)};
-  \node (e) at (0,2) {\(\IBox{(\IImplies{A}{B})}\)};
-  \node (f) at (-1.5,1) {\(\IImplies{A}{B}\)};
-  \node (g) at (1.5,1) {\(\IBox{(\IImplies{\IBox{A}}{B})}\)};
-  \node (h) at (0,0) {\(\IImplies{\IBox{A}}{B}\)};
-
-  \draw[->] (h) -- (f);
-  \draw[->] (h) -- (g);
-  \draw[->] (f) -- (e);
-  \draw[->] (g) -- (e);
-  \draw[->] (e) -- (a);
-  \draw[->] (e) -- (b);
-  \draw[->] (e) -- (c);
-  \draw[->] (e) -- (d);
-  \draw[<->] (a) -- (b);
-  \draw[<->] (b) -- (c);
-  \draw[<->] (c) -- (d);
-\end{tikzpicture}
-\end{center}
+%  For equalisers fix two morphisms \(f,g : (X,\varphi) \to (Y,\psi)\) and
+%  denote their equaliser in \(\E\) by \(m : \IEqualiser{f}{g} \to X\).
+%  %
+%  We turn this equaliser into an assembly by giving it the realizability
+%  predicate \(\TPull{m}\varphi\), the totality of which follows from lemma
+%  \ref{lemm:pullback-preserves-total}.
+%  %
+%  To show \(m\) is tracked amounts to proving
+%  \(\TPull{m}\varphi \leq \TPull{m}\varphi\), which holds by reflexivity of
+%  \(\leq\).
+%  %
+%  Finally suppose we have \(h : (Z,\chi) \to (X,\varphi)\) which equalises \(f\)
+%  and \(g\), then the universal property of \(\IEqualiser{f}{g}\) tells us there
+%  exists a unique map \(u : Z \to \IEqualiser{f}{g}\) such that \(h = mu\).
+%  %
+%  As \(h\) is tracked, then so is \(u\) which follows from
+%  \(\chi\leq\TPull{h}\varphi=\TPull{(mu)}\varphi=\TPull{u}(\TPull{m}\varphi)\).
+%\end{proof}
 %
-\todo[inline]{I think we may also have that \(\IBox{(\IImplies{A}{B})}\) and
-  \(\IBox{(\IImplies{\IBox{A}}{B})}\) are equivalent to the top formulas.}
+%\begin{lemm}\label{lemm:assemblies-cartesian-closed}
+%  The category of assemblies \(\AsmCat\) is cartesian closed.
+%\end{lemm}
+%\begin{proof}
+%  From \Cref{lemm:assemblies-finite-limits} we know that binary products exist,
+%  it thus remains to show that exponentials exist.
+%  %
 %
-%\begin{center}
-%\begin{tikzpicture}
-%
-%  \node (b) at (13,0) {\(\IBox{(\IImplies{\IBox{A}}{\IBox{B}})}\)};
-%  \node (d) at (11,1) {\(\IBox{(\IImplies{A}{\IBox{B}})}\)};
-%  \node (f) at (11,-1) {\(\IBox{(\IImplies{\IBox{A}}{B})}\)};
-%  \node (e) at (8,1) {\(\IBox{(\IImplies{A}{B})}\)};
-%  \node (c) at (8,-1) {\(\IImplies{\IBox{A}}{\IBox{B}}\)};
-%  \node (a) at (6,0) {\(\IImplies{A}{\IBox{B}}\)};
-%
-%  \node (g) at (4,0) {\(\IImplies{A}{B}\)};
-%
-%  \node (h) at (2,0) {\(\IImplies{\IBox{A}}{B}\)};
-%
-%  \draw[->] (h) -- (g);
-%  \draw[->] (g) -- (a);
-%  \draw[<->] (a) -- (e);
-%  \draw[<->] (e) -- (d);
-%  \draw[<->] (d) -- (b);
-%  \draw[<->] (b) -- (f);
-%  \draw[<->] (f) -- (c);
-%  \draw[<->] (c) -- (a);
-%\end{tikzpicture}
-%\end{center}
-%
-The usual definition of implication in realizability uses Heyting implication
-without any boxes, which turns out to be too strong a statement in our setting.
-%
-The above shows there is only one way of weakening an implication with
-\(\IBoxSym\).
-%
-The usual definition of implication in realizability uses Heyting implication
-without any boxes, which turns out to be too strong a statement in our setting.
-%
-The above shows that we have two possible ways of relaxing this, and
-we have chosen the most liberal of the two options.
-
-We also know that \(\IBoxSym\) commutes with universal quantification, i.e.\ the
-formulas \(\IBox{(\IForall{y:Y}{A(y)})}\) and \(\IForall{y:Y}{\IBox{A(y)}}\) are
-logically equivalent.
-%
-This means that, were we to place any boxes around the universal quantifiers,
-we could commute them all inwards, until they would be absorbed
-by our weakening of Heyting implication.
-
-This leaves us with the final question: should we put a \(\IBoxSym\) around
-the existential quantifier or not.
-%
-Unlike boxing the universal quantifiers, this would give us a genuinely weaker
-logical statement, so it could be worthwhile.
-%
-However, it arguable weakens the statement too far, as it means that
-the code \(e\) is no longer uniform in worlds when working in a
-category of presheaves, at which point it seems we could just sheafify
-our pca and work internally to the relevant category of sheaves.
-
-
-\subsection{Totality}
-
-When defining assemblies we will be particularly interested in total
-predicates.
-
-\begin{defn}\label{defn:tripos-total-predicates}
-  A realizability predicate \(\varphi : \RealPred{X}\) is \definiendum{total}
-  if it satisfies \(\IForall{x:X}{\IExists{a:\A}{\varphi(x,a)}}\).
-\end{defn}
-
-Building new total predicates is not particularly difficult as shown by
-the following lemmas.
-%
-These will be enough to show that most standard constructions in the
-category of assemblies have total predicates as needed.
-
-\begin{lemm}\label{lemm:pullback-preserves-total}
-  Given \(\varphi : \RealPred{Y}\) and a map \(f : X \to Y\), if
-  \(\varphi\) is total then so is \(\TPull{f}\varphi\).
-\end{lemm}
-\begin{proof}
-  Fix \(x:X\), by totality of \(\varphi\) we have some \(a:\A\) such that
-  \(\varphi(f(x),a)\).
-  %
-  By definition, this is the same as saying \((\TPull{f}\varphi)(x,a)\) so
-  pullback preserves totality.
-\end{proof}
-
-\begin{lemm}\label{lemm:top-total}
-  The predicate \(\TTop{X}\) is always total.
-\end{lemm}
-\begin{proof}
-  This is equivalent to showing that \(\A\) is inhabited, but a pca
-  comes equipped with two distinguished elements so this is always the case.
-\end{proof}
-
-\begin{lemm}\label{lemm:meet-total}
-  Two predicates \(\varphi,\psi : \RealPred{X}\) are total if and only if their
-  meet \(\TAnd{\varphi}{\psi}{X}\) is total.
-\end{lemm}
-\begin{proof}
-  For the forward direction, for a given \(x:X\) we have \(a:\A\) and \(b:\A\)
-  such that \(\varphi(x,a)\) and \(\psi(x,b)\) and this means that
-  \((\TAnd{\varphi}{\psi}{X})(x,\IAp{\IAp{\IPairCode}{a}}{b})\).
-  %
-  For the backwards direction, if we have \((\TAnd{\varphi}{\psi}{X})(x,a)\)
-  then we also have \(\varphi(x,\IAp{\IFstCode}{a})\) and
-  \(\psi(x,\IAp{\ISndCode}{a})\), so both \(\varphi\) and \(\psi\) are total.
-\end{proof}
-
-\begin{lemm}\label{lemm:join-total}
-  Given two predicates \(\varphi,\psi : \RealPred{X}\), at least one of them is
-  total if and only if their join \(\TOr{\varphi}{\psi}{X}\) is total.
-\end{lemm}
-\begin{proof}
-  For the forward direction we suppose that \(\varphi\) is total
-  and fix some \(x:X\).
-  %
-  By totality of \(\varphi\) we have \(a:\A\) such that
-  \(\varphi(x,a)\), so then \((\TOr{\varphi}{\psi}{X})(x,\IAp{\ILeftCode}{a})\)
-  which shows that \(\TOr{\varphi}{\psi}{X}\) is total.
-  %
-  In the case that \(\psi\) is total the proof follows analogously.
-  %
-  For the converse, fix \(x : X\), then by totality of the join
-  of \(\varphi\) and \(\psi\) we have some \(a:\A\) such that
-  \((\TOr{\varphi}{\psi}{X})(x,a)\).
-  %
-  By definition, this means that there exists \(b:\A\) such that either
-  \(a = \IAp{\ILeftCode}{b}\) and \(\varphi(x,b)\), in which case \(\varphi\) is
-  total, or \(a = \IAp{\IRightCode}{b}\) and \(\psi(x,b)\), in which case
-  \(\psi\) is total.
-\end{proof}
-
-\begin{lemm}\label{lemm:bot-total}
-  The predicate \(\TBot{X}\) is total if and only if
-  \(\INot{(\IExists{x:X}\ITop)}\) holds, or equivalently,
-  if \(X\) is an initial object of \(\E\).
-\end{lemm}
-\begin{proof}
-  First we prove that totality of \(\TBot{X}\) is equivalent to
-  \(\INot{(\IExists{x:X}\ITop)}\).
-  %
-  To do so, notice that
-  \(\IForall{x:X}{\IExists{a:\A}{\TBot{X}(x,a)}}\)
-  unfolds to
-  \(\IForall{x:X}{\IExists{a:\A}{\IBot}}\),
-  and that is equivalent to
-  \(\IForall{x:X}{\IBot}\).
-  %
-  In turn, this is equivalent to the necessary condition.
-
-  For the second equivalence, that \(\INot{(\IExists{x:X}\ITop)}\)
-  holds if and only if \(X\) is initial, we use the Kripke-Joyal semantics
-  in \(\E\).
-  %
-  Doing so, we see the foregoing statement holds if and only if whenever we have
-  a span \(X \overset{x}{\leftarrow} Z \overset{p}{\twoheadrightarrow} Y\) with
-  \(p\) an epimorphism, then \(Y\) is itself initial.
-  %
-  For the forward direction we have the span
-  \(X \leftarrow X \twoheadrightarrow X\) where all maps are the identity,
-  so by assumption \(X\) is initial.
-  %
-  For the converse, assume \(X\) is initial and we have a span
-  \(X \overset{x}{\leftarrow} Z \overset{p}{\twoheadrightarrow} Y\).
-  %
-  Initial objects in a topos are strict, hence \(Z\) is also a strict initial
-  object.
-  %
-  Any map out of a strict initial object is monic, so \(p\) is both
-  monic and epic, which in a topos implies it is an isomorphism.
-  %
-  As \(Y\) is isomorphic to an initial object, it must also be initial
-  as needed.
-\end{proof}
-
-\subsection{Presheaves with a Lawvere-Tierney Topology}
-
-\todo[inline]{adapt to use new realizability predicate type}
-
-Fix two realizability predicates \(\phi,\psi : \RealPred{\X}\), that is global
-elements \(\phi,\psi : 1 \to \RealPred{\X}\).
-%
-We will unfold the denotation of \(\phi \leq \psi\) in the case of a preasheaf
-category with some Lawvere-Tierney topology \(j : \Omega \to \Omega\).
-%
-We are, of course, interested in the following mono
-%
-\[
-  \llbracket
-    \IExists{e : \A}{
-      \IForall{x : \X}{
-        \IForall{a \in \varphi(x)}{
-          \IBox{(
-            \IAnd%
-            {\ITotal{\IAp{e}{a}}}%
-            {\IAp{e}{a} \in \psi(x)}
-          )}
-        }
-      }
-    }
-  \rrbracket : \cdot \hookrightarrow 1
-\]
-%
-We interpret the existential along the projection \(\pi_{\A} : 1 \times \A \to 1\)
-giving us
-%
-\[
-  \exists_{\pi_{\A}}(\underbrace{\llbracket
-    \IForall{x : \X}{
-      \IForall{a \in \varphi(x)}{
-        \IBox{(
-          \IAnd%
-          {\ITotal{\IAp{e}{a}}}%
-          {\IAp{e}{a} \in \psi(x)}
-        )}
-      }
-    }
-  \rrbracket}_{\text{subobject of }1 \times A})
-\]
-%
-We interpret the universal along the projection
-\(\pi_{\X} : (1 \times \A) \times \X \to 1 \times \A\) giving
-%
-\[
-  \exists_{\pi_{\A}}\circ\forall_{\pi_{\X}}(\underbrace{\llbracket
-    \IForall{a \in \varphi(x)}{
-      \IBox{(
-        \IAnd%
-        {\ITotal{\IAp{e}{a}}}%
-        {\IAp{e}{a} \in \psi(x)}
-      )}
-    }
-  \rrbracket}_{\text{subobject of }(1 \times A) \times \X})
-\]
-%
-Next we need to interpret the relative universal quantifier.
-%
-For this, the denotation of the open term
-\(e : \A, x : \X \vdash \phi(x) : \IPower{\A}\) gives us a mono
-%
-\(
-  m :
-  S \hookrightarrow ((1 \times \A) \times \X) \times \A
-\)
-%
-and composing this with the projection
-\(\pi'_{\A} : ((1 \times \A) \times \X) \times \A \to (1 \times \A) \times \X\)
-will give us the map along which we will interpret the quantifier.
-%
-\[
-  \exists_{\pi_{\A}}\circ
-  \forall_{\pi_{\X}}\circ
-  \forall_{\pi'_{\A}\circ m}(\underbrace{\llbracket
-    \IBox{(
-      \IAnd%
-      {\ITotal{\IAp{e}{a}}}%
-      {\IAp{e}{a} \in \psi(x)}
-    )}
-  \rrbracket}_{\text{subobject of } S})
-\]
-%
-Quantifiers are functorial so this is equivalent to the following
-statement with a single universal
-%
-\[
-  \exists_{\pi_{\A}}\circ
-  \forall_{\pi_{\X}\circ\pi'_{\A}\circ m}(\underbrace{\llbracket
-    \IBox{(
-      \IAnd%
-      {\ITotal{\IAp{e}{a}}}%
-      {\IAp{e}{a} \in \psi(x)}
-    )}
-  \rrbracket}_{\text{subobject of } S})
-\]
-%
-The modality is interpeted by taking the closure of the subobjects arising
-out of the Lawvere-Tierney topology \(j:\Omega\to\Omega\).
-%
-\[
-  \exists_{\pi_{\A}}\circ
-  \forall_{\pi_{\X}}\circ
-  \forall_{\pi'_{\A}\circ m}
-  (\overline{\underbrace{\llbracket
-      \IAnd%
-      {\ITotal{\IAp{e}{a}}}%
-      {\IAp{e}{a} \in \psi(x)}
-  \rrbracket}_{\text{subobject of } S}})
-\]
-%
-Conjunction is interpreted by the meet of subobjects. Such meets are computed
-by pointwise intersections, but we can safely ignore that for now.
-%
-\[
-  \exists_{\pi_{\A}}\circ
-  \forall_{\pi_{\X}\circ\pi'_{\A}\circ m}
-  \underset{\text{both subobjects of } S}%
-  {(\overline{\underbrace{\llbracket \ITotal{\IAp{e}{a}}\rrbracket}
-   \wedge
-   \underbrace{\llbracket\IAp{e}{a} \in \psi(x)\rrbracket}
-  })}
-\]
-%
-At this point let us see how to interpret the particular terms mentioned.
-%
-We interpret the term \(e : \A, x : \X \vdash \phi(x) : \IPower{\A} \) as a
-morphism \((1 \times \A) \times \X \to \IPower{\A}\) given by preocomposing
-\(\EEval : X \times \RealPred{\X}\) with the pairing of the projection
-\((1 \times \A) \times \X \to \X\) and of the map
-\((1 \times \A) \times \X \to \RealPred{\X}\) which we get by weakening
-\(\phi : 1 \to \RealPred{\X}\).
-%
-For clarity, the natural transformation \(\EEval\) is given by
-%
-\begin{align*}
-  &\EEval_{w} : \X_{w} \times \mathsf{Nat}(\yo(w) \times \X, \IPower{\A})
-                \to \IPower{\A}_{w}\\
-  &\EEval_{w}(x, \alpha) = \alpha_{w}(\mathsf{id}, x)
-\end{align*}
-%
-meaning that the denotation \(\llbracket\phi(x)\rrbracket\) is given by
-%
-\begin{align*}
-  &\llbracket\phi(x)\rrbracket_{w} : (1 \times \A) \times \X \to \IPower{\A}\\
-  &\llbracket\phi(x)\rrbracket_{w}((\star, a), x) =
-    \EEval_{w}(x, \phi_{w}) = \phi_{w}(\mathsf{id}, x)
-\end{align*}
-%
-Naturality in this case means that for any \(f : u \to w\), \(g : v \to u\)
-and \(x : \X_{u}\) we have
-\[
-  (\alpha_{u}(f, x))\{g\} = \alpha_{v}(fg, x\{g\})
-\]
-
-
-\[
-  ([\alpha_{v}(fg, x\{g\})]_{u}(f, a)) = \alpha_{v}(fg, x\{g\})
-\]
-
-We can now define the mono \(m\) from \(\llbracket\phi(x)\rrbracket\) as
-the mono corresponding to the characteristic function
-\(\chi_{m} : (1 \times \A) \times \X \to \Omega\) arising by precomposing
-with the interpretations of \(e : \A, x : \X \vdash a : \A  \)
-and the weakening of \(e : \A, x : \X \vdash \phi(x) : \IPower{\A}\).
-%
-In the end this means that we have
-\[
-  (((\star, e), x), a) \in \mathsf{domain}(m)_{w}
-  \iff
-  w \in [\phi_{w}(\mathsf{id}, x)]_{w}(\mathsf{id}, a)
-\]
-
-\dots
-
-And this leads us to the following external definition of the ordering
-on realizability predicates.
-
-\begin{defn}
-  We say that \(\phi \leq \psi\) at world \(w\) if there exists a code
-  \(e : \A_{w}\) such that for all maps \(f : u \to w\), elements
-  \(x : \X_{u}\) and codes \(a : \A_{u}\), if
-  %
-  \[
-    \mathsf{id}_{u} \in [\phi_{u}(\mathsf{id}_{u}, x)]_{u}(\mathsf{id}_{u},a)
-  \]
-  %
-  then there exists a cover \(\mathcal{V}\) of \(u\) such that for all
-  \((g : v \to u) \in \mathcal{V}\) we have
-  %
-  \[\begin{array}{ccc}
-  e\{fg\} \cdot_{v} a\{g\} \downarrow &\text{ and }&
-  \mathsf{id}_{v} \in [\psi_{v}(\mathsf{id}_{v}, x\{g\})]_{v}(\mathsf{id}_{v},e\{fg\} \cdot_{v} a\{g\}).
-  \end{array}\]
-\end{defn}
-
-In the case that the underlying category is a poset
-%
-\begin{defn}[Over a poset]
-  We say that \(\phi \leq \psi\) at world \(w\) if there exists a code
-  \(e : \A_{w}\) such that for all extensions \(u \leq w\), elements
-  \(x : \X_{u}\) and codes \(a : \A_{u}\), if
-  %
-  \[
-    u \in [\psi_{u}(u\leq u, x)]_{u}(u \leq u,a)
-  \]
-  %
-  then there exists a cover \(\mathcal{V}\) of \(u\) such that for all \(v \in \mathcal{V}\) we
-  have
-  %
-  \[\begin{array}{ccc}
-    e|_{v} \cdot_{v} a|_{v} \downarrow &\text{ and }&
-    v \in [\psi_{v}(v\leq v, x|_{v})]_{v}(v \leq v,e|_{v} \cdot_{v} a|_{v})
-  \end{array}\]
-\end{defn}
-
-And further assuming that \(\A\) is a constant presheaf we get
-%
-\begin{defn}[Over a poset with constant \(\A\)]
-  We say that \(\phi \leq \psi\) at world \(w\) if there exists a code
-  \(e : \A\) such that for all extensions \(u \leq w\), elements
-  \(x : \X_{u}\) and codes \(a : \A\), if
-  %
-  \[
-    u \in [\phi_{u}(u\leq u, x)]_{u}(u \leq u,a)
-  \]
-  %
-  then there exists a cover \(\mathcal{V}\) of \(u\) such that for all \(v \in \mathcal{V}\) we
-  have
-  %
-  \[\begin{array}{ccc}
-    e \cdot_{v} a \downarrow &\text{ and }&
-    v \in [\psi_{v}(v\leq v, x|_{v})]_{v}(v \leq v,e \cdot_{v} a)
-  \end{array}\]
-\end{defn}
-
-We can also work with uncurried predicates, so now we have
-\(\phi,\psi : \IPower{(\X\times\A)}\), the previous assumptions and if we
-also omit the proofs that specific worlds are extensions of others, then
-we get the following definition, which is what we have been working with
-already:
-%
-\begin{defn}[Lots of simplifications]
-  We say that \(\phi \leq \psi\) at world \(w\) if there exists a code
-  \(e : \A\) such that for all extensions \(u \leq w\), elements
-  \(x : \X_{u}\) and codes \(a : \A\), if
-  %
-  \[
-    u \in \phi_{u}(x, a)
-  \]
-  %
-  then there exists a cover \(\mathcal{V}\) of \(u\) such that for all \(v \in \mathcal{V}\) we
-  have
-  %
-  \[\begin{array}{ccc}
-    e \cdot_{v} a \downarrow &\text{ and }&
-    v \in \psi_{v}(x|_{v}, e \cdot_{v} a)
-  \end{array}\]
-\end{defn}
-
-\section{Realizability Categories}%
-\label{sec:realizability-categories}
-
-With a tripos we can now define its associated category of assemblies
-and realizability topos.
-
-\subsection{Assemblies}%
-\label{sub:assemblies}
-
-\begin{defn}\label{defn:assembly}
-  An \definiendum{assembly} is an object \(X\) of \(\E\) with a realizability
-  predicate \(\varphi : \RealPred{X}\) satisfying the following internal
-  statement \(\IForall{x:X}{\IExists{a:A}{\varphi(x,a)}}\).
-  %
-  We call such a predicates \definiendum{total}.
-\end{defn}
-
-\begin{defn}\label{defn:assembly-morphism}
-  A \definiendum{morphism of assemblies} from \((X,\varphi)\) to
-  \((Y,\psi)\) consists of a morphism \(f : X \to Y\) in \(\E\) such that
-  \(\varphi \leq \TPull{f}\psi\). When \(\varphi \leq \TPull{f}\psi\) holds
-  we say that \(f\) is \definiendum{tracked}.
-\end{defn}
-
-\begin{remk}
-  Using the internal language of \(\E\), \(f : X \to Y\) is tracked as above
-  if we have
-  %
-  \[
-    \IExists{e : \A}{
-      \IForall{x : \X}{
-        \IForall{a : \A}{
-          \IImplies%
-            {\varphi(a,x)}%
-            {\IBox{(
-              \IAnd%
-              {\ITotal{\IAp{e}{a}}}%
-              {\psi(\IAp{e}{a}, f(x))}
-            )}}
-        }
-      }
-    }
-  \]
-\end{remk}
-
-Though we will sometimes use this internal definition, other times it will be
-easier to use abstract properties of triposes, for example in showing that
-assemblies form a category.
-
-\begin{cons}
-  The \definiendum{category of assemblies}, denoted \(\AsmCat\), has as objects
-  the assemblies and as morphisms the morphisms of assemblies.
-  %
-  Identity morphisms and composition are both inherited from \(\E\).
-\end{cons}
-\begin{proof}
-  We claimed that identity morphisms and composition are inherited from \(\E\).
-  %
-  For the former, given an assembly \((X,\varphi)\) we have the identity
-  \(\IId{X}\) which is tracked since \(\TPull{\IId{X}}\) is the identity and
-  \(\leq\) is reflexive.
-  %
-  For composition, suppose we have morphisms of assemblies
-  \(f : (Y,\psi) \to (X,\varphi)\) and \(g : (Z,\chi)\to(Y,\psi)\).
-  %
-  Both of these are tracked hence so \(\psi \leq \TPull{f}\varphi\) and
-  \(\chi \leq \TPull{g}\psi\), but \(\TPull{g}\) is monotonic so in addition we
-  also have
-  \(\chi \leq \TPull{g}\psi \leq \TPull{g}\TPull{f}\varphi=\TPull{(fg)}\varphi\)
-  which means that \(fg\) is tracked as necessary.
-  %
-  The unit and associativity equalities then follow immediately as \(\E\) is a
-  category.
-\end{proof}
-
-\begin{lemm}\label{lemm:assemblies-finite-limits}
-  The category of assemblies \(\AsmCat\) has all finite limits.
-\end{lemm}
-\begin{proof}
-  We construct binary products and equalisers from which all finite limits
-  follow.
-
-  Fix two assemblies \((X,\varphi)\) and \((Y,\psi)\), the underlying object of
-  their product will be the product \(\IProd{X}{Y}\) and the realizability
-  relation will be given by
-  \(\TAnd{(\TPull{\IFst}\varphi)}{(\TPull{\ISnd}\psi)}{\IProd{X}{Y}}\).
-  %
-  This is total by lemmas~\ref{lemm:pullback-preserves-total}
-  and~\ref{lemm:meet-total}.
-  %
-  The projections \(\IFst\) and \(\ISnd\) are tracked as we have
-  \(\TAnd{(\TPull{\IFst}\varphi)}{(\TPull{\ISnd}\psi)}{\IProd{X}{Y}} \leq \TPull{\IFst}\varphi\)
-  and
-  \(\TAnd{(\TPull{\IFst}\varphi)}{(\TPull{\ISnd}\psi)}{\IProd{X}{Y}} \leq \TPull{\ISnd}\psi\).
-  %
-  This leaves us to show that given morphisms \(f : (Z,\chi) \to (X,\varphi)\)
-  and \(g : (Z,\chi) \to (Y,\psi)\) that \(\IPair{f}{g} : Z \to \IProd{X}{Y}\)
-  is tracked.
-  %
-  Since \(f\) and \(g\) are tracked we know that
-  \[
-    \chi \leq \TAnd{(\TPull{f}\varphi)}{(\TPull{g}\psi)}{Z}
-         = \TAnd{\TPull{(\IFst\IPair{f}{g})}\varphi}{\TPull{(\ISnd\IPair{f}{g})}\psi}{Z}
-         = \TPull{\IPair{f}{g}}\left[\TAnd{(\TPull{\IFst}\varphi)}{(\TPull{\ISnd}\psi)}{\IProd{X}{Y}}\right]
-  \]
-  which shows that \(\IPair{f}{g}\) is tracked and so the category of assemblies
-  has binary products.
-
-  For equalisers fix two morphisms \(f,g : (X,\varphi) \to (Y,\psi)\) and
-  denote their equaliser in \(\E\) by \(m : \IEqualiser{f}{g} \to X\).
-  %
-  We turn this equaliser into an assembly by giving it the realizability
-  predicate \(\TPull{m}\varphi\), the totality of which follows from lemma
-  \ref{lemm:pullback-preserves-total}.
-  %
-  To show \(m\) is tracked amounts to proving
-  \(\TPull{m}\varphi \leq \TPull{m}\varphi\), which holds by reflexivity of
-  \(\leq\).
-  %
-  Finally suppose we have \(h : (Z,\chi) \to (X,\varphi)\) which equalises \(f\)
-  and \(g\), then the universal property of \(\IEqualiser{f}{g}\) tells us there
-  exists a unique map \(u : Z \to \IEqualiser{f}{g}\) such that \(h = mu\).
-  %
-  As \(h\) is tracked, then so is \(u\) which follows from
-  \(\chi\leq\TPull{h}\varphi=\TPull{(mu)}\varphi=\TPull{u}(\TPull{m}\varphi)\).
-\end{proof}
-
-\begin{lemm}\label{lemm:assemblies-cartesian-closed}
-  The category of assemblies \(\AsmCat\) is cartesian closed.
-\end{lemm}
-\begin{proof}
-  From \Cref{lemm:assemblies-finite-limits} we know that binary products exist,
-  it thus remains to show that exponentials exist.
-  %
-
-\end{proof}
+%\end{proof}
 
 \subsection{Realizability Topos}%
 \label{sub:realizability-topos}
@@ -1657,6 +1802,11 @@ realizability topos given by the subobjects of the constant objects, and
 compare these to the more elementary, direct definition of assemblies.
 
 \subsection{Sheafififcation}
+
+\begin{defn}
+  We define the \definiendum{extension of a realizability predicate
+    \(\phi : \RealPred{X}\)}
+\end{defn}
 
 \todo[inline]{Recall sheafification as a reflective subcategory. Maybe cite
   McLarty Chapter 21 for this?}
@@ -1938,108 +2088,6 @@ leave such explorations alone for now.
 \end{defn}
 
 \newpage
-\appendix
-
-\section{Some intuitions from Set-based realizability}
-
-Let us focus on standard set-based realizability for now, where the connection
-between assemblies and the realizability topos is well-understood.
-%
-Given a set-based tripos \(P\), its realizability topos is given by the
-following:
-
-\begin{defn}\label{defn-appendix-realizability-topos}
-  The \definiendum{objects of the realizability topos} consist of a set \(X\)
-  along with a binary relation \({\approx} : P(\IProd{X}{X})\) which is
-  \[\begin{array}{ll}
-    \textbf{(symmetric)}& x:X,\,y:X \mid x \approx y \vdash y \approx x\\
-    \textbf{(transitive)}& x:X,\,y:X,\,z:X \mid x \approx y,\,y \approx z \vdash x \approx z
-  \end{array}\]
-  %
-  The \definiendum{morphisms of the realizability topos}
-  from \((X,{ \approx_{X} })\) to \((Y,{ \approx_{Y} })\) consist of
-  equivalence classes of binary relations \(F : P(\IProd{X}{Y})\) which are
-  \[\begin{array}{ll}
-      \textbf{(strict)}& x:X,\,y:Y \mid
-                         F(x,y) \vdash
-                         x\approx_{X}x \land y\approx_{Y}y\\
-      \textbf{(total)}& x:X, \mid
-                         x\approx_{X}x \vdash
-                         \exists y:Y, F(x,y)\\
-      \textbf{(extensional)}&
-                              x:X,\,x':X,\,y:Y,\,y':Y \mid
-                              x\approx_{X}x',\,F(x,y)\,F(x',y') \vdash
-                              y\approx_{Y}y'
-  \end{array}\]
-  where two such relations \(F,G\) are in the same equivalence class if
-  \(x:X,\,y:Y\mid F(x,y) \dashv\vdash G(x,y)\).
-\end{defn}
-
-So although morphisms are given by relations, the extra conditions imposed on
-them mean they behave a lot more like functions than maybe is apparent at first.
-%
-More specifically, given an object \(X,\approx_{X}\), we should think of it as
-the set \(\{x : X \mid x\approx_{X}x\}\) quotiented by \(\approx_{X}\).
-%
-Under this view, a morphism from \((X,\approx_X)\) to \((Y,\approx_Y)\)
-does give an actual function.
-%
-Of course, this is mainly an intuition: the objects and morphisms actually
-contain some ``computability'' information from the tripos \(P\) which is lost
-this way.
-
-%\todo[inline]{following paragraph is wrong, can I fix it?}
-%Expanding on this previous point, let us now consider the effective topos, that
-%is the realizability topos associated with Kleene's first algebra
-%\(\mathcal{K}_{1}\).
-%%
-%In the effective topos we have the
-%objects \((\mathbb{N}, \sim)\) and \((\mathbb{N}, \approx)\),
-%both with underlying sets the natural numbers and the following
-%relations:
-%%
-%\[
-%  \begin{array}{cc}
-%    n \sim m \IsDefined
-%      \begin{cases}
-%        \{n\} & \text{ if } n = m \\
-%        \emptyset & \text{ otherwise }
-%      \end{cases}
-%    &\qquad\qquad n \approx m \IsDefined \{0\}
-%  \end{array}
-%\]
-%%
-%The first of these objects is quite canonical and in fact turns out to be the
-%natural number object in the effective topos.
-%%
-%The latter is a little less canonical
-%be just enough to get some weird results.
-%%
-%Regardless, they are both symmetric and transitive: in the case of \(\sim\)
-%these are both realized by the identity function and in the case of \(\approx\)
-%they are both realized by the constantly zero function.
-%%
-%We have the following two relations \(F\) and \(G\) that represent morphisms
-%from \((\mathbb{N},\sim)\) to \((\mathbb{N},\approx)\):
-%%
-%\[
-%  \begin{array}{cc}
-%    F(n, m) \IsDefined
-%      \begin{cases}
-%        \{n\} & \text{ if } n = m \\
-%        \emptyset & \text{ otherwise }
-%      \end{cases}
-%    &\qquad\qquad G(n, m) \IsDefined
-%      \begin{cases}
-%        \{0\} & \text{ if } n = m \\
-%        \emptyset & \text{ otherwise }
-%      \end{cases}
-%  \end{array}
-%\]
-%%
-%These relations are indeed both strict, total and extensional.
-%%
-%In proving strictness of \(F\) we require
 
 \printbibliography{}
 
