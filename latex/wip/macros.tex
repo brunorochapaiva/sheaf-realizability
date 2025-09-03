@@ -41,6 +41,10 @@
 
 \newcommand{\Sub}[1]{\mathsf{Sub}({#1})}
 
+\newcommand{\HPA}{\textbf{HpA}}
+
+\newcommand{\Op}[1]{{#1}^\text{op}}
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% VERNACULAR COMMANDS %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -94,6 +98,9 @@
 
 \newcommand{\IImpliesSym}{\Rightarrow}
 \newcommand{\IImplies}[2]{{#1}\IImpliesSym{#2}}
+
+\newcommand{\IIFFSym}{\Leftrightarrow}
+\newcommand{\IIFF}[2]{{#1}\IIFFSym{#2}}
 
 \newcommand{\IForallSym}{\forall}
 \newcommand{\IForall}[2]{\IForallSym{#1}.\,{#2}}
@@ -183,8 +190,9 @@
 \newcommand{\ISheaf}[1]{\ISheafSym{#1}}
 
 \newcommand{\ISheafExt}[1]{{#1}^\sharp}
-\newcommand{\ISheafExtM}[2]{{#1}^{({#2})}}
-\newcommand{\IRPExt}[1]{\ISheafExtM{#1}{\sharp,-}}
+\newcommand{\ISheafExtM}[2]{{#1}^{[{#2}]}}
+\newcommand{\IRPExtSym}{\IRPExt{(-)}}
+\newcommand{\IRPExt}[1]{\ISheafExtM{#1}{\sharp,\flat}}
 
 \newcommand{\ISheafIndSym}{\mathcal{D}_\text{ind}}
 \newcommand{\ISheafInd}[1]{\ISheafIndSym\,{#1}}
@@ -205,48 +213,67 @@
 \newcommand{\IValSym}{\text{value}}
 \newcommand{\IVal}[1]{\IValSym\,{#1}}
 
-\newcommand{\ISquashSym}{{\Downarrow}}
+\newcommand{\ISquashSym}{{\downdownarrows}}
 \newcommand{\ISquash}[1]{\ISquashSym\,{#1}}
+\newcommand{\ISquishSym}{{\upuparrows}}
+\newcommand{\ISquish}[1]{\ISquishSym\,{#1}}
 
-\newcommand{\IParExtSym}{\Diamond}
-\newcommand{\IParExt}[1]{\IParExtSym{#1}}
+\newcommand{\IParEExtSym}{{\Downarrow}}
+\newcommand{\IParEExt}[1]{\IParEExtSym{#1}}
+\newcommand{\IParUExtSym}{{\Uparrow}}
+\newcommand{\IParUExt}[1]{\IParUExtSym{#1}}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% TRIPOS %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %% Tripos
-\newcommand{\Trip}{T_\IBoxSym}
+\newcommand{\TSym}{T}
+\newcommand{\T}[1]{T{#1}}
+\newcommand{\TripRest}{T\big|_{\E_\IBoxSym}}
 
 %% Realizability Predicates
-\newcommand{\IRealPred}[1]{\IFun{#1}{\IFun{\A}{\IPropCl}}}
+\newcommand{\IRealPred}[1]{\IFun{#1}{\IFun{\A}{\IProp}}}
+\newcommand{\IRealPredCl}[1]{\IFun{#1}{\IFun{\A}{\IPropCl}}}
 \newcommand{\RealPred}[1]{{\color{red}change!}}
 
 %% Evidence predicate
+\newcommand{\IEvidenceClSym}{\IEvidenceCl{(-)}{(-)}}
+\newcommand{\IEvidenceCl}[2]{\text{evidences}_{\TLeqCl{#1}{#2}}}
 \newcommand{\IEvidenceSym}{\IEvidence{(-)}{(-)}}
-\newcommand{\IEvidence}[2]{\text{evidences}_{{#1}\leq{#2}}}
+\newcommand{\IEvidence}[2]{\text{evidences}_{\TLeq{#1}{#2}}}
+
+%% Tripos ordering
+\newcommand{\TLeqSym}{\leq}
+\newcommand{\TLeq}[2]{{#1}\TLeqSym{#2}}
+\newcommand{\TLeqClSym}{\sqsubseteq}
+\newcommand{\TLeqCl}[2]{{#1}\TLeqClSym{#2}}
 
 % Tripos language
 
-%% Helper macro to tag tripos language symbols with the object type
-\newcommand{\TagWithObject}[2]{\overset{\scriptscriptstyle #2}{#1}}
+\newcommand{\TTop}{\top^{\TSym}}
 
-\newcommand{\TTop}[1]{\TagWithObject{\top}{#1}}
+\newcommand{\TBot}{\bot^{\TSym}}
 
-\newcommand{\TBot}[1]{\TagWithObject{\bot}{#1}}
+\newcommand{\TAndSym}{{\land^{\TSym}}}
+\newcommand{\TAnd}[2]{{#1}\mathop{\TAndSym}{#2}}
 
-\newcommand{\TAndSym}[1]{\TagWithObject{\land}{#1}}
-\newcommand{\TAnd}[3]{{#1}\TAndSym{#3}{#2}}
+\newcommand{\TOrSym}{\lor^{\TSym}}
+\newcommand{\TOr}[2]{{#1}\mathop{\TOrSym}{#2}}
 
-\newcommand{\TOrSym}[1]{\TagWithObject{\lor}{#1}}
-\newcommand{\TOr}[3]{{#1}\TOrSym{#3}{#2}}
+\newcommand{\TImpliesSym}{\Rightarrow^{\TSym}}
+\newcommand{\TImplies}[2]{{#1}\mathop{\TImpliesSym}{#2}}
 
-\newcommand{\TImpliesSym}[1]{\TagWithObject{\Rightarrow}{#1}}
-\newcommand{\TImplies}[3]{{#1}\TImpliesSym{#3}{#2}}
+\newcommand{\TPullSym}[1]{\T({#1})}
+\newcommand{\TPull}[2]{\TPullSym{#1}\mspace{1mu}{#2}}
 
-\newcommand{\TPull}[1]{{#1}^\ast}
-\newcommand{\TExists}[1]{\exists_{#1}}
-\newcommand{\TForall}[1]{\forall_{#1}}
+\newcommand{\TExistsSym}[1]{\exists^{\TSym}_{#1}}
+\newcommand{\TExists}[2]{\TExistsSym{#1}\mspace{1mu}{#2}}
+
+\newcommand{\TForallSym}[1]{\forall^{\TSym}_{\!{#1}}}
+\newcommand{\TForall}[2]{\TForallSym{#1}\mspace{1mu}{#2}}
+
+\newcommand{\TGen}{\text{id}}
 
 %% Category of assemblies
 \newcommand{\AsmSym}{\mathbf{Asm}}
