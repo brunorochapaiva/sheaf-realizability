@@ -525,103 +525,134 @@ The monadic structure of partial elements is by itself not enough to get
 a realizability tripos though, we must also know how to extend predicates on
 a type \(X\) to predicates on its lifting.
 %
-This is the role of modal operators~\cite{moggiNotionsComputationMonads1991} and
-modalities~\cite{cohenPartialMonadicCombinatory2025}.
+This is the role of modal operators~\cite{moggiNotionsComputationMonads1991},
+which each induce a modality in the sense
+of~\cite{cohenPartialMonadicCombinatory2025}.
 
 \begin{prop}
-  The function \(\ISquashSym : \IPar{\IProp} \to \IProp\) defined by
-  sending
-  %
-  \(
-    \ISquash{a} \IsDefined \IProd{(h:\IHolds{\ITotal{a}})}{\IHolds{\IVal{a}\,h}}
-  \)
-  %
-  is an algebra for the lifting monad.
+  The folowing define algebras for the lifting monad
+  with \(\IProp\) as carrier.
+  \[\arraycolsep=2em
+    \begin{array}{ll}
+      \ISquashSym : \IPar{\IProp} \to \IProp
+      &
+        \ISquishSym : \IPar{\IProp} \to \IProp
+      \\
+      \ISquash{\phi} \IsDefined \IProd{(h:\IHolds{\ITotal{\phi}})}{\IHolds{\IVal{\phi}\,h}}
+      &
+        \ISquish{\phi} \IsDefined \IFun{(h:\IHolds{\ITotal{\phi}})}{\IHolds{\IVal{\phi}\,h}}
+    \end{array}
+  \]
 \end{prop}
 
-\begin{defn}
-  We define the \definiendum{existential lifting of a predicate
-    \(P : X \to \IProp\)} as \(\IParEExt{P} : \IPar{X} \to \IProp\) as the
-  composite
-  \(\ISquashSym\circ\IPar{P} : \IPar{X} \to \IPar{\IProp} \to \IProp\).
-  %
-  More explicitly, we have
-  \(\IParEExt{P}\,x\IsDefined \IProd{(h:\IHolds{\ITotal{x}})}{\IHolds{P(\IVal\,x\,h)}}\).
-\end{defn}
+These are of course related, with the former implying the second.
+%
+Unsurprisingly, their difference is exactly that the latter does not guarantee
+that the partial proposition is defined, at which point they are equivalent.
 
-\begin{prop}
-  The function \(\ISquishSym : \IPar{\IProp} \to \IProp\) defined by
-  sending
-  %
-  \(
-    \ISquish{a} \IsDefined \IFun{(h:\IHolds{\ITotal{a}})}{\IHolds{\IVal{a}\,h}}
-  \)
-  %
-  is an algebra for the lifting monad.
+\begin{prop}\label{prop:squash-and-squish}
+  For any partial proposition \(\phi:\IPar{\IProp}\) we have the equivalence
+  \(\IIFF{\ISquash{\phi}}{\IAnd{\ITotal{\phi}}{\ISquish{\phi}}}\).
 \end{prop}
 
-\begin{defn}
-  We define the \definiendum{universal lifting of a predicate
-    \(P : X \to \IProp\)} as \(\IParUExt{P} : \IPar{X} \to \IProp\) as the
-  composite
-  \(\ISquishSym\circ\IPar{P} : \IPar{X} \to \IPar{\IProp} \to \IProp\).
+This explains why only \(\ISquashSym\) seems to feature (implicitly) in
+realizability interpretations.
+%
+Without the requirement that computations terminate we find ourselves able to
+realize everything, which leads to problems.
+%
+However, once we have a way to meaningfully weaken \(\ITotal{a}\), such as
+through the use of a Lawvere-Tierney topology, then \(\ISquishSym\) would become
+useful again.
+
+\begin{prop}\label{prop:boxed-squash-and-boxed-squish}
+  Fora any partial proposition \(\phi : \IPar{\IProp}\) we have
+  \(\IImplies{\IAnd{\IBox{(\ITotal{\phi})}}{\ISquish{\phi}}}{\IBox{(\ISquash{\phi})}}\).
   %
-  More explicitly, we have
-  \(\IParUExt{P}\,x\IsDefined \IFun{(h:\IHolds{\ITotal{x}})}{\IHolds{P(\IVal\,x\,h)}}\).
+  In the case that \(\phi\) is a partial \(\IBoxSym\)-stable proposition, that
+  is \(\phi : \IPar{(\IPropCl)}\), then the converse holds aswell.
+\end{prop}
+\begin{proof}
+  Notice that by~\Cref{prop:squash-and-squish} and the fact that \(\IBoxSym\)
+  preserves conjunctions we have
+  %
+  \[
+    \IIFF%
+    {\IBox{(\ISquash{\phi})}}%
+    {\IAnd{\IBox{(\ITotal{\phi})}}{\IBox{(\ISquish{\phi})}}}
+  \]
+  %
+  and \(\IAnd{\IBox{(\ITotal{\phi})}}{\ISquish{\phi}}\) implies the right hand
+  side as \(\IBoxSym\) is inflationary.
+  %
+  If in addition we know that \(\phi\) is \(\IBoxSym\)-stable,
+  then \(\IImplies{\IBox{(\ISquish{\phi})}}{(\ISquish{\phi})}\) so
+  we get the desired equivalence.
+\end{proof}
+
+So in the case of stable propositions, weakening \(\ITotal{\phi}\) is equivalent
+to weakening the whole requirement that the proposition is defined and true.
+
+\begin{defn}
+  We define the \definiendum{existential and universal liftings of a predicate
+    \(P : X \to \IProp\)} as the following respective predicates on
+  \(\IPar{X}\):
+  %
+  \[\arraycolsep=2em
+    \begin{array}{ll}
+      \IParEExt{P} : \IPar{X} \to \IProp
+      &
+        \IParUExt{P} : \IPar{X} \to \IProp
+      \\
+      \IParEExt{P} \IsDefined \ISquashSym\circ\IPar{P}
+      &
+        \IParUExt{P} \IsDefined \ISquishSym\circ\IPar{P}
+    \end{array}
+  \]
 \end{defn}
+
+\begin{nota}
+  In later sections we will abuse notation and given a predicate
+  \(P : A \to \IProp\) and partial element \(a : \IPar{A}\) write
+  \(\IAnd{\ITotal{a}}{P\,a}\) to mean \(\IParEExt{P}\,a\) and
+  \(\IImplies{\ITotal{a}}{P\,a}\) instead of \(\IParUExt{P}\,a\).
+\end{nota}
 
 \begin{prop}\label{prop:boxed-existential-partial-extension}
   Fix a \(\IBoxSym\)-stable predicate \(P : X \to A \to \IPropCl\)
-  and a partial element \(t : \IPar{A}\),
-  if we let \(Q:X \to \IPropCl\) be given by
+  and a partial element \(a : \IPar{A}\).
   %
-  \(
-    Q\,x \IsDefined \IBox{(\IParEExt{(Px)}\,a)}
-  \)
+  We define two stable predicates on \(X\) and \(\ISheaf{X}\) as follows:
   %
-  then the extension of \(Q\)
-  is computed by
-  %
-  \(
-    \ISheafExt{Q}d \Leftrightarrow \IBox{(\IParEExt{(\ISheafExt{P}d)}\,a)}
-  \).
+  \[\arraycolsep=2em
+    \begin{array}{ll}
+      Q:\IFun{X}{\IPropCl}
+      &
+        R:\IFun{\ISheaf{X}}{\IPropCl}
+      \\
+      {Qx} \IsDefined {\IBox{(\IParEExt{(Px)}\,a)}}
+      &
+        {Rd} \IsDefined {\IBox{(\IParEExt{(\IRPExt{P}d)}\,a)}}
+    \end{array}
+  \]
+  Then the extension \(\ISheafExt{Q}:\IFun{\ISheaf{X}}{\IPropCl}\) of \(Q\)
+  coincides with \(R\).
 \end{prop}
 \begin{proof}
-  We show \(\ISheafExt{Q}\) is equivalent to
-  \(\ILam{d:\ISheaf{X}}{(\IParEExt{(\ISheafExt{P}d)}\,a)}\) by checking that they
-  agree when precomposed by \(\ILeafSym\).
+  We show \(\ISheafExt{Q}\) is equivalent to \(R\) by checking they agree
+  when precomposed by \(\ILeafSym\).
   %
   Given \(x : X\), we then compute
   %
   \[
     \ISheafExt{Q}(\ILeaf{x})
-    = Q\,x
+    = Qx
     = \IBox{(\IParEExt{(P\,x)}\,a)}
     = \IBox{(\IParEExt{(\ISheafExt{P}(\ILeaf{x}))}\,a)}
+    = R(\ILeaf{x})
   \]
   which finishes the proof.
 \end{proof}
-
-\begin{nota}
-  In the rest of this paper we will abuse notation and given
-  a predicate \(P : A \to \IProp\) and partial element \(a : \IPar{A}\),
-  we will write
-  \((\IAnd{\ITotal{a}}{P\,a})\) to mean \(\IParEExt{P}\,a\).
-\end{nota}
-
-With this notation, then we may rephrase the result from
-\Cref{prop:boxed-existential-partial-extension} as saying that the extension
-%
-\(
-  \ISheafExt{(\ILam{x:X}{\IBox{(\IAnd{\ITotal{a}}{P\,x\,a})}})}
-\)
-%
-is equal to
-%
-\(
-  \ILam{d:\ISheaf{X}}{\IBox{(\IAnd{\ITotal{a}}{\ISheafExt{P}\,d\,a})}}
-\).
-
 
 \newpage
 
@@ -703,9 +734,10 @@ tripos:
       {(\IImplies{\ITotal{\IAp{e}{a}}}{\psi\,x\,(\IAp{e}{a})})}}}
   \end{align*}
   %
-  We then define the \definiendum{ordering on evidence predicates}
-  by saying \(\TLeq{\phi}{\psi}\) if there exists a code~\(e : \A\)
-  such that for all \(x : X\) we have \(\IEvidence{\phi}{\psi}\,x\,e\).
+  We then define the \definiendum{ordering \(\TLeqSym\) on realizability
+    predicates} by saying \(\TLeq{\phi}{\psi}\) if there exists a
+  code~\(e : \A\) such that for all \(x : X\) we have
+  \(\IEvidence{\phi}{\psi}\,x\,e\).
 \end{defn}
 
 \begin{prop}
@@ -954,7 +986,7 @@ tripos:
   %
   \[\begin{array}{lll}
     {\T{X}} \IsDefined {(\IRealPred{X}, \TLeqSym)}&\qquad&
-    {\T{(f:X\to Y)}} : TY \to TX\\
+    {\T{(f:X\to Y)}} : T{Y} \to T{X}\\
     &&{\T{(f:X\to Y)}\,\phi} \IsDefined {\phi \circ f}
   \end{array}\]
 \end{prop}
@@ -1180,18 +1212,18 @@ a generic element~\cite[pg. 52]{oostenRealizabilityIntroductionIts2008}.
   hence also equivalent).
 \end{proof}
 
+With this we conclude that \(\TSym\) is an \(\E\)-tripos.
+
 \subsection{Tripos delaying computation and strengthening logical power}%
 \label{sub:vo-tripos}
 
-\begin{defn}\label{defn:vo-tripos-predicates}
-  Given a type \(X\), we define \definiendum{realizability predicates
-  on \(X\)} as the function space \(\IRealPred{X}\).
-\end{defn}
+We now present the definition of a tripos first given
+in~\cite[\S6.3]{vanoostenExercisesRealizability2018}.
 
 \begin{defn}\label{defn:vo-tripos-ordering}
-  Given a type \(X\) and realizability predicates \(\phi,\psi : \IRealPredCl{X}\)
-  we define the \definiendum{evidence predicate for \(\TLeqCl{\phi}{\psi}\)} as
-  follows:
+  Given a type \(X\) and realizability predicates
+  \(\phi,\psi : \IRealPred{X}\) we define the \definiendum{evidence predicate
+    for \(\TLeqCl{\phi}{\psi}\)} as follows:
   %
   \begin{align*}
     \IEvidenceCl{\phi}{\psi}
@@ -1206,10 +1238,156 @@ a generic element~\cite[pg. 52]{oostenRealizabilityIntroductionIts2008}.
       {\IBox{(\IAnd{\ITotal{\IAp{e}{a}}}{\psi\,x\,(\IAp{e}{a})})}}}
   \end{align*}
   %
-  We then define the \definiendum{ordering on evidence predicates}
-  by saying \(\TLeqCl{\phi}{\psi}\) if there exists a code~\(e : \A\)
-  such that for all \(x : X\) we have \(\IEvidenceCl{\phi}{\psi}\,x\,e\).
+  We then define the \definiendum{ordering \(\TLeqClSym\) on realizability
+    predicates} by saying \(\TLeqCl{\phi}{\psi}\) if there exists a
+  code~\(e : \A\) such that for all \(x : X\) we have
+  \(\IEvidenceCl{\phi}{\psi}\,x\,e\).
 \end{defn}
+
+This gives us another Heyting algebra structure on \(\IRealPred{X}\).
+
+\begin{prop}
+  For all types \(X\), the type \(\IRealPred{X}\) equipped with the
+  ordering \(\TLeqClSym\) is a Heyting prealgebra.
+\end{prop}
+
+Curiously, we can show that in \((\IRealPred{X},\TLeqClSym)\) every
+realizability predicate is equivalent to its boxed version.
+%
+That is, for all \(\phi\) we have \(\TLeqCl{\phi}{\IBox{\phi}}\) and
+\(\TLeqCl{\IBox{\phi}}{\phi}\).
+%
+As such, we might as well restrict ourselves to only the stable realizability
+predicates as that gives us an equivalent, but not isomorphic, Heyting
+prealgebra.
+
+\begin{defn}\label{defn:vo-tripos-predicates}
+  Given a type \(X\), we define \definiendum{stable realizability predicates
+  on \(X\)} as the function space \(\IRealPredCl{X}\).
+\end{defn}
+
+\begin{prop}
+  The functor \(\TClSym : \E \to \HPA\) defined below is an \(\E\)-tripos:
+  %
+  \[\begin{array}{lll}
+    {\TCl{X}} \IsDefined {(\IRealPredCl{X}, \TLeqClSym)}&\qquad&
+    {\TCl{(f:X\to Y)}} : \TCl{Y} \to \TCl{X}\\
+    &&{\TCl{(f:X\to Y)}\,\phi} \IsDefined {\phi \circ f}
+  \end{array}\]
+\end{prop}
+
+The attentive reader might wonder what the Heyting prealgebra structure looks
+like as we have omitted such proofs.
+%
+As we will show now, \(\TClSym\) is a subtripos of \(\TSym\) so that will allow
+us to derive all of its structure automatically.
+
+\begin{prop}
+  The tripos \(\TClSym\) is a subtripos of \(\TSym\), that is we have an adjoint
+  pair \(\TInv \dashv \TDir\) of natural transformations with the inverse image
+  \(\TInv_{X} : \T{X} \to \TCl{X}\) being fully faithful and preserving finite
+  meets for all \(X\).
+\end{prop}
+\begin{proof}
+  First let us define our natural transformations: for each \(X\) we let
+  %
+  \[\begin{array}{l}
+      \TDir^{X} : \IFun{(\IRealPredCl{X})}{(\IRealPred{X})}
+      \\
+      \TDir^{X}\,\phi\,x\,a \IsDefined \phi\,x\,a
+  \end{array}\]
+  %
+  be given by forgetting that the predicates are stable, and let
+  %
+  \[\begin{array}{l}
+      \TInv_{X} : \IFun{(\IRealPred{X})}{(\IRealPredCl{X})}
+      \\
+      \TInv_{X}\,\phi\,x\,a \IsDefined \IBox{\phi\,x\,a}
+  \end{array}\]
+  %
+  be given by sending \(\phi\) to \(\IBox{\phi}\).
+
+  We wish to show these give an adjoint pair for which it suffices to show that
+  given realizability predicates \(\phi, \psi : \IRealPred{X}\),
+  \(\TLeqCl{\IBox{\phi}}{\IBox{\psi}}\) if and only if
+  \(\TLeq{\phi}{\IBox{\psi}}\).
+  %
+  For this we show that \(e\) evidences \(\TLeqCl{\IBox{\phi}}{\IBox{\psi}}\) if
+  and only if it evidences \(\TLeq{\phi}{\IBox{\psi}}\):
+  %
+  fix \(x:X\) and \(a:\A\), then the implication
+  %
+  \[
+    \IImplies%
+    {\IBox{(\phi\,x\,a)}}%
+    {\IBox{(\IAnd{\ITotal{\IAp{e}{a}}}{\IBox{(\psi\,x\,(\IAp{e}{a}))}})}}
+  \]
+  %
+  has a \(\IBoxSym\)-stable succedent so it is equivalent to
+  %
+  \[
+    \IImplies%
+    {\phi\,x\,a}%
+    {\IBox{(\IAnd{\ITotal{\IAp{e}{a}}}{\IBox{(\psi\,x\,(\IAp{e}{a}))}})}}
+  \]
+  %
+  and by the functoriality of \(\IBoxSym\) we can rewrite the succedent to get
+  %
+  \[
+    \IImplies%
+    {\phi\,x\,a}%
+    {\IAnd%
+      {\IBox{(\ITotal{\IAp{e}{a}})}}%
+      {(\IImplies%
+        {\ITotal{\IAp{e}{a}}}%
+        {\IBox{(\psi\,x\,(\IAp{e}{a}))})}}}
+  \]
+  %
+  and this shows the adjunction property.
+
+  \todo[inline]{continue}
+  We must also show that \(\TLeq{\phi}{\psi}\) if and only if
+  \(\TLeqCl{\IBox{\phi}}{\IBox{\psi}}\).
+  %
+  Again, we show \(e\) evidences the former if and only if it evidences the
+  latter:
+  %
+  fix \(x:X\) and \(a:\A\), then
+  %
+  \[
+    \IImplies%
+    {\phi\,x\,a}%
+    {\IAnd%
+      {\IBox{(\ITotal{\IAp{e}{a}})}}%
+      {(\IImplies%
+        {\ITotal{\IAp{e}{a}}}%
+        {\psi\,x\,(\IAp{e}{a})})}}
+  \]
+
+  \[
+    \IImplies%
+    {\phi\,x\,a}%
+    {\IAnd%
+      {\IBox{(\ITotal{\IAp{e}{a}})}}%
+      {(\IImplies%
+        {\ITotal{\IAp{e}{a}}}%
+        {\psi\,x\,(\IAp{e}{a})})}}
+  \]
+
+  \todo[inline]{inv image preserves finite meets}
+\end{proof}
+
+\begin{prop}
+  Given realizability predicates \(\phi, \psi : \IRealPred{X}\),
+  \(\TLeqCl{\phi}{\psi}\) if and only if \(\TLeq{\phi}{\IBox{\psi}}\).
+\end{prop}
+\begin{proof}
+\end{proof}
+
+\begin{prop}
+  For all \(X\), the type \(\IRealPred{X}\) equipped with
+  \(\TLeqClSym\) is a Heyting prealgebra.
+\end{prop}
 
 \begin{lemm}\label{prop:vo-extension-of-evidence-predicate}
   Extension of realizability predicates commutes with the evidence

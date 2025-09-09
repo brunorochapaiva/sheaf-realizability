@@ -219,9 +219,9 @@
 \newcommand{\ISquish}[1]{\ISquishSym\,{#1}}
 
 \newcommand{\IParEExtSym}{{\Downarrow}}
-\newcommand{\IParEExt}[1]{\IParEExtSym{#1}}
+\newcommand{\IParEExt}[1]{\IParEExtSym\,{#1}}
 \newcommand{\IParUExtSym}{{\Uparrow}}
-\newcommand{\IParUExt}[1]{\IParUExtSym{#1}}
+\newcommand{\IParUExt}[1]{\IParUExtSym\,{#1}}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% TRIPOS %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -229,7 +229,14 @@
 
 %% Tripos
 \newcommand{\TSym}{T}
-\newcommand{\T}[1]{T{#1}}
+\newcommand{\T}[1]{\TSym{#1}}
+
+\newcommand{\TClSym}{Q}
+\newcommand{\TCl}[1]{\TClSym{#1}}
+
+\newcommand{\TInv}{\Phi^\ast}
+\newcommand{\TDir}{\Phi_\ast}
+
 \newcommand{\TripRest}{T\big|_{\E_\IBoxSym}}
 
 %% Realizability Predicates
