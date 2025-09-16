@@ -147,6 +147,7 @@
 %% Function types
 \newcommand{\IFun}[2]{{{#1}\to{#2}}}
 \newcommand{\ILam}[2]{{\mathop{\lambda({#1}).}{#2}}}
+\newcommand{\ILamU}[2]{{\mathop{\lambda{#1}.}{#2}}}
 
 \newcommand{\IId}[1]{\mathbb{1}_{#1}}
 
@@ -188,6 +189,7 @@
 %% Sheafification
 \newcommand{\ISheafSym}{\mathcal{D}}
 \newcommand{\ISheaf}[1]{\ISheafSym{#1}}
+\newcommand{\ISheafMap}[1]{\ISheafSym{#1}}
 
 \newcommand{\ISheafExt}[1]{{#1}^\sharp}
 \newcommand{\ISheafExtM}[2]{{#1}^{[{#2}]}}
@@ -227,6 +229,8 @@
 %% TRIPOS %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+\newcommand{\PER}[2]{{#1}[{#2}]}
+
 %% Tripos
 \newcommand{\TSym}{T}
 \newcommand{\T}[1]{\TSym{#1}}
@@ -234,8 +238,10 @@
 \newcommand{\TClSym}{Q}
 \newcommand{\TCl}[1]{\TClSym{#1}}
 
-\newcommand{\TInv}{\Phi^\ast}
-\newcommand{\TDir}{\Phi_\ast}
+\newcommand{\TInvSym}{\Phi^\ast}
+\newcommand{\TInv}[1]{\TInvSym_{#1}}
+\newcommand{\TDirSym}{\Phi_\ast}
+\newcommand{\TDir}[1]{\TDirSym^{#1}}
 
 \newcommand{\TripRest}{T\big|_{\E_\IBoxSym}}
 

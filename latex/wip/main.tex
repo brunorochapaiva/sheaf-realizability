@@ -406,6 +406,72 @@ we will use these to extend predicates to partial elements.
    \).
 \end{proof}
 
+\begin{prop}\label{prop:boxed-sigma-boxed}
+  Given a type \(A\) and a family \(F : A \to \IUni\) we have the following
+  equivalences:
+  %
+  \begin{align*}
+    \ISheaf{(\IProd{(a : A)}{Fa})}
+    &\cong
+    \ISheaf{(\IProd{(a : A)}{\ISheaf{(Fa)}})}
+  \end{align*}
+\end{prop}
+\begin{proof}
+  We define the forward and backwards maps as follows:
+  %
+  \[
+    \begin{array}{l}
+      f : \IFun{\ISheaf{(\IProd{(a : A)}{Fa})}}{\ISheaf{(\IProd{(a : A)}{\ISheaf{(Fa)}})}}
+      \\
+      f \IsDefined \ISheafMap{(\ILamU{\IPair{a}{x}}{\IPair{a}{\ILeaf{x}}})}
+      \\[1em]
+      g : \IFun {\ISheaf{(\IProd{(a : A)}{\ISheaf{(Fa)}})}}{\ISheaf{(\IProd{(a : A)}{Fa})}}
+      \\
+      g \IsDefined \ISheafExt{(\ILamU{\IPair{a}{d}}{(\ISheafMap{(\ILamU{x}{\IPair{a}{x}})}\,d)})}
+    \end{array}
+  \]
+  %
+  We prove that \(g \circ f\) equals the identity by precomposing
+  with \(\ILeafSym\).
+  %
+  Fix \(a:A\) and \(x:Fa\), then
+  \begin{align*}
+    (g \circ f)(\ILeaf{\IPair{a}{x}})
+    &=
+      \ISheafExt{(\ILamU{\IPair{a}{d}}{(\ISheafMap{(\ILamU{x}{\IPair{a}{x}})}\,d)})}
+      \big(\ISheafMap{(\ILamU{\IPair{a}{x}}{\IPair{a}{\ILeaf{x}}})}(\ILeaf{\IPair{a}{x}})\big)
+    \\
+    &=
+      \ISheafExt{(\ILamU{\IPair{a}{d}}{(\ISheafMap{(\ILamU{x}{\IPair{a}{x}})}\,d)})}
+      (\ILeaf{\IPair{a}{\ILeaf{x}}})
+    \\
+    &=
+      (\ISheafMap{(\ILamU{x}{\IPair{a}{x}})}\,(\ILeaf{x}))
+    \\
+    &= \ILeaf{\IPair{a}{x}}
+  \end{align*}
+  %
+  We check the remaining roundtrip equation similarly by fixing \(a:A\) and
+  \(d:\ISheaf{(Fa)}\) so
+  \begin{align*}
+    (f \circ g)(\ILeaf{\IPair{a}{d}})
+    &=
+      \ISheafMap{(\ILamU{\IPair{a}{x}}{\IPair{a}{\ILeaf{x}}})}
+      \big(\ISheafExt{(\ILamU{\IPair{a}{d}}{(\ISheafMap{(\ILamU{x}{\IPair{a}{x}})}\,d)})}(\ILeaf{\IPair{a}{d}})\big)
+    \\
+    &=
+      \ISheafMap{(\ILamU{\IPair{a}{x}}{\IPair{a}{\ILeaf{x}}})}
+      (\ISheafMap{(\ILamU{x}{\IPair{a}{x}})}\,d)
+    \\
+    &=
+      (\ISheafMap{(\ILamU{x}{\IPair{a}{\ILeaf{x}}})}\,d)
+    \\
+    &= \ILeaf{\IPair{a}{d}}
+  \end{align*}
+  where for the last equality is proven for all \(d:\ISheaf{(Fa)}\) by checking
+  it holds on the image of the adjunction unit.
+\end{proof}
+
 \begin{prop}
   For a proposition \(P : \IProp\), its sheafification \(\ISheaf{\IHolds{P}}\)
   is equivalent as a type to~\(\IHolds{\IBox{P}}\).
@@ -630,17 +696,17 @@ to weakening the whole requirement that the proposition is defined and true.
       &
         R:\IFun{\ISheaf{X}}{\IPropCl}
       \\
-      {Qx} \IsDefined {\IBox{(\IParEExt{(Px)}\,a)}}
+      {Qx} \IsDefined {\IBox{(\IParEExt{(P\,x)}\,a)}}
       &
-        {Rd} \IsDefined {\IBox{(\IParEExt{(\IRPExt{P}d)}\,a)}}
+        {Rd} \IsDefined {\IBox{(\IParEExt{(\IRPExt{P}\,d)}\,a)}}
     \end{array}
   \]
   Then the extension \(\ISheafExt{Q}:\IFun{\ISheaf{X}}{\IPropCl}\) of \(Q\)
   coincides with \(R\).
 \end{prop}
 \begin{proof}
-  We show \(\ISheafExt{Q}\) is equivalent to \(R\) by checking they agree
-  when precomposed by \(\ILeafSym\).
+  We show them equivalent by the two checking agree
+  when precomposed with \(\ILeafSym\).
   %
   Given \(x : X\), we then compute
   %
@@ -702,7 +768,7 @@ tripos:
     This is a somewhat surprising result so we will return to it and discuss
     some of the intuition later.
 
-  \item todo
+  \item {\color{red} todo: describe third option}
 
 
 \end{enumerate}
@@ -731,6 +797,7 @@ tripos:
       {\phi\,x\,a}%
       {\IAnd%
       {\IBox{(\ITotal{\IAp{e}{a}})}}%
+      %{\IParUExt{(\psi\,x)}\,(\IAp{e}{a})}}}
       {(\IImplies{\ITotal{\IAp{e}{a}}}{\psi\,x\,(\IAp{e}{a})})}}}
   \end{align*}
   %
@@ -1284,110 +1351,124 @@ us to derive all of its structure automatically.
 
 \begin{prop}
   The tripos \(\TClSym\) is a subtripos of \(\TSym\), that is we have an adjoint
-  pair \(\TInv \dashv \TDir\) of natural transformations with the inverse image
-  \(\TInv_{X} : \T{X} \to \TCl{X}\) being fully faithful and preserving finite
-  meets for all \(X\).
+  pair \(\TInvSym \dashv \TDirSym\) of natural transformations such that for all
+  \(X\), the inverse image map \(\TInv{X} : \T{X} \to \TCl{X}\) preserving
+  finite meets and the direct image map \(\TDir{X} : \TCl{X} \to \T{X}\) is
+  fully faithful.
 \end{prop}
 \begin{proof}
   First let us define our natural transformations: for each \(X\) we let
   %
   \[\begin{array}{l}
-      \TDir^{X} : \IFun{(\IRealPredCl{X})}{(\IRealPred{X})}
+      \TDir{X} : \IFun{(\IRealPredCl{X})}{(\IRealPred{X})}
       \\
-      \TDir^{X}\,\phi\,x\,a \IsDefined \phi\,x\,a
+      \TDir{X}\,\phi\,x\,a \IsDefined \phi\,x\,a
   \end{array}\]
   %
   be given by forgetting that the predicates are stable, and let
   %
   \[\begin{array}{l}
-      \TInv_{X} : \IFun{(\IRealPred{X})}{(\IRealPredCl{X})}
+      \TInv{X} : \IFun{(\IRealPred{X})}{(\IRealPredCl{X})}
       \\
-      \TInv_{X}\,\phi\,x\,a \IsDefined \IBox{\phi\,x\,a}
+      \TInv{X}\,\phi\,x\,a \IsDefined \IBox{\phi\,x\,a}
   \end{array}\]
   %
   be given by sending \(\phi\) to \(\IBox{\phi}\).
 
-  We wish to show these give an adjoint pair for which it suffices to show that
-  given realizability predicates \(\phi, \psi : \IRealPred{X}\),
-  \(\TLeqCl{\IBox{\phi}}{\IBox{\psi}}\) if and only if
-  \(\TLeq{\phi}{\IBox{\psi}}\).
+  First we show this gives a geometric morphism from \(\TClSym\) to \(\TSym\).
   %
-  For this we show that \(e\) evidences \(\TLeqCl{\IBox{\phi}}{\IBox{\psi}}\) if
-  and only if it evidences \(\TLeq{\phi}{\IBox{\psi}}\):
+  Given predicates \(\phi:\IRealPred{X}\) and \(\psi:\IRealPredCl{X}\) we will
+  show that \(\TLeqCl{\IBox{\phi}}{\psi}\) and \(\TLeq{\phi}{\psi}\) have the
+  same set of realizers.
   %
-  fix \(x:X\) and \(a:\A\), then the implication
+  Fix a code \(e:\A\) and \(x:X\), then we have the following equivalences
   %
-  \[
+  \begin{align*}
     \IImplies%
     {\IBox{(\phi\,x\,a)}}%
-    {\IBox{(\IAnd{\ITotal{\IAp{e}{a}}}{\IBox{(\psi\,x\,(\IAp{e}{a}))}})}}
-  \]
-  %
-  has a \(\IBoxSym\)-stable succedent so it is equivalent to
-  %
-  \[
-    \IImplies%
-    {\phi\,x\,a}%
-    {\IBox{(\IAnd{\ITotal{\IAp{e}{a}}}{\IBox{(\psi\,x\,(\IAp{e}{a}))}})}}
-  \]
-  %
-  and by the functoriality of \(\IBoxSym\) we can rewrite the succedent to get
-  %
-  \[
-    \IImplies%
-    {\phi\,x\,a}%
-    {\IAnd%
+    {\IBox%
+    {(\IAnd%
+    {\ITotal{\IAp{e}{a}}}%
+    {\psi\,x\,(\IAp{e}{a})})}}
+    &\IIFFSym
+      \IImplies%
+      {\phi\,x\,a}%
+      {\IBox%
+      {(\IAnd%
+      {\ITotal{\IAp{e}{a}}}%
+      {\psi\,x\,(\IAp{e}{a})})}}
+    \\
+    &\IIFFSym
+      \IImplies%
+      {\phi\,x\,a}%
+      {(\IAnd%
       {\IBox{(\ITotal{\IAp{e}{a}})}}%
-      {(\IImplies%
-        {\ITotal{\IAp{e}{a}}}%
-        {\IBox{(\psi\,x\,(\IAp{e}{a}))})}}}
-  \]
+      {\IImplies%
+      {(\ITotal{\IAp{e}{a}})}%
+      {\psi\,x\,(\IAp{e}{a})}})}
+  \end{align*}
   %
-  and this shows the adjunction property.
+  where the first equivalence holds as the succedent is a stable proposition and
+  the second equivalence holds by~\Cref{prop:boxed-squash-and-boxed-squish}.
+  %
+  This shows that the inverse image map is left adjoint to the direct image map
+  leaving us to show that the inverse image preserves finite meets.
+  %
+  Since \(\IBox{\TTop}=\TTop\), we immediately see that the top element is
+  preserved.
+  %
+  This leaves binary meets so fix \(\phi,\psi:\IRealPred{X}\) and we will show
+  that \(\IBox{(\TAnd{\phi}{\psi})}\) is the meet of \(\IBox{\phi}\)
+  and \(\IBox{\psi}\):
+  %
+  by the foregoing we have \(\TLeqCl{\IBox{(\TAnd{\phi}{\psi})}}{\IBox{\phi}}\)
+  if and only if \(\TLeq{(\TAnd{\phi}{\psi})}{\IBox{\phi}}\) and this holds as
+  \(\TLeq{\phi}{\IBox{\phi}}\).
+  %
+  We are left to show that if \(e_{0}\) evidences \(\TLeqCl{\chi}{\IBox{\phi}}\)
+  and \(e_{1}\) evidences \(\TLeqCl{\chi}{\IBox{\psi}}\), then
+  \(\IAbs{a}{\IPAp{\IPAp{\IPairCode}{(\IPAp{e_{0}}{a})}}{(\IPAp{e_{1}}{a})}}\)
+  evidences \(\TLeqCl{\chi}{\IBox{(\TAnd{\phi}{\psi})}}\) for all stable
+  predicates \(\chi\).
+  %
+  Assume that \(\chi\,x\,a\), {\color{red} todo: finish this}
 
-  \todo[inline]{continue}
-  We must also show that \(\TLeq{\phi}{\psi}\) if and only if
-  \(\TLeqCl{\IBox{\phi}}{\IBox{\psi}}\).
-  %
-  Again, we show \(e\) evidences the former if and only if it evidences the
-  latter:
-  %
-  fix \(x:X\) and \(a:\A\), then
-  %
-  \[
-    \IImplies%
-    {\phi\,x\,a}%
-    {\IAnd%
-      {\IBox{(\ITotal{\IAp{e}{a}})}}%
-      {(\IImplies%
-        {\ITotal{\IAp{e}{a}}}%
-        {\psi\,x\,(\IAp{e}{a})})}}
-  \]
+  % , \(a:\A\) and \(x:X\), then we have the following
+  % equivalences
+  % \begin{align*}
+  %   &
+  %     \IBox{(\IAnd%
+  %     {(\IAnd{\ITotal{\IPAp{\IFstCode}{a}}}{\phi\,x\,(\IPAp{\IFstCode}{a})})}%
+  %     {(\IAnd{\ITotal{\IPAp{\ISndCode}{a}}}{\psi\,x\,(\IPAp{\ISndCode}{a})})})}
+  %   \\
+  %   &\IIFFSym
+  %     \IAnd%
+  %     {\IBox{(\IAnd{\ITotal{\IPAp{\IFstCode}{a}}}{\phi\,x\,(\IPAp{\IFstCode}{a})})}}%
+  %     {\IBox{(\IAnd{\ITotal{\IPAp{\ISndCode}{a}}}{\psi\,x\,(\IPAp{\ISndCode}{a})})}}
+  %   \\
+  %   &\IIFFSym
+  %     \IAnd%
+  %     {(\IAnd{\ITotal{\IPAp{\IFstCode}{a}}}{\IBox{(\phi\,x\,(\IPAp{\IFstCode}{a}))}})}%
+  %     {(\IAnd{\ITotal{\IPAp{\ISndCode}{a}}}{\IBox{(\psi\,x\,(\IPAp{\ISndCode}{a}))}})}
+  % \end{align*}
+  % where
+  % the first equivalence holds since \(\IBoxSym\) preserves conjunctions
+  % and the second holds by \Cref{prop:}
 
-  \[
-    \IImplies%
-    {\phi\,x\,a}%
-    {\IAnd%
-      {\IBox{(\ITotal{\IAp{e}{a}})}}%
-      {(\IImplies%
-        {\ITotal{\IAp{e}{a}}}%
-        {\psi\,x\,(\IAp{e}{a})})}}
-  \]
-
-  \todo[inline]{inv image preserves finite meets}
+  Finally we show this geometric morphism is an inclusion of triposes, i.e.\ the
+  direct image map \(\TDir{X}\) preserves and reflects the ordering for all
+  \(X\).
+  %
+  Given stable predicates \(\phi,\psi : \IRealPredCl{X}\), we can use
+  \Cref{prop:boxed-squash-and-boxed-squish} to show that a code \(e\) evidences
+  \(\TLeqCl{\phi}{\psi}\) if and only if it evidences \(\TLeq{\phi}{\psi}\).
 \end{proof}
 
-\begin{prop}
-  Given realizability predicates \(\phi, \psi : \IRealPred{X}\),
-  \(\TLeqCl{\phi}{\psi}\) if and only if \(\TLeq{\phi}{\IBox{\psi}}\).
-\end{prop}
-\begin{proof}
-\end{proof}
-
-\begin{prop}
-  For all \(X\), the type \(\IRealPred{X}\) equipped with
-  \(\TLeqClSym\) is a Heyting prealgebra.
-\end{prop}
+This implies that \(\PER{\E}{\TClSym}\) is a subtopos of \(\PER{\E}{\TSym}\).
+%
+It is not entirely clear at this point what \(\PER{\E}{\TClSym}\) looks like,
+but now recall some results
+from~\cite[\S6.3]{vanoostenExercisesRealizability2018}.
 
 \begin{lemm}\label{prop:vo-extension-of-evidence-predicate}
   Extension of realizability predicates commutes with the evidence
@@ -1430,6 +1511,8 @@ us to derive all of its structure automatically.
   the preceding \Cref{prop:vo-extension-of-evidence-predicate}.
 \end{proof}
 
+This tells us that in \(\PER{\E}{\TClSym}\) we can assume that the underlying
+object of each partial equivalence relation is a sheaf.
 
 \newpage
 
